@@ -1,0 +1,44 @@
+golang中的错误处理机制
+
+错误可能出现问题的地方出现了问题， 异常则是不应该出现问题的地方出现了问题，比如引用了空指针，错误时业务的一部分，而异常不是
+
+error 接口 
+
+type error interface{
+   error() string
+}
+
+error：内置的数据类型，内置的接口
+定义方法  error() string
+使用golang 下的error：
+ 1）errors.New()  创建一个error对象
+ 2） fmt包下的 Errorf()函数：
+	fmt.Errorf("错误信息%d",100)
+
+
+
+
+错误类型的信息：
+    断言：
+    以断言的形式把error通过字段的形式，显示错误信息
+
+获取错误信息
+1、断言底层结构类型并从结构字段获取更多信息
+2、断言底层结构类型，并使用方法获取更多信息
+3、 直接与类型错误的变量比较
+
+
+panic 和recover
+
+panic 恐慌  recover 恢复
+golang利用panic和recover实现程序中的异常处理
+panic() 让当前程序，陷入恐慌，中断程序执行
+而 recover让程序恢复，必须在defer中执行
+
+
+错误表达使用情况
+  1、空指针引用
+  2、下标越界
+  3、除数为0
+  4、不应该出现的分支，如default
+  5、输入不应该引起函数错误

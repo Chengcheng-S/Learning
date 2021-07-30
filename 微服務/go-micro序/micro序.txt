@@ -1,0 +1,100 @@
+# 序
+
+## 简介
+
+Micro 用于构建和管理分布式系统的系统
+
+主要组件：
+
+-  运行时：用于管理服务包括auth，config，discovery，networking的运行时环境
+- 框架：编写要在运行时运行的服务的Go框架
+- 客户端：多语言客户端，使其他程序能够访问微服务
+
+### 安装
+
+```
+go install github.com/micro/micro/v3
+```
+
+使用docker image
+
+```
+docker pull micro/micro
+```
+
+或者下载二进制文件
+
+```
+# MacOS
+curl -fsSL https://raw.githubusercontent.com/micro/micro/master/scripts/install.sh | /bin/bash
+
+# Linux
+wget -q  https://raw.githubusercontent.com/micro/micro/master/scripts/install.sh -O - | /bin/bash
+
+# Windows
+powershell -Command "iwr -useb https://raw.githubusercontent.com/micro/micro/master/scripts/install.ps1 | iex"
+```
+
+protobuf（必备插件）
+
+```
+go get github.com/micro/protobuf/{proto,protoc-gen-go}
+```
+
+运行greeter服务
+
+```
+go get github.com/micro/examples/greeter/srv&& srv
+```
+
+Micro CLI 与服务器的交互
+
+```
+micro env set server
+```
+
+正在运行的服务
+
+```
+micro list  services
+```
+
+创建服务
+
+```
+micro new project_name
+```
+
+```
+Creating service foobar
+
+.
+├── main.go
+├── generate.go
+├── handler
+│   └── foobar.go
+├── proto
+│   └── foobar.proto
+├── Dockerfile
+├── Makefile
+├── README.md
+├── .gitignore
+└── go.mod
+
+
+download protoc zip packages (protoc-$VERSION-$PLATFORM.zip) and install:
+
+visit https://github.com/protocolbuffers/protobuf/releases
+
+download protobuf for micro:
+
+go get -u github.com/golang/protobuf/proto
+go get -u github.com/golang/protobuf/protoc-gen-go
+go get github.com/micro/micro/v3/cmd/protoc-gen-micro
+
+compile the proto file foobar.proto:
+
+cd foobar
+make proto
+```
+

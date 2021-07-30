@@ -1,0 +1,462 @@
+# Protobuf语法：
+
+### 基本规范：
+
+- ·文件以.proto为后缀，除结构定义外的语句以分号结尾
+
+- ·结构定义可以包含：message、service、enum
+
+- ·rpc方法定义结尾的分号可有可无
+
+- ·Message命名采用驼峰命名方式，字段命名采用小写字母加下划线分割方式
+
+  ```go
+  message SongServerRequest {
+        required string song_name = 1;
+    }
+  ```
+
+- ·Enums类型名采用驼峰命名方式,字段命名采用大写字母加下划线分隔方式
+
+  ```go
+  enum Foo {
+        FIRST_VALUE = 1;
+        SECOND_VALUE = 2;
+    }
+  ```
+
+- ·Service与rpc方法名统一采用驼峰式命名
+
+  
+
+### 字段规则：
+
+字段格式：限定修饰符|数据类型|字段名称|=|字段编码值|字段默认值
+
+限定修饰符包括required/optional/repeated
+
+- ·Required: 表示是一个必须字段，必须相对于发送方，在发送消息之前必须设置该字段的值，对于接收方，必须能够识别该字段的意思。发送之前没有设置required字段或者无法识别required字段都会引发编解码异常，导致消息被丢弃
+- Optional：表示是一个可选字段，可选对于发送方，可以有选择性的设置或者不设置该字段的值。对于接收方，如果能够识别可选字段就进行相应的处理，如果无法识别，则忽略该字段，消息中的其它字段正常处理。
+- Repeated：表示该字段可以包含0~N个元素。其特性和optional一样，但是每一次可以包含多个值。可以看作是在传递一个数组的值。
+
+> Protobuf定义了一套基本的数据类型，几乎可以映射到C++/Java等语言的基础数据类型
+> bool 布尔型  
+> double  64位浮点数
+> float    32位浮点数
+> int32    32位整数
+> uin32    无符号的32位整数
+> int64    64位整数
+> uint64   64位无符号整数
+> sint32   32位整数，处理负数效率高
+> sing64    64位整数处理负数效率高
+> fixed32    32位无符号的整数
+> fixed64    64位无符号整数
+> sfixed32   32位整数能以更高的效率处理负数
+> sfixed64    64位整数
+> string      只能处理ASCII 字符
+> bytes       用于处理多字节的语言字符、如中文
+> enum        可以包含一个用户自定义的美剧类型uint32
+> message     可以包含一个用户自定义的消息类型
+
+关于 fixed32 和int32的区别。fixed32的打包效率比int32的效率高，但是使用的空间一般比int32多。因此一个属于时间效率高，一个属于空间效率高
+
+### 字段名称：
+
+   字段名称的命名与C/C++/JAVA等语言的变量命名方式几乎是相同的
+    protobuf建议字段的命名采用以下划线分割的驼峰式，如fiest_name而不是fiestName
+
+### 字段编码值：
+
+·有了该值，通信双方才能互相识别对方的字段,相同的编码值,其限定修饰符和数据类型必须相同,编码的取值范围1~2^32 （4294967296）
+
+·其中 1~15的编码时间和空间效率都是最高的，编码值越大，其编码的时间和空间效率就越低，所以建议把经常要传递的值把其字段编码设置为1-15之间的值
+·1900~2000编码值为Google protobuf 系统内部保留值，建议不要在自己的项目中使用
+
+### 字段默认值
+
+·当在传递数据时，对于required数据类型，如果用户没有设置值，则使用默认值传递到对端
+
+## service定义：
+
+·如果想要将消息类型用在RPC系统中，可以在.proto文件中定义一个RPC服务接口，protocol buffer编译器会根据所选择的不同语言生成服务接口代码
+
+·例如，想要定义一个RPC服务并具有一个方法，该方法接收SearchRequest并返回一个SearchResponse，此时可以在.proto文件中进行如下定义：
+
+```go
+service SearchService {
+        rpc Search (SearchRequest) returns (SearchResponse) {}
+    }
+```
+
+·生成的接口代码作为客户端与服务端的约定，服务端必须实现定义的所有接口方法，客户端直接调用同名方法向服务端发起请求，比较麻烦的是，即便业务上不需要参数也必须指定一个请求消息，一般会定义一个空message
+
+## Message定义
+
+- 一个message类型定义描述了一个请求或响应的消息格式,可以包含多种类型字段
+- ·例如定义一个搜索请求的消息格式,每个请求包含查询字符串、页面、每页数据
+- ·字段名用小写,转为go文件后自动变为大写,message相当于结构体
+
+```go
+//  首行声明使用的protobuf版本为proto3
+sytanx="proto3";
+message SearchRequest {
+    string query = 1;            // 查询字符串
+    int32  page_number = 2;     // 页码
+    int32  result_per_page = 3;   // 每页条数
+    // repeated 修饰符时可变数组，，golang转为切片
+    repeated string hobby=4;
+    
+}
+```
+
+SearchRequest 定义了三个字段，每个字段声明以分号结尾，.
+
+**proto文件支持双斜线 // 添加单行注释**
+
+## 添加更多的Message类型
+
+一个.proto文件中可以定义多个消息类型，一般用于同时定义多个相关的消息，例如在同一个.proto文件中同时定义搜索请求和响应消息
+
+```go
+syntax = "proto3";
+// SearchRequest 搜索请求
+message SearchRequest {
+    string query = 1;            // 查询字符串
+    int32  page_number = 2;     // 页码
+    int32  result_per_page = 3;   // 每页条数
+}
+
+// SearchResponse 搜索响应
+message SearchResponse {
+    ...
+}
+```
+
+## 使用其他Message
+
+·message 支持嵌套使用,作为另一个message中的字段类型
+
+```go
+ message SearchResponse {
+        repeated Result results = 1;
+    }
+```
+
+```go
+message Result {
+    string url = 1;
+    string title = 2;
+    repeated string snippets = 3;
+}
+```
+
+## Message嵌套使用
+
+·支持嵌套消息，消息可以包含另一个消息作为其字段，也可以在消息内定义一个新的消息
+
+·内部声明的message类型名称只可在内部直接使用
+
+```go
+   message SearchResponse {
+        message Result {
+            string url = 1;
+            string title = 2;
+            repeated string snippets = 3;
+        }
+        repeated Result results = 1;
+    }
+```
+
+多底层嵌套：
+
+```go
+message Outer {                // Level 0
+        message MiddleAA {        // Level 1
+            message Inner {        // Level 2
+                int64 ival = 1;
+                bool  booly = 2;
+            }
+        }
+        message MiddleBB {         // Level 1
+            message Inner {         // Level 2
+                int32 ival = 1;
+                bool  booly = 2;
+            }
+        }
+    }
+```
+
+### proto3的map类型
+
+·proto3支持map类型声明
+
+ map<key_type, value_type> map_field = N;
+
+```go
+message Project {...}
+map<string, Project> projects = 1;
+```
+
+**键、值类型可以是内置的类型,也可以是自定义的message类型**
+**字段不支持repeated属性**
+
+## proto文件编译
+
+·通过定义好的.proto文件生成java、py、c、go代码需要安装编译器protoc
+·当使用protocol buffer编译器运行.proto文件时，编译器将生成所选语言的代码，用于使用在proto文件中定义的消息类型、服务接口约定等,不同语言生成的代码格式不同。
+
+> C++: 每个.proto文件生成一个.h文件和一个.cc文件，每个消息类型对应一个类
+>
+> Java: 生成一个.java文件，同样每个消息对应一个类，同时还有一个特殊的Builder类用于创建消息接口
+>
+> Python: 姿势不太一样，每个.proto文件中的消息类型生成一个含有静态描述符的模块，该模块与一个元类metaclass在运行时创建需要的Python数据访问类
+>
+> Go: 生成一个.pb.go文件，每个消息类型对应一个结构体
+>
+> Ruby: 生成一个.rb文件的Ruby模块，包含所有消息类型
+>
+> JavaNano: 类似Java，但不包含Builder类
+>
+> Objective-C: 每个.proto文件生成一个pbobjc.h和一个pbobjc.m文件
+>
+> C#: 生成.cs文件包含，每个消息类型对应一个类
+
+
+
+## import导入定义
+
+·可以使用import语句导入使用其他描述文件中声明的类型
+
+·protobuf接口文件可以像C语言的h文件一个，分离为多个，在需要的时候通过 import导入需要对文件。其行为和C语言的#include或者java的import的行为大致相同，例如import "others.proto";
+
+·protocol buffer编译器会在 -I / --proto_path参数指定的目录中查找导入的文件，如果没有指定该参数，默认在当前目录中查找
+
+## 包的使用
+
+·在proto文件中使用package 声明包名,避免命名冲突
+
+```protobuf
+syntax = "proto3";
+package foo.bar;
+message Open {...}
+```
+
+·在其他的消息格式定义中可以使用包名+消息名的方式来使用类型，如：
+
+```protobuf
+message Foo {
+    ...
+    foo.bar.Open open = 1;
+    ...
+}
+```
+
+> ·在不同的语言中，包名定义对编译后生成的代码影响不同
+> C++ 中：对应C++命名空间，例如Open会在命名空间foo::bar中
+> Java 中：package会作为Java包名，除非指定了option jave_package选项
+> Python 中：package被忽略
+> Go 中：默认使用package名作为包名，除非指定了option go_package选项
+> JavaNano 中：同Java
+> C# 中：package会转换为驼峰式命名空间，如Foo.Bar,除非指定了option csharp_namespace选项
+>
+> 
+>
+
+
+
+## 编写proto文件
+
+```protobuf
+// 版本号
+syntax = "proto3";
+
+// 指定包名
+option go_package=".;message";
+
+// 定义结构体
+message UserRequest {
+    // 定义用户名
+    string name = 1;
+}
+
+// 响应结构体
+message UserResponse {
+    int32 id = 1;
+    string name = 2;
+    int32 age = 3;
+    // repeated修饰符是可变数组，go转切片
+    repeated string hobby = 4;
+}
+
+// service定义方法
+service UserInfoService {
+    rpc GetUserInfo (UserRequest) returns (UserResponse) {
+    }
+}
+```
+
+## 生成.go文件
+
+   rpc + proto         
+
+protoc ./name.proto --go_out=./
+命令行输入： 
+
+```c
+protoc ./message.proto --go_out=./ 
+```
+
+grpc + proro 
+命令行输入  
+
+```c
+protoc -I . --go_out=plugins=grpc:. ./name.proto
+```
+
+转成py文件    
+
+```python
+python -m grpc_tools.protoc -I ./ --python_out=./ --grpc_python_out=./ name.proto
+```
+
+> python_out目录指定 xxxx_pb2.py的输出路径，我们指定为./ 当前路径
+> grpc_python_out指定xxxx_pb2_grpc.py文件的输出路径,我们指定为./ 当前路径
+> grpc_tools.protoc 这是我们的工具包，刚刚安装的
+> -I参数指定协议文件的查找目录，我们都将它们设置为当前目录./
+> compute.proto 我们的协议文件
+>
+> compute.proto 协议文件
+>  compute_pb2.py 里面有消息序列化类
+> compute_pb2_grpc.py 包含了服务器 Stub 类和客户端 Stub 类，以及待实现的服务 RPC 接口。
+
+# 示例
+
+## 服务端编写
+
+server
+
+1.  监听
+2. 实例化grpc
+3. 在grpc上注册微服务
+4. 启动服务端
+
+ 
+
+```go
+//定义空接口
+type UserInfoService struct{}
+
+实例化接口
+var u UserInfoService
+
+//  实现方法
+
+func (s *UserInfoService)GetUserInfo(ctx context.Context,req *pb.UserRequest)(res *pb.UserResponse,err error){
+    // 通过用户名查询用户信息
+	name:=req.Name
+	// 数据中查询用户的信息
+	if name=="lpz"{
+		res=&pb.UserResponse{
+			Id:    1,
+			Name:  name,
+			Age:   18,
+			Hobby: []string{"run","eat"},
+		}
+	}
+	return &pb.UserResponse{}, nil
+}
+```
+
+
+
+```go
+func main() {
+	// 地址
+	addr:="127.0.0.1:8082"
+	// 1监听
+	listen,err:=net.Listen("tcp",addr)
+	// 错误处理
+	Hanlder(err,"listen failed")
+
+	// 2 实例化grpc
+	s:=grpc.NewServer()
+	// 在grpc上注册微服务
+	pb.RegisterUserInfoServiceServer(s,&u)
+	
+	// 4 启动服务项
+	s.Serve(listen)
+
+}
+```
+
+## **client**端编写：
+
+1. 连接服务
+2. 实现grpc客户端
+3. 调用
+
+```go
+func main() {
+	//1 、连接
+	conn ,err:=grpc.Dial("127.0.0.1:8082",grpc.WithInsecure())
+    Handle(err,"dial is failed！")
+
+	defer conn.Close() // 关闭连接 释放资源
+	//  2实例化grpc浏览器
+	client:=pb.NewUserInfoServiceClient(conn)
+
+   //  3组装请求函数
+   req:=new(pb.UserRequest)
+   req.Name="lpz"
+   // 4 接口调用
+   res,err2:=client.GetUserInfo(context.Background(),req)
+   Handle(err2,"resquest failed")
+   fmt.Println(res,"正确的请求姿势")
+}
+```
+
+## grpc 中四种数据交互模式
+
+-  简单模式
+       
+
+- 服务端流
+       
+
+- 客户端流
+       
+
+- 双向流
+
+  
+
+- 服务端流：  服务端返回大量数据时，采用服务端流的形式
+
+```go
+ proto文件定义：
+ ....
+service name{
+   rpc name(Request)returns(stream Response){} 
+   // 添加返回的关键词 stream  服务端流
+}
+```
+
+流模式下，服务接口的服务端提供send方法，将数据以流的形式进行发送， 服务接口的客户端提供**Recv()**方法接收服务端发送的流数据
+
+流模式下，服务接口的服务端提供send方法，将数据以流的形式进行发送， 服务接口的客户端提供**Recv()**方法接收服务端发送的流数据
+
+## TLS 认证
+
+在当前目录下生成server.key 
+openssl ecparam -genkey -name secp384rl -out server.key
+
+基于Token认证的方式
+    无需将用户信息服务存在服务器或者session中
+
+过程： 
+   客户端在发送请求前，首先向服务器发起请求，服务器返回一个生成的token给客户端。客户端将token保存下来，用于后续每次请求时，携带着token参数。服务端在进行处理请求之前，会首先对token进行验证，只有token验证成功了，才会处理并返回相关的数据。
+
+
+
+拦截器
+  调用服务器方法之前进行拦截，并进行Token认证、日志处理等

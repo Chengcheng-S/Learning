@@ -1,0 +1,710 @@
+# Gin
+
+```go
+// 创建一个默认的路由引擎
+r:=gin.Default()
+// GET: 请求方式; /hello:请求的路径;
+
+r.GET("/hello",func(c *gin.Context){
+    //c.JSON: 返回JSON格式的数据
+    c.JSON(200,gin.H{
+       "message":'HELLO GIN!',
+})
+})
+//启动 gin服务
+r.Run(":8080")
+```
+
+## GOlang 模板引擎
+
+​    Go语言内置了文本模板引擎text/template和用于HTML文档的html/template
+
+1. 模板文件通常定义为.tmpl和.tpl为后缀（也可以使用其他的后缀），必须使用UTF8编码。
+2. 模板文件中使用{{和}}包裹和标识需要传入的数据。
+3. 传给模板这样的数据就可以通过点号（.）来访问，如果数据是复杂类型的数据，可以通过{ { .FieldName }}来访问它的字段。
+4. 除{{和}}包裹的内容外，其他内容均不做修改原样输出。
+
+### 模板引擎使用： 
+
+1.   定义模板  name.tmpl
+2. 解析模板文件 
+3.  模板渲染
+
+#### 解析模板： 
+
+```go
+func (t *Template) Parse(src string) (*Template, error)
+func ParseFiles(filenames ...string) (*Template, error)
+func ParseGlob(pattern string) (*Template, error)
+```
+
+也可以使用`func New(name string) *Template`函数创建一个名为`name`的模板，然后对其调用上面的方法去解析模板字符串或模板文件。
+   name 必须和解析的模板名一致.	
+
+#### 模板渲染： 
+
+```go
+func (t *Template) Execute(wr io.Writer, data interface{}) error
+func (t *Template) ExecuteTemplate(wr io.Writer, name string, data interface{}) error
+
+func mian(){
+   http.HandleFunc("/", sayHello)
+   err := http.ListenAndServe(":9090", nil)
+}
+
+unc sayHello(w http.ResponseWriter, r *http.Request) {
+	// 解析指定文件生成模板对象
+	tmpl, err := template.ParseFiles("./hello.tmpl")
+	if err != nil {
+		fmt.Println("create template failed, err:", err)
+		return
+	}
+	// 利用给定数据渲染模板，并将结果写入w
+	tmpl.Execute(w, "模板渲染")
+}
+```
+
+
+
+#### 模板语法：
+
+ `{{.}}` 表示当前对象
+  当传入的数据是结构体对象时 可以使用.来访问结构体中的字段
+
+`{{/* a comment */}}`
+注释，执行时会忽略。可以多行。注释不能嵌套，并且必须紧贴分界符始止。
+
+模板中 变量声明：
+ ` $obj:=value`
+
+移除空格
+   `{{- .name -}} ` {{-语法去除模板内容左侧的所有空白符号， 使用-}}去除模板内容右侧的所有空白符号。
+注意：-要紧挨{{和}}，同时与模板值之间需要使用空格分隔。
+
+
+
+#### 条件判断
+
+```go
+{{if pipeline}} T1 {{end}}
+
+{{if pipeline}} T1 {{else}} T0 {{end}}
+
+{{if pipeline}} T1 {{else if pipeline}} T0 {{end}}
+
+
+
+```
+
+range
+
+Go的模板语法中使用range关键字进行遍历，有以下两种写法，其中pipeline的值必须是数组、切片、字典或者通道
+
+{{range pipeline}} T1 {{end}}
+如果pipeline的值其长度为0，不会有任何输出
+
+{{range pipeline}} T1 {{else}} T0 {{end}}
+如果pipeline的值其长度为0，则会执行T0。
+
+
+with
+{{with pipeline}} T1 {{end}}
+如果pipeline为empty不产生输出，否则将dot设为pipeline的值并执行T1。不修改外面的dot。
+
+{{with pipeline}} T1 {{else}} T0 {{end}}
+如果pipeline为empty，不改变dot并执行T0，否则dot设为pipeline的值并执行T1。
+
+### 内置函数：
+
+#### 比较函数  
+
+```go
+eq      如果arg1 == arg2则返回真
+ne      如果arg1 != arg2则返回真
+lt      如果arg1 < arg2则返回真
+le      如果arg1 <= arg2则返回真
+gt      如果arg1 > arg2则返回真
+ge      如果arg1 >= arg2则返回真
+
+{{eq arg1 arg2 arg3}}
+```
+
+and
+    函数返回它的第一个empty参数或者最后一个参数；
+    就是说"and x y"等价于"if x then y else x"；所有参数都会执行；
+or
+    返回第一个非empty参数或者最后一个参数；
+    亦即"or x y"等价于"if x then x else y"；所有参数都会执行；
+not
+    返回它的单个参数的布尔值的否定
+len
+    返回它的参数的整数类型长度
+index
+    执行结果为第一个参数以剩下的参数为索引/键指向的值；
+    如"index x 1 2 3"返回x[1][2][3]的值；每个被索引的主体必须是数组、切片或者字典。
+print
+    即fmt.Sprint
+printf
+    即fmt.Sprintf
+println
+    即fmt.Sprintln
+html
+    返回与其参数的文本表示形式等效的转义HTML。
+    这个函数在html/template中不可用。
+urlquery
+    以适合嵌入到网址查询中的形式返回其参数的文本表示的转义值。
+    这个函数在html/template中不可用。
+js
+    返回与其参数的文本表示形式等效的转义JavaScript。
+call
+    执行结果是调用第一个参数的返回值，该参数必须是函数类型，其余参数作为调用该函数的参数；
+    如"call .X.Y 1 2"等价于go语言里的dot.X.Y(1, 2)；
+    其中Y是函数类型的字段或者字典的值，或者其他类似情况；
+    call的第一个参数的执行结果必须是函数类型的值（和预定义函数如print明显不同）；
+    该函数类型值必须有1到2个返回值，如果有2个则后一个必须是error接口类型；
+    如果有2个返回值的方法返回的error非nil，模板执行会中断并返回给调用模板执行者该错误；
+
+
+
+### 自定义函数
+
+```go
+  后台：
+  // 自定义一个夸人的模板函数  匿名函数至多有两个返回值 且最后一个返回值为error
+	kua := func(arg string) (string, error) {
+		return arg + "真帅", nil
+	}
+	// 采用链式操作在Parse之前调用Funcs添加自定义的kua函数
+	tmpl, err := template.New("hello").Funcs(template.FuncMap{"kua": kua}).Parse(string(htmlByte)
+
+
+自定义模板 
+template中嵌套其他的template。这个template可以是单独的文件，也可以是通过define定义的template。
+
+模板继承：
+{{block "name" plpeline}}T1 {{end}}
+
+block是定义模板{{define "name"}} T1 {{end}}和执行{{template "name" pipeline}}缩写，典型的用法是定义一组根模板，然后通过在其中重新定义块模板进行自定义。
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <title>Go Templates</title>
+</head>
+<body>
+<div class="container-fluid">
+    {{block "content" . }}{{end}}
+</div>
+</body>
+</html>
+
+
+```
+
+```go
+然后定义一个templates/index.tmpl，”继承”base.tmpl：
+ 继承模板
+{{template "base.tmpl"}}
+  重定义模板   {{/*重定义  重定义时 名称必须和模板出一致*/}}
+{{define "content"}}
+
+    <div>Hello world!</div>
+
+{{end}}
+
+
+```
+
+然后使用template.ParseGlob按照正则匹配规则解析模板文件，然后通过ExecuteTemplate渲染指定的模板：
+
+```go
+func index(w http.ResponseWriter, r *http.Request){
+	tmpl, err := template.ParseGlob("templates/*.tmpl")
+	if err != nil {
+		fmt.Println("create template failed, err:", err)
+		return
+	}
+	err = tmpl.ExecuteTemplate(w, "index.tmpl", nil)
+	if err != nil {
+		fmt.Println("render template failed, err:", err)
+		return
+	}
+}
+```
+
+在模板文件开头使用`{{define 模板名}}`语句显式的为模板命名。
+可以把模板文件存放在templates文件夹下面的不同目录中，然后使用`template.ParseGlob("templates/**/*.tmpl")`解析模板。
+
+
+
+### 修改默认的标识符
+
+```go
+ template.New("test").Delims("{[", "]}").ParseFiles("./t.tmpl")
+```
+
+多种前端框架混合使用时
+
+***************************************************************
+### RESTful API
+
+ 
+
+```
+ REST是客户端与web服务器之间进行交互时，使用http协议中的4个请求方法
+  GET 获取资源
+  POST  新建资源
+  PUT   更新资源
+  DELETE  删除资源
+结合postman使用
+```
+
+
+
+*****************************************************************
+## GIN中的HTML渲染
+
+```go
+使用 LoadHTMLGlob() 或者 LoadHTMLFiles()
+
+func main() {
+	router := gin.Default()
+     
+
+        //router.LoadHTMLGlob("templates/*")
+    //router.LoadHTMLFiles("templates/template1.html", "templates/template2.html")
+    router.GET("/index", func(c *gin.Context) {
+    	c.HTML(http.StatusOK, "index.tmpl", gin.H{
+    		"title": "Main website",
+    	})  //gin.H  map的快捷方式
+    })
+    router.Run(":8080")
+
+}
+
+index.html
+
+<html>
+
+	<h1>
+		{{ .title }}
+	</h1>
+
+</html>
+
+//使用不同目录下名称相同的模板：	
+func main() {
+	router := gin.Default()
+	router.LoadHTMLGlob("templates/**/*")
+	router.GET("/posts/index", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "posts/index.tmpl", gin.H{
+			"title": "Posts",
+		})
+	})
+	router.GET("/users/index", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "users/index.tmpl", gin.H{
+			"title": "Users",
+		})
+	})
+	router.Run(":8080")
+}
+
+templates/posts/index.tmpl
+ {{ define "posts/index.tmpl" }}   
+ HTML  
+ {{end}} 
+
+templates/users/index.tmpl
+{{ define "users/index.tmpl" }}
+<html><h1>
+	{{ .title }}
+</h1>
+
+<p>Using users/index.tmpl</p>
+
+</html>
+{{ end }}
+```
+
+
+
+*****************************************************************
+
+### 自定义模板函数
+
+```go
+r:=gin.Defalut()
+r.SetFuncMap(template.FuncMap{
+    "func_name":fuc(str string)template.HTML{
+          return template.HTML(str)
+},   
+})
+r.LoadHTMLFlies("./index.tmpl")
+r.get("/index",func(c *gin.Context){
+      c.HTML(http.StatusOK,"index.tmpl",str)
+})
+
+r.Run("port")
+
+模板中使用自定义的函数
+{{.|func_name}}
+
+*****************************************************************
+
+
+```
+
+### 自定义分隔符
+
+```go
+r.Delims("{[","]}")
+```
+
+
+
+****************************************************************
+### 静态文件处理:
+
+```go
+     router.Static("xxx","./static")
+     
+     
+     
+<link rel="stylesheet" href="/xxx/index.css">
+```
+
+### JSON 数据转换
+
+```go
+// 方法一：使用map
+		data:= map[string]interface{}{
+			"name":"煞",
+			"message":"hello boy",
+			"age":55,
+		}
+		// 方法2 gin.H
+
+
+
+// 方法3: 结构体
+type Msg struct {
+	Name string `json:"name"`  // 结构体tag 对结构体字段做定制化操作
+	Age  int    `json:"age"`
+}
+			字段的首字母大写  外部可以使用
+```
+
+
+
+*****************************************************************
+### 获取query参数
+
+```go
+// 获取浏览器发请求携带的参数query string
+         // 通过key=value方式   & 连接多个键值
+		// 通过query获取请求中携带的query string
+		//http://127.0.0.1:9090/web?query=%E6%9D%A8%E4%BA%8C
+		name:=context.Query("query")
+        ss:=context.Query("ss")
+        ///web?query=大师啊&ss=低调啊兄弟 传递多个参数
+        //2、取不到值时 采用默认值
+		//name:=context.DefaultQuery("query","呀呀呀")
+/*
+		//3  取不到参数就返回false
+		name,ok:=context.GetQuery("query")
+		if !ok{
+			fmt.Println("取不到啊")
+			name=" "
+		}
+
+ */
+		context.JSON(http.StatusOK,gin.H{
+			"name":name,
+			"ss":ss,
+		})
+	})
+```
+
+
+
+
+
+*****************************************************************
+### 表单提交
+
+页面间的相互跳转 action /href=""  指定r.GET("path")
+
+
+
+***************************************************************
+### 获取uri  /path参数
+
+   参数都是string
+   获取多个uri的匹配不要冲突 path格式上必须一致
+
+*****************************************************************
+### 参数绑定  
+
+   context.ShouldBind(&u)// 修改字段的值 传递地址
+
+
+
+***************************************************************
+### 文件上传
+
+<form action="/upload" method="post" enctype="multipart/form-data">
+enctype 规定在发送到服务器之前应该如何对表单数据 进行编码
+默认地，表单数据会编码为 "application/x-www-form-urlencoded"。就是说，在发送到服务器之前，所有字符都会进行编码（空格转换为 "+" 加号，特殊符号转换为 ASCII HEX 值）。
+
+multipart/form-data  不对字符编码  在使用包含文件上传空间的表单时，必须使用该值
+
+text/plain  空格转为+  但不对特殊字符编码   
+
+
+
+```go
+route.POST("/upload", func(context *gin.Context) {
+		// 从请求中读取文件
+		fileReader, err := context.FormFile("f1")
+		HandleError(err, "read failed")
+
+		// 将读取到的文件保存到本地
+		// 文件路径拼接
+		filepaths := fmt.Sprintf("./%s", fileReader.Filename)
+		//paths:=path.Join("/",fileReader.Filename)
+		err1 := context.SaveUploadedFile(fileReader, filepaths)
+		HandleError(err1, "save failed")
+		context.JSON(http.StatusOK, gin.H{
+			"mesage": "ok",
+		})
+	}）
+
+
+```
+
+
+
+****************************************************************
+### 重定向
+
+```go
+context.Redirect(http.StatusMovedPermanently,"http://www.baidu.com")
+```
+
+
+
+### 路由重定向
+
+```go
+context.Request.URL.Path="/b"  //将请求的uri修改
+r.HandleContext(context)  // 继续后续的处理
+```
+
+
+
+**************************************************************
+### 路由 路由组
+
+#### 普通路由：
+
+```go
+r.GET("/index", func(c *gin.Context) {...})
+r.GET("/login", func(c *gin.Context) {...})
+r.POST("/login", func(c *gin.Context) {...})
+
+
+//  可以处理任意请求方式
+r.Any("/test", func(c *gin.Context) {...})
+
+
+
+//  没有匹配到路由请求 
+
+r.NoRoute(func(c *gin.Context) {
+		c.HTML(http.StatusNotFound, "views/404.html", nil)
+	})
+
+
+
+路由组  有共同url前缀的路由划分
+userGroup := r.Group("/user")
+	{
+		userGroup.GET("/index", func(c *gin.Context) {...})
+		userGroup.GET("/login", func(c *gin.Context) {...})
+		userGroup.POST("/login", func(c *gin.Context) {...})
+
+	}
+	shopGroup := r.Group("/shop")
+	{
+		shopGroup.GET("/index", func(c *gin.Context) {...})
+		shopGroup.GET("/cart", func(c *gin.Context) {...})
+		shopGroup.POST("/checkout", func(c *gin.Context) {...})
+	}
+	r.Run()
+
+}
+```
+
+#### 路由嵌套：
+
+```go
+shopGroup := r.Group("/shop")
+	{
+		shopGroup.GET("/index", func(c *gin.Context) {...})
+		shopGroup.GET("/cart", func(c *gin.Context) {...})
+		shopGroup.POST("/checkout", func(c *gin.Context) {...})
+		// 嵌套路由组
+		xx := shopGroup.Group("xx")
+		xx.GET("/oo", func(c *gin.Context) {...})
+	}
+```
+
+
+
+*****************************************************************
+### Gin 中间件
+
+ 
+
+```go
+  gin.HandlerFunc 类型
+type HandlerFunc func(*Context)
+加入用户自定义的钩子函数(Hook)  钩子函数叫做中间件,处理一些公共的业务逻辑，如登录认证、权限校验、数据分页、记录日志、好事统计等。
+
+
+func name(c *gin.Context){.....}
+
+// 为某个路由单独注册中间件
+r.GET("/j", m1,func(c *gin.Context) {})
+
+
+c.NEXT() 调用后续函数
+c.Abort() 阻止调用后续函数
+
+
+c.Set(key)  // 设置请求上下文的值
+
+value,bool=c.Get(key) // 获取设置上下文的值  跨中间件取值
+
+r.Use(m1)  //全局注册中间件函数
+	r.GET("/j",func(c *gin.Context) {
+		c.JSON(http.StatusOK,gin.H{
+			"index":"j",
+                 
+
+		})
+	})
+
+
+```
+
+### 路由绑定中间件
+
+```go
+// 路由组注册中间件
+	// func 1
+	yygroup:=r.Group("/yy",ChackLogin(true))
+	{
+		yygroup.GET("/ii", func(c *gin.Context) {
+			 c.JSON(http.StatusOK,gin.H{"yy":"ii",})
+		})
+	}
+
+	// func2
+	xxgroup:=r.Group("/xx")
+	xxgroup.Use(ChackLogin(true))
+	{
+		xxgroup.GET("/bb", func(c *gin.Context) {
+			 c.JSON(http.StatusOK,gin.H{"xx":"bb",})
+		})
+	}
+
+
+
+
+r:=gin.New()// 新建一个没有任何中间件的路由
+
+gin.Default() 默认使用Logger 和Recovery中间件
+```
+
+### gin中间件中使用goroutine
+
+当在中间件或handler中启动新的goroutine时，不能使用原始的上下文（c *gin.Context），必须使用其只读副本（c.Copy()）。
+
+***************************************************************
+### cookie：
+
+```go
+ c.SetCookie(name,name,maxAge,path,domain,secure,httpOnly)
+maxAge  int 单位秒
+path  cookie所在的目录
+domain  string 域名
+secure   是否只可以通过http访问
+httpOnly  bool 是否允许别人通过js获取自己的cookie
+
+// 服务端要给客户端cookie
+   r.GET("cookie", func(c *gin.Context) {
+      // 获取客户端是否携带cookie
+      cookie, err := c.Cookie("key_cookie")
+      if err != nil {
+         cookie = "NotSet"
+         // 给客户端设置cookie
+         //  maxAge int, 单位为秒
+         // path,cookie所在目录
+         // domain string,域名
+         //   secure 是否智能通过https访问
+         // httpOnly bool  是否允许别人通过js获取自己的cookie
+         c.SetCookie("key_cookie", "value_cookie", 60, "/",
+            "localhost", false, true)
+
+
+
+
+定义一个获取cookie的中间件 检测cookie是否存在
+func AuthMiddleWare() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// 获取客户端cookie并校验
+		if cookie, err := c.Cookie("abc"); err == nil {
+			if cookie == "123" {
+				c.Next()
+				return
+			}
+		}
+		// 返回错误
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "err"})
+		// 若验证不通过，不再调用后续的函数处理
+		c.Abort()
+		return
+	}
+}
+
+
+清除cookie
+ router.GET("/clear_cookie", func(context *gin.Context) {
+        context.SetCookie("name", "Shimin Li", -1, "/", "localhost", false, true)
+    })
+```
+
+
+
+### 日志文件：
+
+```go
+func main() {
+    gin.DisableConsoleColor()
+
+    // Logging to a file.
+    f, _ := os.Create("gin.log")
+    gin.DefaultWriter = io.MultiWriter(f)
+    
+    // 如果需要同时将日志写入文件和控制台，请使用以下代码。
+    // gin.DefaultWriter = io.MultiWriter(f, os.Stdout)
+    r := gin.Default()
+    r.GET("/ping", func(c *gin.Context) {
+        c.String(200, "pong")
+    })
+    r.Run()
+
+}
+```
+

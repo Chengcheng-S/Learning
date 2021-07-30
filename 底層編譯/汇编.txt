@@ -1,0 +1,295 @@
+go tool compile -S name.go
+
+go tool compile 调用go底层的命令工具
+-S 输出汇编格式
+
+go tool compile -S first.go
+go.cuinfo.packagename. SDWARFINFO dupok size=0
+        0x0000 63 6f 64 65 31                                   code1
+"".id SNOPTRDATA size=8
+        0x0000 d4 04 00 00 00 00 00 00                          ........
+
+
+SNOPTRDATA 相关标志，NOPTR 表示数据中不包含指针数据
+
+plan9 汇编
+
+基本指令
+栈调整
+栈的调整是通过对硬件 SP 寄存器进行运算来实现的，例如
+SUBQ $0x18,SP // 对SP做减法，为函数分配函数栈帧
+
+ADDQ $0x18 ,SP // 对SP做加法，清除函数栈帧
+数据搬运 常量用$num 表示，可以为负数，默认情况下是10进制，可以用0x123表示16进制
+ MOVB $1,DI //1 byte
+ MOVW $0x10，BX  // 2bytes
+ MOVD $1,DX	// 4bytes
+ MOVQ $-10,AX	//8bytes
+ 搬运长度有MOV后缀决定
+ 计算指令
+ ADDQ AX,BX 	// BX+=AX
+ SUBQ AX,BX 	//BX-=AX
+ IMULQ AX,BX	//BX*=AX
+ 类似于搬运指令可以修改后缀来对应不同长度的操作数
+ eg： ADDW/ADDB/ADDL/ADDQ
+ 条件跳转/无条件跳转
+ 无条件跳转 JMP addr // 跳转到地址，地址可为代码中的地址，不过实际上手写不会出现这种东西
+ JMP label // 跳转到标签，可以跳转到同一函数内的标签位置
+ JMP 2(PC)  // 以当前指令为基础，向前/后跳转x行
+ JMP -2(PC) // 以当前指令为基础，向前/后跳转x行 有条件跳转
+ JNZ target   // 如果zero flag 被set，则跳转 寄存器 amd64的通用寄存器
+**********************************************
+ (lldb) reg read General Purpose Registers:
+  rax = 0x0000000000000005
+  rbx = 0x000000c420088000
+  rcx = 0x0000000000000000
+  rdx = 0x0000000000000000
+  rdi = 0x000000c420088008
+  rsi = 0x0000000000000000
+  rbp = 0x000000c420047f78
+  rsp = 0x000000c420047ed8
+  r8 = 0x0000000000000004
+  r9 = 0x0000000000000000
+  r10 = 0x000000c420020001
+  r11 = 0x0000000000000202
+  r12 = 0x0000000000000000
+  r13 = 0x00000000000000f1
+  r14 = 0x0000000000000011
+  r15 = 0x0000000000000001
+  rip = 0x000000000108ef85
+  int`main.main + 213 at int.go:19
+  rflags = 0x0000000000000212
+  cs = 0x000000000000002b
+  fs = 0x0000000000000000
+  gs = 0x0000000000000000
+  --------------------------------------------------------
+  应用代码层面会用到通用寄存器主要为：
+  rax,rbx,rcx,rdx,rdi,rsi,r8~r15 bp和sp被用来管理栈顶和栈底 plan9中使用寄存器不需要带r或者e的前缀，
+  如rax只需要写AX即可 MOVQ $101,AX=mov rax,101 通用寄存器在IA64和plan9中的对应关系
+  IA64==========>plan9
+  RAX	  	        AX
+  RBX	  	        BX
+  RCX		        CX
+  RDX		        DX
+  RDI		        DI
+  RSI		        SI
+  RBP		        BP
+  RSP		        SP
+  R8~R14		    R8~14
+  RIP		        PC
+  伪寄存器
+  GOlang引入4个伪寄存器
+  FP: Frame pointer: arguments and locals 帧指数：参数和局部变量
+  PC: Program counter: jumps and branches. 程序计数器：跳转分支
+  SB: Static base pointer: global symbols.  静态基指针：全局符号
+  SP: Stack pointer: top of stack.     堆栈顶部指针
+  FP：使用形如symbol+offset(FP)的方式，
+  引入函数的输入参数，如 arg0+0(FP), arg0+8(FP) 使用FP 不加symbol时，编译无法通过，加symbol主要是为了程序的可读性。
+  PC: 在x86平台下对应ip寄存器，adm64上则为rip，除了个别跳转之外，很少用到PC
+  SB :常用于声明函数或全局变量。
+  SP: plan9指向当前栈帧的局部变量的开始位置，形如symbol+offset(SP)的方式，
+  引用函数的局部变量， offset的合法取值为[-framesize,0),假定第局部变量为8个字节，那么第一局部变量可以用localvar0-8(SP)表示 与硬件寄存器SP不同的地方，栈帧size为0的情况下，伪寄存器SP和硬件寄存器SP指向同一位置，
+  symbol+offset(SP)则表示伪寄存器SP，如果是offset(SP)表示硬件寄存器SP 对于编译输出(go tool compile -S / go tool objdump)的代码来讲，目前所有的 SP 都是硬件寄存器 SP，无论是否带 symbol。
+  注:
+    1·伪SP和硬件SP的区别方法，若该SP之前有symbol 即伪寄存器，若没有则是硬件SP寄存器
+    2·SP和FP的对应位置会改变，不应该尝试用伪SP寄存器去寻找那些用FP+offset来引用的值，例如函数的入参和返回值 3·伪SP实际指向stack的bottom
+    4·在go tool objdump/go tool compile -S 输出的程序中没有伪SP寄存器和FP寄存器的，在编译和反汇编的结果中只有真实的SP寄存器
+    5·FP和Go源码中的framepointer不相等  这里指向的是caller的伪SP寄存器
+
+变量声明
+汇编中的变量一般存储与.rodata和.data段中的只读值，对应到应用层的话就是已经初始化的全局的const、var、static 变量、常量
+使用DATA结合的GLOBL定义变量
+DATA 使用方法：
+DATA symbol+offset(SB)/width,value
+offset: 该值相对于符号symbol的偏移，而不是相对于全局变量某个地址的偏移
+
+使用GLOBL指令将变量声明为global，额外接受两个参数，一个flag，另一个为变量的总大小
+GLOBL divtab(SB),RODATA,$64
+
+GLOBL 必须在DATA之后，
+定义readonly全局变量的例子
+DATA age+0X00(SB)/4,$18  //forerver 18
+GLOBL age(SB),DODATA,$4
+
+DATA pi+0(SB)/8,$3.1415926
+GLOBL pi(SB),RODATA ,$8
+
+DATA bithYear+0(SB)/4,$1998
+GLOBL birthYear(SB),RODATA ,$4
+
+所有符号在声明时，其offset一般都为0
+有时也可能会想在全局变量中定义数组，或字符串，这时候就需要用上非 0 的 offset 了
+DATA bio<>+0(SB)/8,$" oh yes i"
+DATA bio<>+8(SB)/8,$"AM HERE"
+GOLBL bio<>(SB),RODATA,$16
+<> 跟在符号名之后，表示该全局变量只在当前文件生效，类似于clang中的static，外部文件禁止引用该变量，否则会return relocation target not found
+flag的取值 NOPROF= 1  不需要剖析标记的函数 ，此标志已弃用
+DUPOK=2  在一个二进制文件中包含次符号的多个实例是合法的，链接器将选择要使用的副本之一
+NOSPLIT=4 对于文本项。不要插入签到吗来检测堆栈是否必须拆分，这个例程的框架，加上它任何调用的东西，都必须放在堆栈顶部的空闲空间之中，用于保护程序，如堆栈拆分代码本身
+RODATA =8 用于数据和全局项。将此数据放在只读部分。
+NOPTR=16  对于数据和全局项，此数据不包含指针，因此不需要垃圾回收机器扫描
+WRAPPER=32  对于文本项，此为包装函数，不应记为禁用恢复
+NEEDCTXT=64  对于文本项  此为闭包函数，因此它使用器传入的上下文寄存器 当flag使用这些参数时，需要在汇编文件头部引入#include "textflag.h"
+函数声明
+plan9汇编标准函数的定义
+func add(a,b int) int
+    => 该声明在同一个package下的任意.go文件中
+    => 只有函数头 无函数体，
+以及实现方法
+TEXT package·add(SB)，NOSPLIT,$0-8
+    MOVQ a+0(FP),AX
+    MOVQ a+8(FP),BX
+    ADDQ AX,BX 
+    MOVQ BX,ret+16(FP)
+    RET
+最后一行必须留空行，否则报错
+TEXT 用来定义函数，除了TEXT之外前边变量声明说到的DATA/GLOBL 定义中的pkgname部分可以省略，
+
+注：在更改packagename的话需要修改程序 · 是一个unicode的中点 参数及返回值大小
+
+                              参数及返回值大小
+                                  |
+ TEXT pkgname·add(SB),NOSPLIT,$32-32
+       |        |               |
+      包名     函数名         栈帧大小(局部变量+可能需要的额外调用函数的参数空间的总大小，但不包括调用其它函数时的 ret address 的大小)
+
+
+
+栈结构
+
+                       -----------------
+                       current func arg0
+                       ----------------- <----------- FP(pseudo FP)
+                        caller ret addr
+                       +---------------+
+                       | caller BP(*)  |
+                       ----------------- <----------- SP(pseudo SP，实际上是当前栈帧的 BP 位置)
+                       |   Local Var0  |
+                       -----------------
+                       |   Local Var1  |
+                       -----------------
+                       |   Local Var2  |
+                       -----------------                -
+                       |   ........    |
+                       -----------------
+                       |   Local VarN  |
+                       -----------------
+                       |               |
+                       |               |
+                       |  temporarily  |
+                       |  unused space |
+                       |               |
+                       |               |
+                       -----------------
+                       |  call retn    |
+                       -----------------
+                       |  call ret(n-1)|
+                       -----------------
+                       |  ..........   |
+                       -----------------
+                       |  call ret1    |
+                       -----------------
+                       |  call argn    |
+                       -----------------
+                       |   .....       |
+                       -----------------
+                       |  call arg3    |
+                       -----------------
+                       |  call arg2    |
+                       |---------------|
+                       |  call arg1    |
+                       -----------------   <------------  hardware SP 位置
+                       | return addr   |
+                       +---------------+
+
+
+
+ BP 即caller的BP寄存器的值，caller BP在编译期插入，用户手写程序时，计算frame size 不包括这个caller BP部分的
+ 是否插入caller BP主要判断依据：
+ 1·函数栈帧大小大于0
+ 2·函数返回true
+ func Framepointer_enabled(goos, goarch string) bool
+ {
+  return framepointer_enabled != 0 && goarch == "amd64" && goos != "nacl"
+  }
+如果编译器在最终的汇编结果中没有插入 caller BP(源代码中所称的 frame pointer)的情况下，伪 SP 和伪 FP 之间只有 8 个字节的 caller 的 return address，
+而插入了 BP 的话，就会多出额外的 8 字节。也就说伪 SP 和伪 FP 的相对位置是不固定的，有可能是间隔 8 个字节，也有可能间隔 16 个字节。并且判断依据会根据平台和 Go 的版本有所不同。
+FP 伪寄存器指向函数的传入参数的开始位置，因为栈是朝低地址方向增长，为了通过寄存器引用参数时方便，所以参数的摆放方向和栈的增长方向是相反的 即：
+FP high ----------------------> low
+argN, ... arg3, arg2, arg1, arg0
+假设所有参数均为 8 字节,使用symname+0(FP)访问第一个参数， symname+8(FP)访问第二个参数
+用伪SP引用局部变量,伪SP指向局部变量的底部，所以 symname-8(SP)表示第一个局部变量 symname-16(SP)表示第二个局部变量 c
+aller return address和current func argo有caller来分配内存，不算在当前的栈帧内
+
+FP SP BP 的关系
+
+                                       caller
+                                 +------------------+
+                                 |                  |
+       +---------------------->  --------------------
+       |                         |                  |
+       |                         | caller parent BP |
+       |           BP(pseudo SP) --------------------
+       |                         |                  |
+       |                         |   Local Var0     |
+       |                         --------------------
+       |                         |                  |
+       |                         |   .......        |
+       |                         --------------------
+       |                         |                  |
+       |                         |   Local VarN     |
+                                 --------------------
+ caller stack frame              |                  |
+                                 |   callee arg2    |
+       |                         |------------------|
+       |                         |                  |
+       |                         |   callee arg1    |
+       |                         |------------------|
+       |                         |                  |
+       |                         |   callee arg0    |
+       |                         ----------------------------------------------+   FP(virtual register)
+       |                         |                  |                          |
+       |                         |   return addr    |  parent return address   |
+       +---------------------->  +------------------+---------------------------    <-------------------------------+
+                                                    |  caller BP               |                                    |
+                                                    |  (caller frame pointer)  |                                    |
+                                     BP(pseudo SP)  ----------------------------                                    |
+                                                    |                          |                                    |
+                                                    |     Local Var0           |                                    |
+                                                    ----------------------------                                    |
+                                                    |                          |
+                                                    |     Local Var1           |
+​                                                    ----------------------------                            callee stack frame
+​                                                    |                          |
+                                                    |       .....              |
+                                                    ----------------------------                                    |
+                                                    |                          |                                    |
+                                                    |     Local VarN           |                                    |
+                                  SP(Real Register) ----------------------------                                    |
+                                                    |                          |                                    |
+                                                    |                          |                                    |
+                                                    |                          |                                    |
+                                                    |                          |                                    |
+                                                    |                          |                                    |
+​                                                    +--------------------------+    <-------------------------------+
+
+                                                              callee
+
+
+
+argsize 和framesize计算规则
+argsize 在函数声明之中
+    TEXT pkgname ·add(SB),NOSPLIT,$16-32
+    $16-32 表示$framesize-argsize,GO在函数调用时，参数和返回值都需要由caller在其栈帧上备好内存空间，
+    callee 在声明时，需要明确何为argsize，其计算方式为 参数的大小求和+返回值大小求和 例如入参是 3 个 int64 类型，返回值是 1 个 int64 类型，那么这里的 argsize = sizeof(int64) * 4。
+    或者通过简单实现一个相同的签名空函数，然后通过go tool objdump逆向查找分配的内存空间
+    framesize计算 手写代码的 framesize 不需要考虑由编译器插入的 caller BP，要考虑：
+    1·局部变量，及其每个变量的size
+    2·在函数是否由对齐函数调用时，如果有，调用时需要将callee的参数，返回值考虑在内
+    虽然return address(rip)的值也是存储在caller的stack frame上，这个过程由CALL指令和RET指令完成
+    PC寄存器的保存和恢复，在手写汇编时，同样也是不需要考虑这个 PC 寄存器在栈上所需占用的 8 个字节的。
+    3·原则上来说， 调用函数时只要不把局部变量覆盖掉就可以了。
+ 4·在确保逻辑没有问题的前提下，覆盖局部变量也没有问题。只要保证进入和退出汇编函数时的 caller 和 callee 能正确拿到返回值就可以。
+
+
+

@@ -1,0 +1,87 @@
+
+
+reflect 
+  在编译时不知道类型的情况下，可更新变量、运行时查看值、调用方法以及直接对他们的布局进行操作的机制，称为反射。
+反射使用TypeOf和ValueOf函数从接口中获取目标对象的信息，轻松完成目的   
+
+反射的使用： 1）获取变量内部信息  reflect.ValueOf()获取输入参数接口中的数据的值，如果为空则返回0；
+     reflect.TypeOf()动态获取数据参数接口中的值的类型，如果为空则为nil
+       2）接口变量的 类型/值
+       已知原有类型
+          已知类型后转换为其对应的类型的做法如下，直接通过interface方法后强制转换，如下： 
+        realValue:=value.interface().(已知的类型)
+         
+
+           其中value:=reflect.ValueOf()
+      未知对象类型
+ /*
+     获取字段
+     step1：先获取reflect.Type  NumFiled() 当前类型有多少字段   Filed(index) 获取每一个字段
+     step2： 通过Filed获取每一个字段
+     step3： Interface() 获取对应的值
+      */
+       接口类型反射未知类型.go
+
+
+
+
+
+Go官方关于反射的三大定律:
+    1)（基础）反射可以从接口值得到发射对象，反射是一种检测存储在interface中的类型和值机制，这可以通过TypeOf 和ValueOf函数获得
+    2）（与1相反）反射可以从反射对象获得接口值。他将ValueOf的返回值通过inferface()函数反向转变成interface变量
+    反射类型对象可以相互转换，反射类型对象实际上就是指reflect
+.Type和reflect.Value()    
+    3）如果需要操作一个反射变量，则其值必须可以修改
+    反射变量可以设置的本质是它存储了原变量本身，这样对反射变量的操作，就会反应到原变量本身；反之，入股反射变量不能代表原变量，那么操作了反射变量，不会对原变量产生任何影响
+
+
+
+
+
+**************************************************************
+通过反射设置实际对象的值
+      
+// 需要操作指针 ptr
+//  获取reflect.ValueOf()
+v:=reflect.ValueOf(&mm) // 参数必须是ptr才可以修改值
+newv:=v.Elem()
+newv.CanSet() // 是否可以修改数据
+
+newv.Set(number)//数据是否可修改
+
+注：1、需要传入的参数是ptr，然后通过Elem()方法去获取所指向的value
+2、如果传入的不是指针，而是变量则直接panic
+3、reflect.Value.Elem() 表示获取原始值对应的反射对象，只有原始值可以修改，当前反射对象不能修改
+4、struct或者struct嵌套处理方式一致
+5、修改反射类型对象，其值必须是'addressable'，对应的要传入的是指针，同时要通过Elem方法获取原生值对应的反射对象
+
+*********************************************************************
+reflect对象进行方法调用
+call 方法
+方法名首字母必须大小写 cnm qisnid了
+
+调用方法.go
+
+1、要通过反射调用对应的方法，先获取reflect.Valueof(interface)获取reflect.Value
+2、reflect.Value.MethodByName() 名字必须大写，返回指定的方法名
+3、[]reflect.Value 最终需要调用的参数 如果无参数 输入nil ，参数多个则
+	value2.Call([]reflect.Value{reflect.ValueOf(5),reflect.ValueOf("日的")})
+
+4、参数调用必须一致
+5、本来可以用对象访问方法直接调用的，但是如果通过反射，那么首先需要注册，MethodByName 通过反射调用methodValue.Call()
+
+
+
+/*
+	调用函数
+	函数也可以看作接口变量类型
+	 1、 函数————> 反射对象 value
+	2、kind-——》func
+    3、 call 调用
+
+
+*/
+
+
+
+reflect.DeepEqual() 判断两个引用类型的数据是否相等

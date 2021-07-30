@@ -1,0 +1,87 @@
+使用curl访问
+post： curl -d args url
+
+get:
+curl url
+*****************
+控制器
+-----------------------------------
+1）写一个控制器
+
+```go
+ type TestController strcut{
+   beego.Controller
+}
+
+
+
+func (c *TestController)Get(){
+
+    c.Ctx.WriteString("context")
+
+}
+```
+
+
+
+2）写一个路由
+------------------------------------
+```go
+func init(){
+beego.Router("/test", &controllers.TestController{},"get:Get，post:Post")
+	}
+```
+
+3) 开启
+bee run
+
+4）git的curl请求
+curl "localhost:8080/test"
+
+
+url传参： get  /post
+---------------------
+1）控制器中方法获取参数
+// 声明一个控制器
+
+```go
+type TestArgController struct {
+
+	beego.Controller
+
+}
+```
+
+```go
+func (c *TestArgController) Ina() {
+	 id:=c.GetString("id")
+	 c.Ctx.WriteString(id+"前为id，后为name")
+
+	 // 获取name参数
+	 name:=c.Input().Get("name")
+	 c.Ctx.WriteString(name)
+
+}
+```
+
+
+
+2）创建路由
+beego.Router("/test/arg", &controllers.TestArgController{},"get:Ina")
+
+
+3）启动
+bee run
+4）访问
+127.0.0.1:1234/test/arg?id=1&name=2
+
+
+
+model层
+-----------------------------------
+beego  ORM
+
+1）控制器
+xxxController
+
+

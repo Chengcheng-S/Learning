@@ -1,0 +1,2328 @@
+bee的命令：
+   new 基于网站开发
+   api  手机接口开发
+   run  运行
+
+
+
+************************************************
+curl 利用url语法在命令行下工作的文件传输工具，支持文件上传下载，综合传输工具，cURL还包含了用于程序开发的libcurl。
+
+获取页面： 
+  curl http://curl.haxx.se 获得http://curl.haxx.se指向的页面，可以指向一个文件或者一个图直接下载到本地，。
+   如果下载的是HTML文档，缺省的将是显示文件头部，全部显示需要加参数-i ，要只显示头部的话使用参数-l。
+   参数-v 命令查看curl如何工作，向服务器发送所有的命令都会显示出来，
+   为了断点续传，可以使用参数-r指定传输范围。
+
+   获取post 请求携带的参数时，需要使用curl -d url 
+   
+   对于upload 传输文件 需要使用
+    curl -F upload=@localfilename -F press=OK URL 
+    实质是将本地文件用POST方法上传到服务器
+
+     PUT  http协议文件上传到额标准方法时使用PUT，此时curl命令使用-T 参数：
+     curl -T uploadfile www.uploadhttp. com/receive.cgi
+    
+
+有关认证：
+   curl可以处理各种情况的认证页面,例如下载用户名/密码认证方式的页面。
+   curl -u name:password www.secrets. com
+   
+    如果网络是通过http代理服务器出去的，而代理服务器需要用户名和密码，那么输入：
+   curl -U proxyuser:proxypassword http://curl.haxx. se
+
+  任何需要输入用户名和密码的时候，只在参数中指定用户名而空着密码，curl可以交互式的让用户输入密码。
+
+引用：
+    有些网络资源访问的时候必须经过另外一个网络地址跳转过去，这用术语来说是：referer，引用。
+    对于这种地址的资源，curl也可以下载：
+    curl -e http://curl.haxx. se daniel.haxx. se
+
+指定用户端：
+   有些网络资源首先需要判断用户使用什么浏览器,符合标准才能下载或者浏览，此时curl需要伪装成 任何浏览器
+   curl -A "Mozilla/4.0 (compatible; MSIE 5.01; Windows NT 5.0)" URL
+   使用该命令可以把curl伪装成IE5.0，用户平台为windows,
+    
+    curl -A "Mozilla/4.73 [en] (X11; U; Linux 2.2.15 i686)" URL
+   此时curl变成了Netscape，运行在PIII平台的Linux上了。
+
+COOKIES:
+   对于有cookie记录的文件,使用命令,
+   curl -b stored_cookies_in_file www.cookiesite. com
+
+   curl可以根据旧的cookie写出新cookie并发送到网站：
+   curl -b cookies.txt -c newcookies.txt www.cookiesite. com
+
+
+加密HTTP 
+     如果是通过OpenSSL加密的https协议传输的网页，curl可以直接访问：
+   curl https://that.secure.server. com
+
+http认证：
+   如果是采用证书认证的http地址，证书在本地，那么curl这样使用
+   curl -E mycert.pem https://that.secure.server. com
+
+
+**************************************************
+
+
+命令行下启动bee.exe 
+创建新的工程 bee new name  会在gopath下生成目录结果
+
+创建API命令： bee api name  其中涵盖有test模块用于做单元测试
+同时，该命令还支持一些自定义参数自动连接数据库创建相关 model 和 controller: bee api [appname] [-tables=""] [-driver=mysql] [-conn="root:<password>@tcp(127.0.0.1:3306)/test"] 如果 conn 参数为空则创建一个示例项目，否则将基于链接信息链接数据库创建项目。
+
+Run 命令：
+	bee run 命令是监控 beego 的项目，通过 fsnotify监控文件系统。但是注意该命令必须在 $GOPATH/src/appname 下执行。 这样我们在开发过程中就可以实时的看到项目修改之后的效果：
+关于run 003错误 go mod init  初始化go mod
+
+项目组织结构：
+·conf：项目配置文件所在的目录,项目中有一些全局的配置可以放在此目录下，默认指定三个配置 appname 项目名称  httpport 监听端口
+runmode  执行模式
+·controllers：该项目存放控制器文件所在的目录，控制前就是控制应用调用哪些业务逻辑，由controllers处理完http请求之后，并负责返回给前端调用者   控制层
+
+·models:实体层或数据层,在models层中实现和用户业务数据的处理,主要和数据库表相关的一些操作会在这一目录中实现,然后将执行胡的结果数据返回给controller层,如数据的修改就是在models中实现的
+
+·router：路由层(分发)当前浏览器进行一个http请求到达后台项目时，根据请求处理不同的url进行不同的业务处理
+
+·statics ：静态文件 css js img 
+·views：html模板文件
+
+
+**********************************************
+路由设置：
+	基础路由、固定路由、正则路由、自动路由
+路由注册 beego.Router  映射url到controller，第一个参数为url的地址,第二个参数为对应的Contorller，即控制器
+
+
+*************************************************************
+Controller逻辑：
+
+type MainController struct {
+        beego.Controller   // post get init prepare delete head
+}   声明一个控制前maincontroller 内嵌了beego.Controller(GO的内嵌方式)
+ beego 是一个 RESTful 的框架 默认是执行对应 req.Method 的方法
+如浏览器的是 GET 请求，那么默认就会执行 MainController 下的 Get 方法
+
+func (this *MainController) Get() {
+        this.Data["Website"] = "beego.me"
+        this.Data["Email"] = "astaxie@gmail.com"
+        this.TplName = "index.tpl"   // 渲染模板
+}
+
+通过各种方式获取数据，然后赋值到 this.Data 中，这是一个用来存储输出数据的 map，可以赋值任意类型的值
+
+this.TplName 就是需要渲染的模板，这里指定了 index.tpl，如果用户不设置该参数，那么默认会去到模板目录的 Controller/<方法名>.tpl 查找，例如上面的方法会去 maincontroller/get.tpl (文件、文件夹必须小写)。
+
+用户设置了模板之后系统会自动的调用 Render 函数（这个函数是在 beego.Controller 中实现的），所以无需用户自己来调用渲染。
+
+当然也可以不使用模版，直接用 this.Ctx.WriteString 输出字符串，
+
+
+********************************************************************
+View编写：
+默认支持tpl和html的后缀名，如果要设置其他的后缀可以调用beego.AddTemplateExt接口的设置，beego采用了GO语言默认的模板引擎,和go的模板语法一致
+
+*********************************************
+静态文件处理
+beego默认注册了static目录为静态处理的目录,注册样式：URL前缀和映射的目录(在/main.go文件中 beego.Run()之前加入)  StaticDir["/static"]="static"
+
+可以设置多个静态文件处理目录，有多个文件下载目录 download1、download2，你可以这样映射（在 /main.go 文件中 beego.Run() 之前加入）：
+beego.SetStaticPath("/down1", "download1")
+beego.SetStaticPath("/down2", "download2")
+
+这样用户访问 URL http://localhost:8080/down1/123.txt 则会请求 download1 目录下的 123.txt 文件。
+
+
+
+
+****************************************************************************
+Contriller设计
+beego 目前支持 INI、XML、JSON、YAML 格式的配置文件解析，但是默认采用了 INI 格式解析，用户可以通过简单的配置就可以获得很大的灵活性。
+1.1 默认配置解析
+	beego默认会解析当前应用下的conf/app.conf文件
+	该文件为配置文件 可以设置多个参数
+如： mysqluser = "root"
+ mysqlpass = "rootpass"
+ mysqlurls = "127.0.0.1"
+ mysqldb   = "beego"
+
+可以通过以下的方式获去配置信息
+beego.AppConfig.String("mysqluser")
+beego.AppConfig.String("mysqlpass")
+beego.AppConfig.String("mysqlurls")
+beego.AppConfig.String("mysqldb")
+
+1.1.1 不同级别的配置
+   配置文件中支持section，可以有不同的runmode的配置，默认优先读取runmode下的配置信息  
+如
+appname = beepkg
+httpaddr = "127.0.0.1"
+httpport = 9090
+runmode ="dev"
+autorender = false
+recoverpanic = false
+viewspath = "myview"
+
+[dev]
+httpport = 8080
+[prod]
+httpport = 8088
+[test]
+httpport = 8888
+以上文件就是在不同的runmode下解析不同的配置,例如在dev模式下，httpport为8080，在prod模式下为8088，在test模式下为8888，其他配置文件同理,解析时优先解析runmode下的配置，然后解析默认的配置
+
+读取不同模式下配置参数的方法是"模式::配置参数名"比如:
+beego.AppConfig.String("dev::mysqluser")
+
+对于自定义的参数，需使用 beego.GetConfig(typ, key string, defaultVal interface{}) 来获取指定 runmode 下的配置（需 1.4.0 以上版本），typ 为参数类型，key 为参数名, defaultVal 为默认值。
+
+1.1.2 多个配置文件
+ INI格式配置支持include方式，引入多个配置文件,
+
+app.conf
+
+appname = beepkg
+httpaddr = "127.0.0.1"
+httpport = 9090
+
+include "app2.conf"
+
+
+app2.conf
+
+runmode ="dev"
+autorender = false
+recoverpanic = false
+viewspath = "myview"
+
+[dev]
+httpport = 8080
+[prod]
+httpport = 8088
+[test]
+httpport = 8888
+
+以上两个配置文件效果一致
+
+1.1.3 支持环境变量配置
+    配置文件解析支持从环境变量中获取配置项,配置项格式：${环境变量}
+  runmode  = "${ProRunMode||dev}"
+httpport = "${ProPort||9090}" 
+   优先使用环境变量中配置的runmode和httpport，如果有配置环境变量ProRunMode则优先使用改环境变量值，如果不存在或者为空，则使用dev作为runmode
+
+
+1.1.4 系统默认参数
+    基础配置 ：BConfig 保存了所有 beego 里面的系统默认参数，你可以通过 beego.BConfig 来访问和修改底下的所有配置信息.
+    
+       配置文件路径，默认是应用程序对应的目录下的 conf/app.conf，用户可以在程序代码中加载自己的配置文件 beego.LoadAppConfig("ini", "conf/app2.conf") 也可以加载多个文件，只要你调用多次就可以了，如果后面的文件和前面的 key 冲突，那么以最新加载的为最新值
+
+
+     APP配置：
+       APPName  应用名称 默认是beego 通过bee new projectname 
+       beego.BConfig.AppName = "beego"
+
+       RunMode  应用运行模式,可选值为prod，dev或者test 默认是dev 为开发模式，在开发模式下出错回提示友好的错误页面，如前面错误描述中所述,
+       beego.BConfig.RunMode = "dev"
+
+       RouterCaseSensitive
+       是否忽略路由大小写匹配，默认为true 区分大小写
+       beego.BConfig.RouterCaseSensitive = true
+
+       RecoverPanic 
+       是否恢复异常，默认为true 即当前应用出现异常情况，通过recover回复，而不会导致应用异常退出
+       beego.BConfig.RecoverPanic = true
+            
+       ServerName 
+       beego服务器默认在请求的时候输出server为beego
+       beego.BConfig.ServerName = "beego"
+
+       CopyRequestBody
+       是否允许在http请求中，返回原始请求数据字节,默认为false(GET or Head or上传文件请求除外)
+       EnableGzip
+       是否开启gzip支持，默认为false不支持gzip，一旦开启gzip，在模板输出的内容回进行gzip或者zlib压缩,根据用户的Accept-Encoding来判断
+      beego.BConfig.EnableGzip = false
+      Gzip允许用户自定义压缩级别、压缩长度阈值和针对请求类型压缩:
+
+	压缩级别, gzipCompressLevel = 9,取值为 1~9,如果不设置为 1(最快压缩)
+
+	压缩长度阈值, gzipMinLength = 256,当原始内容长度大于此阈值时才开启压缩,默认为 20B(ngnix默认长度)
+
+	请求类型, includedMethods = get;post,针对哪些请求类型进行压缩,默认只针对 GET 请求压缩
+
+       MaxMemory
+       文件上传默认内存缓存大小，默认值为1<<26(64M)
+       beego.BConfig.MaxMemory = 1 << 26
+      
+       EnableErrorsShow
+       是否显示系统错误信息 默认为true
+       beego.BConfig.EnableErrorsShow = true
+
+
+       EnableErrorsRender
+       是否将错误信息进行渲染,默认为true，即出错会提示友好的错误页面，对于API类型的应用可能需要将该选项设置为false以阻止在dev模式下不必要的模板渲染信息返回
+
+
+    WEB 配置
+    AutoRender
+    是否自动渲染，默认为true，对于api类型应用，需要设置为false，不需要渲染模板
+    
+    EnableDocs
+    是否开启文档内置功能，默认为false
+     beego.BConfig.WebConfig.EnableDocs = true
+
+     FlashName
+    Flash数据设置时Cookie的名称，默认是BEEGO_FLASH
+    beego.BConfig.WebConfig.FlashName = "BEEGO_FLASH"
+
+    FlashSeperator
+    Flash数据的分隔符,默认是GEEGOFLASH
+    beego.BConfig.WebConfig.FlashSeparator = "BEEGOFLASH"
+    
+    StaticDir
+    静态文件目录设置，默认为false，可配置单个或多个目录:
+    单个目录, StaticDir = download. 相当于 beego.SetStaticPath("/download","download")
+
+    多个目录, StaticDir = download:down download2:down2. 相当于 beego.SetStaticPath("/download","down") 和 beego.SetStaticPath("/download2","down2")
+
+beego.BConfig.WebConfig.StaticDir
+
+     StaticExtensionsToGzip
+
+允许哪些后缀名的静态文件进行 gzip 压缩，默认支持 .css 和 .js
+
+beego.BConfig.WebConfig.StaticExtensionsToGzip = []string{".css", ".js"}
+
+等价 config 文件中
+
+  StaticExtensionsToGzip = .css, .js
+TemplateLeft
+
+模板左标签，默认值是{{。
+
+beego.BConfig.WebConfig.TemplateLeft="{{"
+
+TemplateRight
+
+模板右标签，默认值是}}。
+
+beego.BConfig.WebConfig.TemplateRight="}}"
+
+ViewsPath
+
+模板路径，默认值是 views。
+
+beego.BConfig.WebConfig.ViewsPath="views"
+
+EnableXSRF
+
+是否开启 XSRF，默认为 false，不开启。
+
+beego.BConfig.WebConfig.EnableXSRF = false
+
+XSRFKEY
+
+XSRF 的 key 信息，默认值是 beegoxsrf。 EnableXSRF＝true 才有效
+
+beego.BConfig.WebConfig.XSRFKEY = "beegoxsrf"
+
+XSRFExpire
+
+XSRF 过期时间，默认值是 0，不过期。
+
+beego.BConfig.WebConfig.XSRFExpire = 0
+
+监听配置
+Graceful
+
+是否开启热升级，默认是 false，关闭热升级。
+
+beego.BConfig.Listen.Graceful=false
+
+ServerTimeOut
+
+设置 HTTP 的超时时间，默认是 0，不超时。
+
+beego.BConfig.Listen.ServerTimeOut=0
+
+ListenTCP4
+
+监听本地网络地址类型，默认是TCP6，可以通过设置为true设置为TCP4。
+
+beego.BConfig.Listen.ListenTCP4 = true
+
+EnableHTTP
+
+是否启用 HTTP 监听，默认是 true。
+
+beego.BConfig.Listen.EnableHTTP = true
+
+HTTPAddr
+
+应用监听地址，默认为空，监听所有的网卡 IP。
+
+beego.BConfig.Listen.HTTPAddr = ""
+
+HTTPPort
+
+应用监听端口，默认为 8080。
+
+beego.BConfig.Listen.HTTPPort = 8080
+
+EnableHTTPS
+
+是否启用 HTTPS，默认是 false 关闭。当需要启用时，先设置 EnableHTTPS = true，并设置 HTTPSCertFile 和 HTTPSKeyFile
+
+beego.BConfig.Listen.EnableHTTPS = false
+
+HTTPSAddr
+
+应用监听地址，默认为空，监听所有的网卡 IP。
+
+beego.BConfig.Listen.HTTPSAddr = ""
+
+HTTPSPort
+
+应用监听端口，默认为 10443
+
+beego.BConfig.Listen.HTTPSPort = 10443
+
+HTTPSCertFile
+
+开启 HTTPS 后，ssl 证书路径，默认为空。
+
+beego.BConfig.Listen.HTTPSCertFile = "conf/ssl.crt"
+
+HTTPSKeyFile
+
+开启 HTTPS 之后，SSL 证书 keyfile 的路径。
+
+beego.BConfig.Listen.HTTPSKeyFile = "conf/ssl.key"
+
+EnableAdmin
+
+是否开启进程内监控模块，默认 false 关闭。
+
+beego.BConfig.Listen.EnableAdmin = false
+
+AdminAddr
+
+监控程序监听的地址，默认值是 localhost 。
+
+beego.BConfig.Listen.AdminAddr = "localhost"
+
+AdminPort
+
+监控程序监听的地址，默认值是 8088 。
+
+beego.BConfig.Listen.AdminPort = 8088
+
+EnableFcgi
+
+是否启用 fastcgi ， 默认是 false。
+
+beego.BConfig.Listen.EnableFcgi = false
+
+EnableStdIo
+
+通过fastcgi 标准I/O，启用 fastcgi 后才生效，默认 false。
+
+beego.BConfig.Listen.EnableStdIo = false
+
+Session配置
+SessionOn
+
+session 是否开启，默认是 false。
+
+beego.BConfig.WebConfig.Session.SessionOn = false
+
+SessionProvider
+
+session 的引擎，默认是 memory，详细参见 session 模块。
+
+beego.BConfig.WebConfig.Session.SessionProvider = ""
+
+SessionName
+
+存在客户端的 cookie 名称，默认值是 beegosessionID。
+
+beego.BConfig.WebConfig.Session.SessionName = "beegosessionID"
+
+SessionGCMaxLifetime
+
+session 过期时间，默认值是 3600 秒。
+
+beego.BConfig.WebConfig.Session.SessionGCMaxLifetime = 3600
+
+SessionProviderConfig
+
+配置信息，根据不同的引擎设置不同的配置信息，详细的配置请看下面的引擎设置，详细参见 session 模块
+
+SessionCookieLifeTime
+
+session 默认存在客户端的 cookie 的时间，默认值是 3600 秒。
+
+beego.BConfig.WebConfig.Session.SessionCookieLifeTime = 3600
+
+SessionAutoSetCookie
+
+是否开启SetCookie, 默认值 true 开启。
+
+beego.BConfig.WebConfig.Session.SessionAutoSetCookie = true
+
+SessionDomain
+
+session cookie 存储域名, 默认空。
+
+beego.BConfig.WebConfig.Session.SessionDomain = ""
+
+
+
+LOG 配置
+
+AccessLogs
+
+是否输出日志到 Log，默认在 prod 模式下不会输出日志，默认为 false 不输出日志。此参数不支持配置文件配置。
+
+beego.BConfig.Log.AccessLogs = false
+
+FileLineNum
+
+是否在日志里面显示文件名和输出日志行号，默认 true。此参数不支持配置文件配置。
+
+beego.BConfig.Log.FileLineNum = true
+
+Outputs
+
+日志输出配置，参考 logs 模块，console file 等配置，此参数不支持配置文件配置。
+
+beego.BConfig.Log.Outputs = map[string]string{"console": ""}
+
+or
+
+beego.BConfig.Log.Outputs["console"] = ""
+
+
+
+
+
+
+
+
+
+
+********************************************************
+路由设置：
+1.1.1  get路由
+   beego,Get("/",func(c *context.Context)){
+      
+    ctx.Output.Body([]byte("hello world"))
+}
+
+1.1.2 post 路由
+
+beego.Post("/alice",func(ctx *context.Context){
+     ctx.Output.Body([]byte("bob"))
+})
+
+
+1.1.3 注册一个可以相应任何http的路由
+beego.Any("/foo",func(ctx *context.Context){
+     ctx.Output.Body([]byte("bar"))
+})
+
+
+1.1.4  所有支持的基础函数如下所示：
+beego.Get(router, beego.FilterFunc)
+beego.Post(router, beego.FilterFunc)
+beego.Put(router, beego.FilterFunc)
+beego.Patch(router, beego.FilterFunc)
+beego.Head(router, beego.FilterFunc)
+beego.Options(router, beego.FilterFunc)
+beego.Delete(router, beego.FilterFunc)
+beego.Any(router, beego.FilterFunc)
+
+
+
+1.1.5 支持自定义的handler实现
+  rpc 的应用,但是想要集成到 beego 中,或者其他的 httpserver 应用,集成到 beego 中来.现在可以很方便的集成
+
+s := rpc.NewServer()
+s.RegisterCodec(json.NewCodec(), "application/json")
+s.RegisterService(new(HelloService), "")
+beego.Handler("/rpc", s)
+
+beego.Handler(router, http.Handler)该函数，第一个参数表示路由url,第二个参数就是已经实现的http.Handler,注册之后就会把rpc作为前缀的请求发送到http.Handler进行处理 。该函数第三个参数则为是否为前缀匹配，默认为false,那么就会在路由匹配的时候前缀匹配,即 /rpc/user 这样的也会匹配去运行
+
+1.2 restful controller 路由
+
+RESTful 是一种目前 API 开发中广泛采用的形式，beego 默认就是支持这样的请求方法，也就是用户 Get 请求就执行 Get 方法，Post 请求就执行 Post 方法。因此默认的路由是这样 RESTful 的请求方式。
+
+
+1.3 固定路由
+固定路由也是全匹配的路由
+
+beego.Router("/", &controllers.MainController{})
+beego.Router("/admin", &admin.UserController{})
+beego.Router("/admin/index", &admin.ArticleController{})
+beego.Router("/admin/addpkg", &admin.AddController{})
+
+一个固定的路由，一个控制器，然后根据用户请求方法不同请求控制器中对应的方法，典型的 RESTful 方式。
+
+1.4 正则路由
+
+beego 参考了 sinatra 的路由实现，支持多种方式的路由：
+
+beego.Router("/api/?:id", &controllers.RController{})
+默认匹配 // 如url  api/23  id的值为23  //   灵活传参
+
+beego.Router("/api/:id", &controllers.RController{})
+默认匹配 //例如对于URL"/api/123"可以匹配成功，此时变量":id"值为"123"，但URL"/api/"匹配失败   // 默认设置参数
+
+
+beego.Router("/api/:id([0-9]+)", &controllers.RController{})
+自定义正则匹配 //例如对于URL"/api/123"可以匹配成功，此时变量":id"值为"123"
+
+
+beego.Router("/user/:username([\\w]+)", &controllers.RController{})
+正则字符串匹配 //例如对于URL"/user/astaxie"可以匹配成功，此时变量":username"值为"astaxie"
+
+
+beego.Router("/download/*.*", &controllers.RController{})
+*匹配方式 //例如对于URL"/download/file/api.xml"可以匹配成功，此时变量":path"值为"file/api"， ":ext"值为"xml"
+
+
+
+beego.Router("/download/ceshi/*", &controllers.RController{})
+
+*全匹配方式 //例如对于URL"/download/ceshi/file/api.json"可以匹配成功，此时变量":splat"值为"file/api.json"
+
+
+
+beego.Router("/:id:int", &controllers.RController{})
+
+int 类型设置方式，匹配 :id为int 类型，框架帮你实现了正则 ([0-9]+)
+
+
+beego.Router("/:hi:string", &controllers.RController{})
+
+string 类型设置方式，匹配 :hi 为 string 类型。框架帮你实现了正则 ([\w]+)
+
+
+beego.Router("/cms_:id([0-9]+).html", &controllers.CmsController{})
+
+带有前缀的自定义正则 //匹配 :id 为正则类型。匹配 cms_123.html 这样的 url :id = 123。
+
+
+可以自Controller中通过如下方式获取上边的变量
+this.Ctx.Input.Param(":id")
+this.Ctx.Input.Param(":username")
+this.Ctx.Input.Param(":splat")
+this.Ctx.Input.Param(":path")
+this.Ctx.Input.Param(":ext")
+
+
+1.5 自定义方法及restful规则
+自定义函数： beego.Router("/",&IndexContorller{},"*:Index")
+使用第三个参数，设置对应的method到函数名，定义如下
+·*表示任意的method都执行该函数
+·使用httpmethod:funcname 格式展示
+·多种不同的格式使用;分割
+·多个method对应同一个funcname，method之间通过，分割
+
+实例展示
+beego.Router("/api/list",&RestController{},"*:ListFood")
+beego.Router("/api/create",&RestController{},"post:CreateFood")
+beego.Router("/api/update",&RestController{},"put:UpdateFood")
+beego.Router("/api/delete",&RestController{},"delete:DeleteFood")
+
+多个请求指向同一个函数：
+beego.Router("/api",&RestController{},"get,post:ApiFunc")
+
+可用的http Method
+* get: GET 请求
+* post: POST 请求
+* put: PUT 请求
+* delete: DELETE 请求
+* patch: PATCH 请求
+* options: OPTIONS 请求
+* head: HEAD 请求
+
+如果同时存在*和对应的HTTPMethod，那么优先执行httpmethod的方法，
+例如：同时注册了如下所示的路由：
+beego.Router("/simple",&SimpleController{},"`*:AllFunc;post:PostFunc`")
+那么执行 POST 请求的时候，执行 PostFunc 而不执行 AllFunc。
+
+注： 自定义函数的路由默认不支持 RESTful 的方法，也就是如果你设置了 beego.Router("/api",&RestController{},"post:ApiFunc") 这样的路由，如果请求的方法是 POST，那么不会默认去执行 Post 函数。
+
+
+1.6 自动匹配
+用户首先需要把路由的控制器注册到自动路由之中
+beego.AutoRouter(&controllers.ObjectController{})
+beego就会通过反射获取该结构体中所有的实现方法,
+/object/login   调用 ObjectController 中的 Login 方法
+/object/logout  调用 ObjectController 中的 Logout 方法
+
+
+除了前缀两个 /:controller/:method 的匹配之外，剩下的 url beego 会帮你自动化解析为参数，保存在 this.Ctx.Input.Params 当中：
+/object/blog/2013/09/12  调用 ObjectController 中的 Blog 方法，参数如下：map[0:2013 1:09 2:12]
+
+方法名在内部是保存了用户设置的，例如 Login，url 匹配的时候都会转化为小写，所以，/object/LOGIN 这样的 url 也一样可以路由到用户定义的 Login 方法中。
+
+现在已经可以通过自动识别出来下面类似的所有 url，都会把请求分发到 controller 的 simple 方法：
+
+/controller/simple
+/controller/simple.html
+/controller/simple.json
+/controller/simple.xml
+可以通过 this.Ctx.Input.Param(":ext") 获取后缀名。
+
+
+1.7 注解路由
+
+ beego 1.3 版本开始支持了注解路由 ，用户无需在router中注册路由,只需要include相应的controller，然后在controller的method方法上router注释(//@router)即可,
+
+************************
+// CMS API
+type CMSController struct {
+    beego.Controller
+}
+
+func (c *CMSController) URLMapping() {
+    c.Mapping("StaticBlock", c.StaticBlock)
+    c.Mapping("AllBlock", c.AllBlock)
+}
+
+
+// @router /staticblock/:key [get]
+func (this *CMSController) StaticBlock() {
+
+}
+
+// @router /all/:key [get]
+func (this *CMSController) AllBlock() {
+
+}
+
+
+router.go
+beego.Include(&CMSController{})
+
+beego会自动进行源码分析,且只会在dev模式下进行生成,生成的路由放在/routers/commentsRouter.go 文件中。
+
+如上支持以下的路由
+GET /staticblock/:key
+GET /all/:key
+
+
+等效于
+
+beego.Router("/staticblock/:key", &CMSController{}, "get:StaticBlock")
+beego.Router("/all/:key", &CMSController{}, "get:AllBlock")
+
+
+增加了 URLMapping 这个函数，用户如果没有进行注册，那么就会通过反射来执行对应的函数，如果注册了就会通过 interface 来进行执行函数，性能上面会提升很多。
+
+********************************
+1.8 namespace
+类似于gin中的group
+
+//初始化 namespace
+ns :=
+beego.NewNamespace("/v1",
+    beego.NSCond(func(ctx *context.Context) bool {
+        if ctx.Input.Domain() == "api.beego.me" {
+            return true
+        }
+        return false
+    }),
+    beego.NSBefore(auth),
+    beego.NSGet("/notallowed", func(ctx *context.Context) {
+        ctx.Output.Body([]byte("notAllowed"))
+    }),
+    beego.NSRouter("/version", &AdminController{}, "get:ShowAPIVersion"),
+    beego.NSRouter("/changepassword", &UserController{}),
+    beego.NSNamespace("/shop",
+        beego.NSBefore(sentry),
+        beego.NSGet("/:id", func(ctx *context.Context) {
+            ctx.Output.Body([]byte("notAllowed"))
+        }),
+    ),
+    beego.NSNamespace("/cms",
+        beego.NSInclude(
+            &controllers.MainController{},
+            &controllers.CMSController{},
+            &controllers.BlockController{},
+        ),
+    ),
+)
+//注册 namespace
+beego.AddNamespace(ns)
+
+支持如下的url请求
+·GET/v1/notallowed
+·GET /v1/version
+GET /v1/changepassword
+POST /v1/changepassword
+GET /v1/shop/123
+GET /v1/cms/ 对应 MainController、CMSController、BlockController 中得注解路由
+
+支持前置过滤，条件判断，无限嵌套namespace
+
+namespace的接口如下：
+·NewNamespace(prefix string, funcs ...interface{})
+   初始化 namespace 对象,下面这些函数都是 namespace 对象的方法,但是推荐使用 NS 开头的相应函数注册，因为这样更容易通过 gofmt 工具看的更清楚路由的级别关系
+
+·NSCond(cond namespaceCond)
+   支持满足条件的就执行改namsepace，不满足就不执行。
+·NSBefore(filiterList ...FilterFunc)
+
+·NSAfter(filiterList ...FilterFunc)
+  
+  分别对应 beforeRouter 和 FinishRouter 两个过滤器，可以同时注册多个过滤器
+
+
+NSInclude(cList ...ControllerInterface)
+
+NSRouter(rootpath string, c ControllerInterface, mappingMethods ...string)
+NSGet(rootpath string, f FilterFunc)
+NSPost(rootpath string, f FilterFunc)
+NSDelete(rootpath string, f FilterFunc)
+NSPut(rootpath string, f FilterFunc)
+NSHead(rootpath string, f FilterFunc)
+NSOptions(rootpath string, f FilterFunc)
+NSPatch(rootpath string, f FilterFunc)
+NSAny(rootpath string, f FilterFunc)
+NSHandler(rootpath string, h http.Handler)
+NSAutoRouter(c ControllerInterface)
+NSAutoPrefix(prefix string, c ControllerInterface)
+
+设置路由的函数,详细的使用和上面 beego 的对应函数是一样
+
+
+·NSNamespace(prefix string, params ...innnerNamespace)
+   嵌套其他的namespace
+
+·Cond(cond namespaceCond)
+
+支持满足条件的就执行该 namespace, 不满足就不执行,例如你可以根据域名来控制 namespace
+
+·Filter(action string, filter FilterFunc)  
+   action 表示你需要执行的位置, before 和 after 分别表示执行逻辑之前和执行逻辑之后的 filter
+
+
+Router(rootpath string, c ControllerInterface, mappingMethods ...string)
+
+AutoRouter(c ControllerInterface)
+AutoPrefix(prefix string, c ControllerInterface)
+Get(rootpath string, f FilterFunc)
+Post(rootpath string, f FilterFunc)
+Delete(rootpath string, f FilterFunc)
+Put(rootpath string, f FilterFunc)
+Head(rootpath string, f FilterFunc)
+Options(rootpath string, f FilterFunc)
+Patch(rootpath string, f FilterFunc)
+Any(rootpath string, f FilterFunc)
+Handler(rootpath string, h http.Handler)
+上面这些都是设置路由的函数,详细的使用和上面 beego 的对应函数是一样的
+
+
+
+//APIS
+ns :=
+    beego.NewNamespace("/api",
+        //此处正式版时改为验证加密请求
+        beego.NSCond(func(ctx *context.Context) bool {
+            if ua := ctx.Input.Request.UserAgent(); ua != "" {
+                return true
+            }
+            return false
+        }),
+        beego.NSNamespace("/ios",
+            //CRUD Create(创建)、Read(读取)、Update(更新)和Delete(删除)
+            beego.NSNamespace("/create",
+                // /api/ios/create/node/
+                beego.NSRouter("/node", &apis.CreateNodeHandler{}),
+                // /api/ios/create/topic/
+                beego.NSRouter("/topic", &apis.CreateTopicHandler{}),
+            ),
+            beego.NSNamespace("/read",
+                beego.NSRouter("/node", &apis.ReadNodeHandler{}),
+                beego.NSRouter("/topic", &apis.ReadTopicHandler{}),
+            ),
+            beego.NSNamespace("/update",
+                beego.NSRouter("/node", &apis.UpdateNodeHandler{}),
+                beego.NSRouter("/topic", &apis.UpdateTopicHandler{}),
+            ),
+            beego.NSNamespace("/delete",
+                beego.NSRouter("/node", &apis.DeleteNodeHandler{}),
+                beego.NSRouter("/topic", &apis.DeleteTopicHandler{}),
+            )
+        ),
+    )
+
+beego.AddNamespace(ns)
+
+***********************************************
+一、控制器函数
+
+  type xxxController struct {
+    beego.Controller
+  }
+beego.Controller 实现了接口 beego.ControllerInterface，beego.ControllerInterface 定义了如下函数：
+·Init(ct *context.Context, childName string, app interface{})
+  初始化了 Context、相应的 Controller 名称，模板名，初始化模板参数的容器 Data，app 即为当前执行的 Controller 的 reflecttype，这个 app 可以用来执行子类的方法。
+·Prepare()
+  用户扩展用的，这个函数会在下面定义的这些 Method 方法之前执行，用户可以重写这个函数实现类似用户验证之类。
+
+·GET()
+   如果用户请求的 HTTP Method 是 GET，那么就执行该函数，默认是 405，用户继承的子 struct 中可以实现了该方法以处理 Get 请求
+
+·POST()
+  如果用户请求的 HTTP Method 是 POST，那么就执行该函数，默认是 405，用户继承的子 struct 中可以实现了该方法以处理 Post 请求。
+
+·DELETE()
+  如果用户请求的 HTTP Method 是 DELETE，那么就执行该函数，默认是 405，用户继承的子 struct 中可以实现了该方法以处理 Delete 请求。
+
+·PUT()
+  如果用户请求的 HTTP Method 是 PUT，那么就执行该函数，默认是 405，用户继承的子 struct 中可以实现了该方法以处理 Put 请求.
+
+·HEAD()
+  如果用户请求的 HTTP Method 是 HEAD，那么就执行该函数，默认是 405，用户继承的子 struct 中可以实现了该方法以处理 Head 请求。
+
+·PATCH()
+  如果用户请求的 HTTP Method 是 PATCH，那么就执行该函数，默认是 405，用户继承的子 struct 中可以实现了该方法以处理 Patch 请求.
+
+·Options()
+  如果用户请求的HTTP Method是OPTIONS，那么就执行该函数，默认是 405，用户继承的子 struct 中可以实现了该方法以处理 Options 请求。
+
+
+·Finish()
+  这个函数是在执行完相应的 HTTP Method 方法之后执行的，默认是空，用户可以在子 struct 中重写这个函数，执行例如数据库关闭，清理数据之类的工作。
+
+·Render() error
+  这个函数主要用来实现渲染模板，如果 beego.AutoRender 为 true 的情况下才会执行。
+
+type AddController struct {
+    beego.Controller
+}
+
+func (this *AddController) Prepare() {
+
+}
+
+func (this *AddController) Get() {
+    this.Data["content"] = "value"
+    this.Layout = "admin/layout.html"
+    this.TplName = "admin/add.tpl"
+}
+
+func (this *AddController) Post() {
+    pkgname := this.GetString("pkgname")
+    content := this.GetString("content")
+    pk := models.GetCruPkg(pkgname)
+    if pk.Id == 0 {
+        var pp models.PkgEntity
+        pp.Pid = 0
+        pp.Pathname = pkgname
+        pp.Intro = pkgname
+        models.InsertPkg(pp)
+        pk = models.GetCruPkg(pkgname)
+    }
+    var at models.Article
+    at.Pkgid = pk.Id
+    at.Content = content
+    models.InsertArticle(at)
+    this.Ctx.Redirect(302, "/admin/index")
+}
+
+
+1.1  提前终止运行
+在Prepare阶段进行判断,如果用户认证不通过,输出一段信息，然后直接终止进程，之后的post、get之类的不在执行,可以使用stoprun来终止逻辑,可以在任意的地方执行。
+
+type RController struct {
+    beego.Controller
+}
+
+func (this *RController) Prepare() {
+    this.Data["json"] = map[string]interface{}{"name": "astaxie"}
+    this.ServeJSON()
+    this.StopRun()
+}
+
+调用stoprun之后 若定义了finish函数,则不会执行,如果需要释放资源，须在调用stoprun之前，手动调用finish函数
+
+
+1.2 表单中使用PUT方法
+
+首先表单本身还是使用 POST 方法提交, 但是可以在表单中添加一个隐藏字段:
+  <form method="post" ...>
+  <input type="hidden" name="_method" value="put" />
+
+接着在 Beego 中添加一个过滤器来判断是否将请求当做 PUT 来解析:
+var FilterMethod = func(ctx *context.Context) {
+    if ctx.BeegoInput.Query("_method")!="" && ctx.BeegoInput.IsPost(){
+          ctx.Request.Method = ctx.BeegoInput.Query("_method")
+    }
+}
+
+beego.InsertFilter("*", beego.BeforeRouter, FilterMethod)
+
+
+
+
+*******************************************************
+XSRF过滤
+    跨站请求伪造CXRF 为web应用中的一个安全问题通过伪装来自收信人用户的请求来利用受信任的网站,可以理解为：CSRF攻击：攻击者盗用了你的身份，以你的名义向第三方网站发送恶意请求。 CRSF能做的事情包括利用你的身份发邮件、发短信、进行交易转账等，甚至盗取你的账号。
+ 
+XSS跨站脚本攻击，利用站点内信任用户进行攻击。
+
+beego内建有CSRF防范机制,启动方式：在配置文件中添加
+{
+enablexsrf = true
+xsrfkey = 61oETzKXQAGaYdkL5gEmGeJJFuYh7EQnp2XdTP1o
+xsrfexpire = 3600
+}
+或者在main入口处设置：
+beego.EnableXSRF = true
+beego.XSRFKEY = "61oETzKXQAGaYdkL5gEmGeJJFuYh7EQnp2XdTP1o"
+beego.XSRFExpire = 3600  //过期时间，默认1小时
+
+如果开启了CXRF那么beego的Web应用将对所有用户设置一个_xsrf的cookie只，默认时间为1小时,如果在post put delete请求中没有这个cookie值，那么这个请求会被直接拒绝，若开启了这个机制，在所有的被提交的表单中,需要加上一个域来提供这个值,可以在模板中 使用专门的函数XSRFormHTML()来做到这一点。
+过期时间伤设置全局的过期时间，beego.XSRFExpire，也可以在控制器中修改这个过期时间,专门针对一类处理逻辑：
+func (this *HomeController) Get(){
+    this.XSRFExpire = 7200
+    this.Data["xsrfdata"]=template.HTML(this.XSRFFormHTML())
+}
+
+
+
+2.1.1  在表单中的使用
+在 Controller 中这样设置数据
+  func (this *HomeController) Get(){
+    this.Data["xsrfdata"]=template.HTML(this.XSRFFormHTML())
+}
+
+
+然后在模板中这样设置：
+<form action="/new_message" method="post">
+  {{ .xsrfdata }}
+  <input type="text" name="message"/>
+  <input type="submit" value="Post"/>
+</form>
+
+2.1.2 在js中的应用
+若提交的为AJAX的POST 请求,需要在每一个请求中通过脚本填上_xsrf这个值,
+ajax中的post请求,使用jquery函数来为所有的请求添加_xsrf值。
+
+jQuery.postJSON = function(url, args, callback) {
+   var xsrf, xsrflist;
+   xsrf = $.cookie("_xsrf");
+   xsrflist = xsrf.split("|");
+   args._xsrf = base64_decode(xsrflist[0]);
+    $.ajax({url: url, data: $.param(args), dataType: "text", type: "POST",
+        success: function(response) {
+        callback(eval("(" + response + ")"));
+    }});
+};
+
+
+扩展jquery
+通过扩展ajax给每个请求加入xsrf的header
+需要你在 html 里保存一个 _xsrf 值
+
+func (this *HomeController) Get(){
+    this.Data["xsrf_token"] = this.XSRFToken()
+}
+放在head中
+<head>
+    <meta name="_xsrf" content="{{.xsrf_token}}" />
+</head>
+
+
+扩展ajax方法,将_xsrf值加入header,扩展后支持jquery post/get等内部使用了ajax方法。
+
+var ajax = $.ajax;
+$.extend({
+    ajax: function(url, options) {
+        if (typeof url === 'object') {
+            options = url;
+            url = undefined;
+        }
+        options = options || {};
+        url = options.url;
+        var xsrftoken = $('meta[name=_xsrf]').attr('content');
+        var headers = options.headers || {};
+        var domain = document.domain.replace(/\./ig, '\\.');
+        if (!/^(http:|https:).*/.test(url) || eval('/^(http:|https:)\\/\\/(.+\\.)*' + domain + '.*/').test(url)) {
+            headers = $.extend(headers, {'X-Xsrftoken':xsrftoken});
+        }
+        options.headers = headers;
+        return ajax(url, options);
+    }
+});
+
+
+对于 PUT 和 DELETE 请求（以及不使用将 form 内容作为参数的 POST 请求）来说，你也可以在 HTTP 头中以 X-XSRFToken 这个参数传递 XSRF token。
+
+需要针对每一个请求处理器定制 XSRF 行为，你可以重写 Controller 的 CheckXSRFCookie 方法。例如需要使用一个不支持 cookie 的 API， 你可以通过将 CheckXSRFCookie() 函数设空来禁用 XSRF 保护机制。然而如果 你需要同时支持 cookie 和非 cookie 认证方式，那么只要当前请求是通过 cookie 进行认证的，你就应该对其使用 XSRF 保护机制。
+
+
+2.2 支持controller级别的屏蔽
+XSRF 之前是全局设置的一个参数,如果设置了那么所有的 API 请求都会进行验证。
+有时API 逻辑是不需要进行验证的,因此现在支持在controller 级别设置屏蔽:
+type AdminController struct{
+    beego.Controller
+}
+
+func (a *AdminController) Prepare() {
+    a.EnableXSRF = false
+}
+
+
+******************************************************
+1. 请求数据处理
+
+  获取参数
+  GetString(key string) string
+  GetStrings(key string) []string
+  GetInt(key string) (int64, error)
+  GetBool(key string) (bool, error)
+  GetFloat(key string) (float64, error)
+eg：
+func (this *MainController) Post() {
+    jsoninfo := this.GetString("jsoninfo")
+    if jsoninfo == "" {
+        this.Ctx.WriteString("jsoninfo is empty")
+        return
+    }
+}
+
+处理不同类型的数据
+func (this *MainController) Post() {
+    id := this.Input().Get("id")
+    intid, err := strconv.Atoi(id)
+}
+
+用户可以通过c.Ctx.Request获取信息。
+
+
+
+1.1  直接解析到struct
+把表单的内容赋值到一个struct，通过struct字段名与表单字段对应直接解析到struct
+
+定义struct
+type user struct {
+    Id    int         `form:"-"`
+    Name  interface{} `form:"username"`
+    Age   int         `form:"age"`
+    Email string
+}
+
+
+表单：
+ 
+<form id="user">
+    名字：<input name="username" type="text" />
+    年龄：<input name="age" type="text" />
+    邮箱：<input name="Email" type="text" />
+    <input type="submit" value="提交" />
+</form>
+
+
+controller解析
+
+func (this *MainController) Post() {
+    u := user{}
+    if err := this.ParseForm(&u); err != nil {
+        //handle error
+    }
+}
+  
+
+注：
+·StructTag form 的定义和renderform方法共用一个标签
+·定义 struct 时，字段名后如果有 form 这个 tag，则会以把 form 表单里的 name 和 tag 的名称一样的字段赋值给这个字段，否则就会把 form 表单里与字段名一样的表单内容赋值给这个字段。如上面例子中，会把表单中的 username 和 age 分别赋值给 user 里的 Name 和 Age 字段，而 Email 里的内容则会赋给 Email 这个字段。
+
+·调用 Controller ParseForm 这个方法的时候，传入的参数必须为一个 struct 的指针，否则对 struct 的赋值不会成功并返回 xx must be a struct pointer 的错误。
+
+·果要忽略一个字段，有两种办法，一是：字段名小写开头，二是：form 标签的值设置为 "_"。
+
+1.2 获取request body里的内容
+1、在配置文件中设置copyrequetsbody=true
+2、在controller中这是
+
+
+func (this *ObjectController) Post() {
+    var ob models.Object
+    var err error
+    if err = json.Unmarshal(this.Ctx.Input.RequestBody, &ob); err == nil {
+        objectid := models.AddOne(ob)
+        this.Data["json"] = "{\"ObjectId\":\"" + objectid + "\"}"
+    } else {
+        this.Data["json"] = err.Error()
+    }
+    this.ServeJSON()
+}
+
+
+1.3 文件上传
+beego中处理文件上传在form中设置属性：
+    enctype="multipart/form-data"
+
+注：文件上传一般放在系统内存中, 如果文件的大小,大于设置的缓存内存大小，那么存放到临时文件中,默认焕春内存为64mb
+   beego.MaxMemory = 1<<22  通过该方法设置缓存内存大小
+或者在配置文件中设置
+maxmemory = 1<<22
+
+beego内置处理文件上传到的方法
+
+·GetFile(key string)(multipart.File, *multipart.FileHeader, error)
+该方法主要用于用户读取表单中的文件名,the_file,然后返回对应的信息,用户根据这些变量来处理文件上传,：过滤、保存文件。
+·SaveFile(fromfile,tofile string)error
+该方法实在getfile的基础上实现了快速保存的功能,fromfile是提交时候的html表单中的name。
+
+
+<form enctype="multipart/form-data" method="post">
+    <input type="file" name="uploadname" />
+    <input type="submit">
+</form>
+
+
+保存如下
+func (c *FormController) Post() {
+    f, h, err := c.GetFile("uploadname")
+    if err != nil {
+        log.Fatal("getfile err ", err)
+    }
+    defer f.Close()
+    c.SaveToFile("uploadname", "static/upload/" + h.Filename) // 保存位置在 static/upload, 没有文件夹要先创建
+
+}
+
+1.4数据绑定
+
+支持从用户请求中直接数据bind到指定对象,
+若请求地址如下
+?id=123&isok=true&ft=1.2&ol[0]=1&ol[1]=2&ul[]=str&ul[]=array&user.Name=astaxie
+
+
+var id int
+this.Ctx.Input.Bind(&id, "id")  //id ==123
+
+var isok bool
+this.Ctx.Input.Bind(&isok, "isok")  //isok ==true
+
+var ft float64
+this.Ctx.Input.Bind(&ft, "ft")  //ft ==1.2
+
+ol := make([]int, 0, 2)
+this.Ctx.Input.Bind(&ol, "ol")  //ol ==[1 2]
+
+ul := make([]string, 0, 2)
+this.Ctx.Input.Bind(&ul, "ul")  //ul ==[str array]
+
+user struct{Name}
+this.Ctx.Input.Bind(&user, "user")  //user =={Name:"astaxie"}
+
+
+********************************************************************
+Session控制
+   beego内置了session模块 目前 session 模块支持的后端引擎包括 memory、cookie、file、mysql、redis、couchbase、memcache、postgres，用户也可以根据相应的 interface 实现自己的引擎。
+
+
+beego中session设置： 
+    1）在main入口函数设置如下：
+   
+	beego.BConfig.WebConfig.Session.SessionOn = true
+     2）在配置文件中设置：
+      sessionon=true
+
+   session使用：
+func (this *MainController) Get() {
+    v := this.GetSession("asta")
+    if v == nil {
+        this.SetSession("asta", int(1))
+        this.Data["num"] = 0
+    } else {
+        this.SetSession("asta", v.(int)+1)
+        this.Data["num"] = v.(int)
+    }
+    this.TplName = "index.tpl"
+}
+
+session 有几个方便的方法：
+·SetSession(name string, value interface{})
+·GetSession(name string) interface{}
+·SessionRegenerateID()  // 会话重新生成ID
+·DestroySession()   // 会话销毁
+
+使用自定义的方式启动关闭session
+
+sess:=this.StartSession()
+defer sess.SessionRelease() // 资源释放
+
+sess对象具有的方法：
+
+sess.Set()
+sess.Get()
+sess.Delete()
+sess.SessionID()
+sess.Flush() //刷新
+
+关于session参数设置：
+·beego.BConfig.WebConfig.Session.SessionOn  
+ 	设置是否开启session，默认为false，配置文件对应的参数名：sessionon
+·beego.BConfig.WebConfig.Session.SessionProvider
+ 	shezhisession引擎，默认是memory, 目前支持file，mysql，redis等
+·beego.BConfig.WebConfig.Session.SessionName
+	设置cookies的名字,session默认是保存在，用户浏览器cookies里的,默认名是beegosessionID，配置文件对应的参数名为：sessionname
+·beego.BConfig.WebConfig.Session.SessionGCMaxLifetime
+  	设置 Session 过期的时间，默认值是 3600 秒，配置文件对应的参数：sessiongcmaxlifetime。
+
+·beego.BConfig.WebConfig.Session.SessionProviderConfig
+	设置对应 file、mysql、redis 引擎的保存路径或者链接地址，默认值是空，配置文件对应的参数：sessionproviderconfig。
+
+·beego.BConfig.WebConfig.Session.SessionHashFunc
+	默认值为 sha1，采用 sha1 加密算法生产 sessionid
+
+·beego.BConfig.WebConfig.Session.SessionHashKey
+	默认的 key 是 beegoserversessionkey，建议用户使用的时候修改该参数
+
+·beego.BConfig.WebConfig.Session.SessionCookieLifeTime
+	设置 cookie 的过期时间，cookie 是用来存储保存在客户端的数据。
+	
+在beego1.1.3之后移除第三方依赖库,若要使用其他的session引擎需要安装
+	go get -u github.com/astaxie/beego/session/mysql
+
+·当 SessionProvider 为 file SessionProviderConfig 是指保存文件的目录，
+   	beego.BConfig.WebConfig.Session.SessionProvider="file"
+	beego.BConfig.WebConfig.Session.SessionProviderConfig = "./tmp"
+
+
+
+·当 SessionProvider 为 mysql 时，SessionProviderConfig 是链接地址，采用 go-sql-driver，如下所示：
+
+	beego.BConfig.WebConfig.Session.SessionProvider = "mysql"
+	beego.BConfig.WebConfig.Session.SessionProviderConfig = 	"username:password@protocol(address)/dbname?param=value"
+
+注： 在使用mysql存储session信息的时候,需要事先在mysql创建表。
+ ·当 SessionProvider 为 redis 时，SessionProviderConfig 是 redis 的链接地址，采用了 redigo，如下所示：
+
+	beego.BConfig.WebConfig.Session.SessionProvider = "redis"
+	beego.BConfig.WebConfig.Session.SessionProviderConfig = "127.0.0.1:6379"
+
+
+·当 SessionProvider 为 memcache 时，SessionProviderConfig 是 memcache 的链接地址，采用了 memcache，如下所示：
+	beego.BConfig.WebConfig.Session.SessionProvider = "memcache"
+	beego.BConfig.WebConfig.Session.SessionProviderConfig = "127.0.0.1:7080"
+
+
+·当 SessionProvider 为 postgres 时，SessionProviderConfig 是 postgres 的链接地址，采用了 postgres，如下所示：
+	beego.BConfig.WebConfig.Session.SessionProvider = "postgresql"
+	beego.BConfig.WebConfig.Session.SessionProviderConfig = "postgres://pqgotest:password@localhost/pqgotest?sslmode=verify-full"
+
+
+·当 SessionProvider 为 couchbase 时，SessionProviderConfig 是 couchbase 的链接地址，采用了 couchbase，如下所示：
+	beego.BConfig.WebConfig.Session.SessionProvider = "couchbase"
+	beego.BConfig.WebConfig.Session.SessionProviderConfig = "http://bucketname:bucketpass@myserver:8091"
+
+注：
+   
+  因为 session 内部采用了 gob 来注册存储的对象，例如 struct，所以如果你采用了非 memory 的引擎，请自己在 main.go 的 init 里面注册需要保存的这些结构体，不然会引起应用重启之后出现无法解析的错误。
+
+********************************************************************************
+过滤器
+   beego支持自定义过滤中间件，例如安全验证,强制跳转等。
+   过滤函数如下所示：
+   beego.InsertFilter(pattern string, position int, filter FilterFunc, params ...bool)
+   args：
+   1、pattern 路由规则，可以根据一定的规则进行路由，全匹配可以用 *
+   2、filter filter 函数 type FilterFunc func(*context.Context)
+   3、position 执行 Filter 的地方，五个固定参数如下，分别表示不同的执行过程
+      ·BeforeStatic 静态地址之前
+      ·BeforeRouter 寻找路由之前
+      ·BeforeExec 找到路由之后，开始执行相应的 Controller 之前
+      ·AfterExec 执行完 Controller 逻辑之后执行的过滤器
+      ·FinishRouter 执行完逻辑之后执行的过滤器
+   4、params：
+      1、设置 returnOnOutput 的值(默认 true), 如果在进行到此过滤之前已经有输出，是否不再继续执行此过滤器,默认设置为如果前面已有输出(参数为true)，则不再执行此过滤器
+      2、是否重置 filters 的参数，默认是 false，因为在 filters 的 pattern 和本身的路由的 pattern 冲突的时候，可以把 filters 的参数重置，这样可以保证在后续的逻辑中获取到正确的参数
+ 
+验证用户是否已经登录：
+ var FilterUser = func(ctx *context.Context) {
+    _, ok := ctx.Input.Session("uid").(int)
+    if !ok && ctx.Request.RequestURI != "/login" {
+        ctx.Redirect(302, "/login")
+    }
+}
+
+beego.InsertFilter("/*",beego.BeforeRouter,FilterUser)
+注：使用 session 的 Filter 必须在 BeforeStatic 之后才能获取，因为 session 没有在这之前初始化。
+
+可以通过正则路由进行过滤，如果匹配参数就执行：
+ var FilterUser = func(ctx *context.Context) {
+    _, ok := ctx.Input.Session("uid").(int)
+    if !ok {
+        ctx.Redirect(302, "/login")
+    }
+}
+beego.InsertFilter("/user/:id([0-9]+)",beego.BeforeRouter,FilterUser)
+
+
+1.1  过滤器实现路由
+Context.Input 中增加了 RunController 和 RunMethod, 这样我们就可以在执行路由查找之前,在 filter 中实现自己的路由规则.
+var UrlManager = func(ctx *context.Context) {
+    // 数据库读取全部的 url mapping 数据
+    urlMapping := model.GetUrlMapping()
+    for baseurl,rule:=range urlMapping {
+        if baseurl == ctx.Request.RequestURI {
+            ctx.Input.RunController = rule.controller
+            ctx.Input.RunMethod = rule.method
+            break
+        }
+    }
+}
+
+beego.InsertFilter("/*",beego.BeforeRouter,UrlManager)
+
+********************************************************
+Flash  数据
+
+主要用于两个逻辑间传递临时数据，flash中存放的所有数据会在紧接着下一个逻辑中调用后清除，一般用于传递和 提示错误信息。
+适合 POST /GET/Redirect
+
+------------------------------------------------------
+Models
+beeg ORM安装包
+go get github.com/astaxie/beego/orm
+
+初始化三步
+1、建立连接
+ orm.RegisterDataBsae("default","mysql","username:pwd@tcp(127.0.0.1:3306)/dab_name?charset=utf8",30)
+
+2、数据迁移
+  orm.RegisterModel(new(model struct))
+
+3、 建表
+ orm.RunSyncdb("default",false,true)
+
+
+其他操作
+  1、实例化操作对象
+  o:=orm.NewOrm()
+  u:=User{...}
+  增
+  id,err:=o.Insert(&u)  
+  
+  删
+  num,err:=o.Delete(&u)
+  
+  查
+  user:=User{ID:u.id}
+  err=o.Read(&user)
+  
+  改
+  user.Name="sss"
+  num,err:=o.Update(&user)
+  
+
+
+SQL查询：
+  
+var maps []orm.Params
+num,err:=o.Raw("SELECT * FROM user").Values(&maps)
+for_,term:=range maps{
+   fmt.Println(term["id"],":",term["name"])
+ }
+
+
+事务处理：
+o.Begin()
+user := User{Name: "slene"}
+id, err := o.Insert(&user)
+if err == nil {
+    o.Commit()
+} else {
+    o.Rollback()
+}
+
+
+
+
+调试信息 
+orm.debug=true
+开启后会输出所有的查询语句
+
+
+
+CRUD 操作
+
+对象的CRUD操作
+已知到主键的值 ，可以进行CRUD操作
+
+对object操作的四个方法;
+ Read/Insert/Update/Delete
+
+
+ o := orm.NewOrm()
+user := new(User)
+user.Name = "slene"
+
+fmt.Println(o.Insert(user))
+
+user.Name = "Your"
+fmt.Println(o.Update(user))
+fmt.Println(o.Read(user))
+fmt.Println(o.Delete(user))
+
+
+Read 
+o:=orm.NewOrm()
+user:=User{Id=1}
+
+err:=o.Read(&user)
+if err==orm.ErrNoRows{
+   fmt.Println("查询不到行")
+}else if err==orm.ErrMissPK{
+   fmt.Println("找不到主键")
+}else{
+   fmt.Println(user.ID,user.Name)
+}
+
+Read 默认通过查询主键赋值，可以使用指定的字段进行查询。
+
+对象的 其他字段将会时对应类型的默认值
+user:=User(Name,"slene")
+err；=o.Read(&user,"Name")
+
+
+
+
+ReadOrCreate
+尝试从数据库读取数据，不存在的话创建一个
+默认必须传入一个参数作为条件字段，同时也支持多个参数多个条件字段。
+
+o:=orm.NewOrm()
+user:=User{Name:"slene"}
+
+// 三个返回参数依次为：是否新创建的，对象、Id,值，错误
+if created,id,err:=o.ReadOrCreate(&user,"Name");err==nil{
+    if created{
+       fmt.Println("New Insert an object.id:",id)
+ }else{
+
+   fmt.Println("Get an object.id",id)
+}
+
+}
+
+Insert 
+第一个返回值为自增键ID
+id,err：=o.Insert(&user)
+if err!=nil{
+   fmt.Println(err)
+}
+  fmt.Printf("%v",id)
+创建后会自动对auto的field赋值
+
+
+InsertMulti
+同时插入多个对象
+user:=[]User{
+   {name:""},
+   {name:""},
+
+}
+successNums,err；=o.InsertMulti(num,users)
+参数1：bulk 并列插入的数量
+参数2：slice 对象的slice
+返回值成功插入的量
+当bulk为1时，将会顺序插入slice中的数据
+
+Update 第一个返回值为影响的行数
+update默认更新所有的字段，可以更新指定的字段
+
+
+Delete
+第一个返回值为影响的行数
+if num,err:=o.Delete(&user{id=1});err==nil{
+    fmt.Println(num)
+}
+delete操作会对反向关系进行操作，此例中Post得到一个User外键，删除User时，如果on_delete设置为默认的级联操作，将删除对应的Post
+num,err:=or.Delete(&UserInfo{ID:1})
+    if err==nil{
+    	fmt.Printf("delete is success and affect rows is %v",num)
+	}
+
+ 
+高级查询
+orm以queryseter来组织查询，每个返回queryseter的方法都会获得一个新的queryseter对象
+基本使用 方法：
+o:=orm.NewOrm()
+// 获取queryseter对象，user为表名
+qs:=o.QueryTable("user")
+// 可以直接使用对象作为表名
+user:=new(User)
+qs:=o.QueryTable(User)
+
+
+
+QuerySeter中用于描述字段和sql操作符，使用简单的expr查询方法
+
+qs.Filter("id", 1) // WHERE id = 1
+qs.Filter("profile__age", 18) // WHERE profile.age = 18
+qs.Filter("Profile__Age", 18) // 使用字段名和 Field 名都是允许的
+qs.Filter("profile__age", 18) // WHERE profile.age = 18
+qs.Filter("profile__age__gt", 18) // WHERE profile.age > 18
+qs.Filter("profile__age__gte", 18) // WHERE profile.age >= 18
+qs.Filter("profile__age__in", 18, 20) // WHERE profile.age IN (18, 20)
+
+qs.Filter("profile__age__in", 18, 20).Exclude("profile__lt", 1000)
+// // WHERE profile.age IN (18, 20) AND NOT profile_id < 1000
+
+
+Operators
+
+当前支持的操作符号：
+
+exact / iexact 等于
+contains / icontains 包含
+gt / gte 大于 / 大于等于
+lt / lte 小于 / 小于等于
+startswith / istartswith 以...起始
+endswith / iendswith 以...结束
+in
+isnull
+后面以 i 开头的表示：大小写不敏感
+
+
+Exact
+
+Filter / Exclude / Condition expr 的默认值
+
+qs.Filter("name","slene")// where name="slene"
+qs.Filter("name_exact","slene")// where name="slene"
+
+//使用=匹配，大小写是否敏感却决于 数据表使用的collation
+qs.Filter("profile_id",nil)
+// where profile_id is null
+
+
+iexact
+qs.Filter("name_iexact","Slene")
+// Where name like slene  大小写不敏感
+
+contains
+qs.Filter("name_contains","slene")
+//where name like binary slene  模糊匹配
+
+
+qs.Filter("name_iocntains","slene")
+// where name like slene  模糊匹配 忽略大小写
+
+
+IN
+qs.Filter("age_in",12.....55)
+    ||
+alist:=[]int{15....25}
+qs.Fliter("age_in",alist)
+
+
+gt/gte
+qs.Filter("profile_age_gt",17)
+// where profile.age >17
+
+qs.Filter("profile_age_get",20)
+//  where profile.age >=20
+
+
+lt/lte
+qs.Filter("profile_age_lt",15)
+//where age<15
+
+qs.Filter("profile_age_lte",18)
+// where age<=18
+
+
+startswith
+qs.Filter("name_startswith","slene")
+// 匹配以slene开始的字符串 
+
+istartswtih
+qs.Filter("name_istartswith","slene")
+// 大小写不敏感的匹配 以slene开始的文字
+
+endswith
+qs.Filter("name_endswith","slene")
+// 匹配以slene结尾的字符
+
+iendswith
+qs.Filter("name_iendswith","slene")
+// 大小写不敏感的匹配，匹配slene结尾的字符串
+
+isnull
+qs.Filter("profile_isnull",true)
+qs.Filter("profile_id_isnull",true) 
+//  where profile_id is null
+
+
+qs.Filter("profile_id_isnull",false)
+// where id is not null
+
+
+ 
+
+高级接口查询
+每个返回QuerySeter的api调用时都会创建一个queryseter不影响之前的创建
+高级查询使用filter和exclude来做常用的条件查询，囊括两种清晰的过滤规则：包含、排除
+
+
+
+Fliter
+用来查询结果 起到包含条件的作用
+多个Filter之间使用AND 连接
+qs.Fliter("profile_id_isnull",true).Fliter("name","slene")
+
+
+Exclude
+过略查询结果，起到排除条件的作用，使用 NOT排除条件，多个Exclude之间使用AND连接
+qs.Exclude("profile_id_isbull",false).Filter("name_startswith","slene")
+
+
+SetCond
+自定义条件表达式
+cond:=orm.NewCondition()
+cond1:=cond.And("profile_isnull",false).AndNot("status_in",1).Or("profile_age_gt",2000)
+
+qs:=orm.QueryTable("user")
+qs=qs.SetCond(cond1)
+// where ...AND....AND NOT...OR...
+
+cond2:=cond.AndCond(cond1).OrCond(cond.And("name","slene"))
+qs:=qs.SetCond(cond2).Count()
+// Where(..AND...AND NOT..OR...)OR(...)
+
+
+Limit
+限制最大返回的数据行数，第二个参数可以设置offset
+var DefaultRowLimit=1000// orm默认的limit值为1000
+// 默认情况下select查询的最大行数为1000
+// limit 1000
+
+qs.Limit(10)
+
+qs.Limit(10,20)
+// Limit10  offset 20  和sql相反
+
+
+
+qs.Limit(-1)
+// no limit
+
+qs.Limit(-1,100)
+-1 指定无limit限制但是offset偏移情况
+
+OFFSET
+设置偏移行数
+qs.Offset(20)
+// Limit 1000 offset 20
+
+GroupBy
+qs.GroupBy("id","age")
+// groupby id age
+
+
+OrderBy
+参数使用expr
+在expr前使用-表示Desc的排列
+var DefaultRelsDepth = 5 // 默认情况下直接调用 RelatedSel 将进行最大 5 层的关系查询
+
+qs := o.QueryTable("post")
+
+qs.RelatedSel()
+// INNER JOIN user ... LEFT OUTER JOIN profile ...
+
+qs.RelatedSel("user")
+// INNER JOIN user ...
+// 设置 expr 只对设置的字段进行关系查询
+
+// 对设置 null 属性的 Field 将使用 LEFT OUTER JOIN
+
+
+Count
+依据当前的查询条件，返回结果行数
+cnt, err := o.QueryTable("user").Count() // SELECT COUNT(*) FROM USER
+fmt.Printf("Count Num: %s, %s", cnt, err)
+
+
+Exit
+
+exit:=o.QueryTable("user").Filter("UserName","Name").Exist()
+fmt.Printf("is exist；%s",exits)
+
+
+Update
+依据当前查询条件，进行批量更新操作
+num, err := o.QueryTable("user").Filter("name", "slene").Update(orm.Params{
+    "name": "astaxie",
+})
+fmt.Printf("Affected Num: %s, %s", num, err)
+// SET name = "astaixe" WHERE name = "slene"
+
+原子操作增加字段值
+\\假设user struct 里有一个nums int 字段
+num,err:o.QueryTable("user").Filter("name","slene").Update(orm.Params{"nums":"orm.ColValue(orm.ColAdd,100),"})
+
+orm.ColValue支持以下操作
+ColAdd  加
+ColMinus 减
+colMultiply 乘
+colExcept  除
+
+Delete
+依据当前查询条件，进行批量删除操作
+num, err := o.QueryTable("user").Filter("name", "slene").Delete()
+fmt.Printf("Affected Num: %s, %s", num, err)
+// DELETE FROM user WHERE name = "slene"
+
+
+
+PrepareInsert
+用于一次prepare多次insert插入，提高批量插入的速度
+var users []*User
+...
+qs := o.QueryTable("user")
+i, _ := qs.PrepareInsert()
+for _, user := range users {
+    id, err := i.Insert(user)
+    if err == nil {
+        ...
+    }
+}
+// PREPARE INSERT INTO user (`name`, ...) VALUES (?, ...)
+// EXECUTE INSERT INTO user (`name`, ...) VALUES ("slene", ...)
+// EXECUTE ...
+// ...
+i.Close() // 别忘记关闭 statement
+
+
+
+ALL 返回对应的结果集对象
+all的参数支持[]type 和[]*type两种形式及的slice
+
+var users []*User
+num, err := o.QueryTable("user").Filter("name", "slene").All(&users)
+fmt.Printf("Returned Rows Num: %s, %s", num, err)
+All / Values / ValuesList / ValuesFlat 受到 Limit 的限制，默认最大行数为 1000
+
+
+可以指定返回的字段
+type Post struct {
+    Id      int
+    Title   string
+    Content string
+    Status  int
+}
+
+// 只返回 Id 和 Title
+var posts []Post
+o.QueryTable("post").Filter("Status", 1).All(&posts, "Id", "Title")
+对象的其他字段值将会是对应类型的默认值
+
+One
+尝试返回单条记录
+var user User
+err := o.QueryTable("user").Filter("name", "slene").One(&user)
+if err == orm.ErrMultiRows {
+    // 多条的时候报错
+    fmt.Printf("Returned Multi Rows Not One")
+}
+if err == orm.ErrNoRows {
+    // 没有找到记录
+    fmt.Printf("Not row found")
+}
+可以指定返回的字段：
+
+// 只返回 Id 和 Title
+var post Post
+o.QueryTable("post").Filter("Content__istartswith", "prefix string").One(&post, "Id", "Title")
+对象的其他字段值将会是对应类型的默认值
+
+
+Values
+返回结果集的key=>value值
+key 为Model里的Field name, value的值是interface{}类型,例如，如果你要将value赋值给struct中的某字段，需要根据结构体对应字段类型使用断言获取真实值。举例:Name : m["Name"].(string)
+
+var maps []orm.Params
+num, err := o.QueryTable("user").Values(&maps)
+if err == nil {
+    fmt.Printf("Result Nums: %d\n", num)
+    for _, m := range maps {
+        fmt.Println(m["Id"], m["Name"])
+    }
+}
+返回指定的 Field 数据
+
+TODO: 暂不支持级联查询 RelatedSel 直接返回 Values
+
+但可以直接指定 expr 级联返回需要的数据
+
+var maps []orm.Params
+num, err := o.QueryTable("user").Values(&maps, "id", "name", "profile", "profile__age")
+if err == nil {
+    fmt.Printf("Result Nums: %d\n", num)
+    for _, m := range maps {
+        fmt.Println(m["Id"], m["Name"], m["Profile"], m["Profile__Age"])
+        // map 中的数据都是展开的，没有复杂的嵌套
+    }
+}
+
+
+
+valueList
+返回的结果集以slice存储，结果的排列与Model中定义的field顺序一致，返回的每个元素以string保存
+var lists []orm.ParamsList
+num, err := o.QueryTable("user").ValuesList(&lists)
+if err == nil {
+    fmt.Printf("Result Nums: %d\n", num)
+    for _, row := range lists {
+        fmt.Println(row)
+    }
+}
+
+
+指定expr返回指定的field
+var lists []orm.ParamsList
+num, err := o.QueryTable("user").ValuesList(&lists, "name", "profile__age")
+if err == nil {
+    fmt.Printf("Result Nums: %d\n", num)
+    for _, row := range lists {
+        fmt.Printf("Name: %s, Age: %s\m", row[0], row[1])
+    }
+}
+
+ValuesFlat
+返回特定的field，将结果集展开到单个slice中
+var list orm.ParamsList
+num, err := o.QueryTable("user").ValuesFlat(&list, "name")
+if err == nil {
+    fmt.Printf("Result Nums: %d\n", num)
+    fmt.Printf("All User Names: %s", strings.Join(list, ", "))
+}
+
+
+
+事务处理：
+o:=orm.NewOrm()
+err:=o.Begin()
+if  ..{
+   o.Rollback()
+}else{
+  o.Commit()
+}
+
+
+自定义表名
+
+type User struct {
+    Id int
+    Name string
+}
+
+func (u *User) TableName() string {
+    return "auth_user"
+}
+如果前缀设置为 prefix_ 那么表名为：prefix_auth_user
+
+
+
+命令模式：
+注册模型与数据库之后，调用RunCommand执行orm命令
+func main(){
+   ...
+   orm.RunCommand
+}
+go build main.go
+./main.orm
+
+
+
+
+------------------------------------------------------------------------------
+模板引擎 
+和go模板引擎语法大致一致
+{{ }}
+.访问当前位置的上下文
+$引用当前模板根级的上下文
+$var 访问创建的变量
+
+模板中支持golang符号
+{{“string”}}  一般string
+{{·raw string·}}	原始string
+{{'c'}} byte
+{{print nil}}  nil
+
+模板中的pipleline
+上下文变量的输出，函数通过管道传递的返回值
+{{.|FuncA|FuncB|FuncC}}
+
+pipeline为空：
+1、false/0
+2、nil或interface
+3、长度为0的array、map、slice、string
+
+
+if  ...else....end
+{{if pipeline}}{{end}}
+
+if 判断，pipeline为空，相当于 if  false
+嵌套循环
+{{if .IsHome}}
+{{else if .IsAbout}}
+{{else}}
+{{end}}
+
+range...end
+
+{{range pipeline}}{{.}}{{end}}
+
+pipeline 支持的类型为 array, slice, map, channel
+
+range 循环内部的 . 改变为以上类型的子元素
+
+对应的值长度为 0 时，range 不会执行，. 不会改变
+
+
+{{range .Pages}}
+    {{.Num}} of {{$.Total}}
+{{end}}
+使用创建的变量，在这里和 go 中的 range 用法是相同的。
+
+{{range $index, $elem := .Pages}}
+    {{$index}} - {{$elem.Num}} - {{.Num}} of {{$.Total}}
+{{end}}
+range 也支持 else
+
+{{range .Pages}}
+{{else}}
+    {{/* 当 .Pages 为空 或者 长度为 0 时会执行这里 */}}
+{{end}}
+
+
+
+with....end
+
+with 重定向 pipeline
+{{with .Field.NestField.SubField}}
+    {{.Var}}
+{{end}}
+
+用于变量赋值
+{{with $value := "My name is %s"}}
+    {{printf . "slene"}}
+{{end}}
+
+
+with...else
+{{with pipeline}}
+{{else}}
+		{{}}
+{{end}}
+
+
+define 自定义模板，模板定义和模板嵌套
+{{define “loop”}}
+	<li>{{.Nmae}}<li>
+{{end}}
+
+
+使用template调用模板
+<url>
+	{{rnage .Items}}
+		{{template "loop" .}}
+	{{end}}
+<ul>
+
+
+template
+将对应的上下文pipeline传给模板，才可以在模板中调用
+{{template “模板名” pipeline}}
+
+{{template "name" .}}
+
+Beego中的模板继承
+{{template "name" .}}
+
+注释
+允许多行注释，不允许嵌套
+{{/*...
+..*/}}
+
+基本函数
+| 将变量传递给函数
+{{. Con|markdon|addlinks}}
+{{.Name |printf "%s"}}
+
+使用括号
+{{printf "num is %s %d "(printf "%d %d" 1 2)3}}
+
+and
+{{and .X.Y.Z}}
+and会逐一判断每个参数，将返回第一个为空的参数，否则返回最后一个非空参数
+
+call 
+可以调用函数并且传入参数
+{{call .Field.Func.Arg1.Arg2}}
+调用的函数需要返回1个值或者2个值，返回两个值时，第二个值返回error，返回的错误不等于nil，执行将终止。
+
+index
+支持map、slice、array、string 读取指定类型对应的下标
+this.Data["Map"]=map[string]string{"name":"beggo"}
+{{index.Map "name"}}
+
+
+len
+返回对应类型的长度，支持类型map\slice、array、string\channel
+{{printf "the object len is %d"(。Contente|len)}}
+
+not
+返回输入参数的否定值，if true then false else true
+
+or
+逐一判断每个参数，将返回第一个非空参数，否则返回最后一个参数
+{{or.X.Y.Z}}
+
+print 对应的fmt.Sprint
+
+urlquery
+{{urlquery “http://beego.me”}}
+return   http%3A%2F%2Fbeego.me
+
+比较系列函数
+eq/ne/lt/le/gt/ge
+eq 和其他函数不一样的地方是，支持多个参数，和下面的逻辑判断相同
+
+arg1==arg2 || arg1==arg3 || arg1==arg4 ...
+与 if 一起使用
+
+{{if eq true .Var1 .Var2 .Var3}}{{end}}
+{{if lt 100 200}}{{end}}
+
+模板处理
+beego模板引擎采用 内置的html/template
+模板处理逻辑则是缓存编译的方式，所有的模板会在beego启动时，全部编译然后缓存到map中
+
+模板目录
+views  beego会自动在该目录 下所有模板文件进行解析，可以自定义模板目录
+beego.ViewsPath="myviewpath"
+
+自动渲染
+beego自动在调用完相应的method之后调用render函数，也可以配置无需自动调用 
+autorender=false
+或者在main.go 中设置 beego.autorender=false
+
+
+模板标签
+默认模板标签为{{}}  可以设置更改模板标签
+beego.TemplateLefr="<<<"
+beego.TemplateRight=">>>"
+
+模板数据
+模板数据通过controller中的this.Data 获取，修改模板中的获取内容{{.Content}}
+在controller中设置
+this.Dtat["Content"]="value"
+
+使用各类数据进行模板渲染
+控制器赋值
+this.Dtat["a"]=&A{Name:"axta",Age:2}
+模版渲染数据如下
+the username is {{.a.Name}}
+the age is {{.a.Age}}
+
+
+map 类型
+控制器函数  
+mp["name"]="value"
+this.Data["mp"]=mp
+
+模板渲染数据如下：
+this  username is  {{.mp.name}}
+
+slice
+控制器赋值
+ss:=[]string {"0"}
+tihs.Data["S"]=ss
+
+模版渲染数据如下
+{{rnage $key,$value:=s}}
+{{$key}}
+{{$value}}
+{{end]}
+
+
+模板名称
+设置模板文件格式 
+beego.AddTemplateExt("文件后缀名")
+
+设置自动渲染，在controller为设置任何的tplName beego自动设置模板文件如下
+
+c.TplName = strings.ToLower(c.controllerName) + "/" + strings.ToLower(c.actionName) + "." + c.TplExt
+对应的controller名字+请求方法.模板后缀
+
+
+Layout 设计
+beego支持laytout设计，若某些模块是固定的，著需要更改部分，可以如下设置
+this.Layout="layout.html"
+this.TpiName="template——name"
+
+在layout.html中 必须设置
+{{.LayoutContent}}
+beego会解析TplNmae指定的文件，将内容赋值给LayoutContent，然后渲染layout.html文件，
+
+采用缓存目录下所有的文件，
+{{template "head.html".}}
+Logic code
+{{template "footer.html" .}}
+注： .  用于传递当前参数到子模版  上下文
+
+
+laytoutSection
+可以允许layout页面设置多个section，每个section可以包含各自的子模版页
+
+逻辑处理
+type BlogsController struct {
+    beego.Controller
+}
+
+func (this *BlogsController) Get() {
+    this.Layout = "layout_blog.tpl"
+    this.TplName = "blogs/index.tpl"
+    this.LayoutSections = make(map[string]string)
+    this.LayoutSections["HtmlHead"] = "blogs/html_head.tpl"
+    this.LayoutSections["Scripts"] = "blogs/scripts.tpl"
+    this.LayoutSections["Sidebar"] = ""
+}
+
+
+renderform使用
+定义struct
+type User struct {
+    Id    int         `form:"-"`
+    Name  interface{} `form:"username"`
+    Age   int         `form:"age,text,年龄："`
+    Sex   string
+    Intro string `form:",textarea"`
+}
+
+structTag 定义使用标签为 from 
+如果 form 标签只有一个值，则为表单中类型 name 的值，除了最后一个值可以忽略外，其他位置的必须要有 , 号分割，如：form:",,姓名："
+如果要忽略一个字段，有两种办法，一是：字段名小写开头，二是：form 标签的值设置为 -
+现在的代码版本只能实现固定的格式，用 br 标签实现换行，无法实现 css 和 class 等代码的插入。所以，要实现 form 的高级排版，不能使用 renderform 的方法，而需要手动处理每一个字段。
+
+
+
+
+模板函数
+beego 支持用户自定义函数，须在beego.Run() 之前调用
+
+    func hello(in string)(out string){
+        out = in + "world"
+        return
+    }
+
+    beego.AddFuncMap("hi",hello)
+
+定义之后你就可以在模板中这样使用了：
+
+    {{.Content | hi}}
+
+目前 beego 内置的模板函数如下所示：
+
+* dateformat
+
+    实现了时间的格式化，返回字符串，使用方法 {{dateformat .Time "2006-01-02T15:04:05Z07:00"}}。
+
+* date
+
+    实现了类似 PHP 的 date 函数，可以很方便的根据字符串返回时间，使用方法 {{date .T "Y-m-d H:i:s"}}。
+
+* compare
+
+    实现了比较两个对象的比较，如果相同返回 true，否者 false，使用方法 {{compare .A .B}}。
+
+* substr
+
+    实现了字符串的截取，支持中文截取的完美截取，使用方法 {{substr .Str 0 30}}。
+
+* html2str
+
+    实现了把 html 转化为字符串，剔除一些 script、css 之类的元素，返回纯文本信息，使用方法 {{html2str .Htmlinfo}}。
+
+* str2html
+
+    实现了把相应的字符串当作 HTML 来输出，不转义，使用方法 {{str2html .Strhtml}}。
+
+* htmlquote
+
+    实现了基本的 html 字符转义，使用方法 {{htmlquote .quote}}。
+
+* htmlunquote
+
+    实现了基本的反转移字符，使用方法 {{htmlunquote .unquote}}。
+
+* renderform
+
+    根据 StructTag 直接生成对应的表单，使用方法 {{&struct | renderform}}。
+
+* assets_css
+
+    为css文件生成一个`<link>`标签`. `使用方法 {{assets_css src}}
+
+* assets_js
+
+    为js文件生成一个`<script>`标签`.`使用方法 {{assets_js src}}
+
+* config
+
+    获取AppConfig的值`.`使用方法 {{config configType configKey defaultValue}}`.` 可选的 configType有String,Bool,Int,Int64,Float,DIY
+
+* map_get
+
+    获取 `map` 的值
+
+    用法:
+
+        // In controller
+        Data["m"] = map[string]interface{} {
+            "a": 1,
+            "1": map[string]float64{
+                "c": 4,
+            },
+        }
+
+        // In view
+        {{ map_get .m "a" }} // return 1
+        {{ map_get .m 1 "c" }} // return 4
+
+* urlfor
+
+    获取控制器方法的 URL
+
+        {{urlfor "TestController.List"}}
+
+    详见 模板中如何使用
+
+
+静态文件处理
+beego.SetStaticPath("/static","pubilc")
+arg1: 路径，url路径信息
+arg2; 静态文件所在的目录
+
+beego支持多个静态文件注册，
+beego.SetStaticPath("/images","images")
+beego.SetStaticPath("/css","css")
+beego.SetStaticPath("/js","js")
+
+
+Session模块

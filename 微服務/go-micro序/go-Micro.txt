@@ -1,0 +1,451 @@
+# GO Micro 可插拔的插件化框架
+
+默认实现了consul作为服务发现，通过http进行通信，使用protobuf和json进行编解码。
+
+## 流程
+
+### 服务发现
+
+自动服务注册和名称解析，服务发现是微服务开发的核心，默认发现机制是多播DNS（mdns），零配置系统，选择使用SWIM协议为p2p网络设置八卦，或者为弹性云原生设置设置consul。
+
+### 负载均衡
+
+ 基于服务发现构建的客户端负载均衡，发现服务任意数量和实例地址，使用随机散列负载均衡来提供服务的均匀分布,并在出现问题时重试不同的节点。
+
+### 消息解码
+
+基于内容类型的动态消息解码，客户端和服务器将使用解码器和内容类型无缝解码和解码 GO类型 ， 可以编码任何种类的消息，并从不同的客户端发送，客户端和服务器默认处理 此问题，包括protobuf和json
+
+### 请求/响应
+
+基于RPC的请求/响应，支持双向流，micro提供了同步通信抽象，对服务的请求将自动解决，负载平衡，拨号和流式传输。启用tls时，默认传输为http/1.1和http2
+
+### Async Messaging
+
+PubSub是异步通信和事件驱动架构的一流公民，事件通知是微服务开发的核心模式，启用tls是，默认消息传递 是点对点http/1.1或http2
+
+### 可插拔接口
+
+GO Micro为每个分布式系统抽象使用GO接口,这类接口是可插拔的，并允许 Go Micro与运行时无关，可以插入任何基础技术。
+
+通信流程：
+       Server监听客户端的调用，和Broker推送过来的信息进行处理，并且Server端 需要向Register注册自己的存在或消亡，这样Client才能知道自己的状态。
+
+Register服务的注册和发现，Client端从Register中得到Server的信息，然后每次调用都根据算法选择一个Server进行通信，(需要通过编码/解码，选择传输协议等一系列过程)
+
+如果有需要通知所有的Server端可以使用Brocker进行信息的推送，Brocker信息队列进行信息的接收和发布。
+
+go-micro在启动时，默认选择http通信和protobuf的编码方式，在go-micro服务端启动的时候需要注册registrySayHandler方法
+该方法内部实现主要利用反射，注册的对象实现了rpc接口的方法，如say实现了sayhandler，go-micro默认的router利用反射把say对象的信息完全提取出来
+解析出结构体内部的方法以及方法参数，保存到一个map内-> map[结构体名称]方法信息集合
+
+路由信息处理，——> 注册服务并启动服务(启动HTTP服务)
+服务的简单流程： 选择通信协议和编码方式--> 注册服务方法——> 启动服务并注册服务信息
+
+客户端启动的时候选择默认的通信协议，http和protobuf编码 实现如下：
+
+```go
+rsp, err := client.Hello(context.Background(), &model.SayParam{Msg: "hello server"})
+```
+
+## 客户端流程：
+
+封装参数——> 编码数据——> 连接服务——> 发送数据——>接收数据，返回数据、解码
+
+## server流程：
+
+接收数据——> 解码数据、寻找响应的实例和方法，利用反射调用具体方法——>编码返回数据——> 发送给客户端
+
+
+
+8接口
+·Transort 服务间的通信接口，服务发送和接受的最终实现方式，其下的Listen方法为Server端调用，监听某个端口，待客户端调用
+
+- Dial 客户端进行连接的方法，返回一个client接口，内嵌Socket接口，具体发送和接受通信的信息
+- http 传输为go-micro默认的同步通信机制
+  ·Codec 传输编码、解码，默认采用protobuf
+- Codec接口的write方法即编码过程，Read为解码过程
+
+- ·Registry 服务注册和发现，
+- Service进行Register注册，Client使用watch方法进行监控，当有服务加入或者删除时触发该方法，提醒客户端更新的Service
+- 默认服务注册和发现时consul
+  ·Selector 以Registry为基础，selecotr为负载均衡机制，当客户端向服务器发送请求时，selector根据不用的算法从registry中寻找可用service节点，默认随机算法
+- ·Broker   消息发布和订阅的接口，
+  因为服务的节点是不固定的，如果有需要修改所有服务行为的需求，可以使服务订阅某个主题，当有信息发布时，所有的监听服务都会收到信息，根据你的需要做相应的行为。
+  默认实现方式为http
+- ·Client 请求服务的接口，封装了Transport，codec进行rpc调用，也封装了brocker进行信息的发布支持双工通信，默认rpc实现方式
+- ·Server  监听rpc请求，监听broker的订阅消息，等待消息队列的推送.默认采用rpc实现方式
+- ·Service 是client和server的封装，使用初始值初始化service和client
+
+创建微服务：
+  在micro框架中，服务用接口来进行定义，服务被定义为Service
+定义如下：
+
+```go
+ type Service struct{
+      Init(...Option)
+      Options() Options
+      Client() client.Client
+      Server()  server.Server
+      Run()     error
+      String()   string
+    
+}
+```
+
+在该接口中，定义了一个服务实例具体要包含的方法，分别是Init、Options、Client、Server、Run、String等6个方法
+
+在该接口中，定义了一个服务实例具体要包含的方法，分别是Init、Options、Client、Server、Run、String等6个方法
+
+服务初始化服务实例：
+除了提供了Service定义外，提供创建服务实例的方法供开发者调用：
+
+```go
+service:=micro.NewService()
+```
+
+NewService可以接受一个Options类型的可选参数，定义如下：
+
+```go
+func NewService(opts ...Option)Service{
+       return newService(opts..)
+}
+```
+
+Options可选配置
+   关于Options可配置选项，有很多可以选择的设置项，micro框架中包含了 options.go文件，定义了详细的可选配置的内容，最基本常见的 配置项有：服务名称，服务的版本，服务的地址 ：
+
+服务名称：
+
+```go
+func Name(n string)Option{
+       return func(o *Options){
+            o.Server.Init(server.Name(n))
+}
+    }
+```
+
+//服务版本
+
+```go
+func  Version(v string)Option{
+     return func(o*Options){
+       o.Server.Init(server.Version(v))
+	}
+}
+```
+
+// 服务部署地址
+
+```go
+func Address(addr string)Option{
+     return func(o *Options){
+          o.Server.Init(server.Adderss(addr))
+}
+}
+
+func Metadata(md map[string]string)Option{
+     return func (o *Option){
+     o.Server.Init(server.Metadata(md))
+}
+}
+```
+
+完整的实例话对象代码如下：
+
+```go
+func main(){
+    // 创建一个新的服务的对象实例
+    service:=micro.NewService(
+        micro.Name("...")
+        micro.Version("v1.0.0")
+	)
+}
+```
+
+开发者直接调用micro.Name为服务设置名称，设置**版本号**等信息，对应的函数内部，调用了server.Server.Init函数对配置项进行初始化。
+
+将服务注册到consul
+终端中输入 `consul agent -dev`  **启动consul服务**
+
+将**指定的服务注册**到consul
+go run server.go --registry=consul
+
+在浏览器8500端口查看结果 
+
+```go
+ //创建一个新的服务对象实例
+	service := micro.NewService(
+		micro.Name("student_service"),
+		micro.Version("v1.0.0"),
+		micro.Registry(consul.NewRegistry()),
+）
+```
+
+通过micro.Registry可以指定要注册的发现组件，注册到consul因此调用consul.NewRegistry
+
+
+插件化
+不只是go-micro 整个micro都设计称为了插件化，可以随意的更换服务接口的机制 
+
+## 服务注册发现的原理：
+
+ 服务注册发现是将**所有的**服务注册到**注册组件中心**，各服务在进行互相调用功能时，先通过查询方法获取到需要调用的服务的状态信息和地址，然后向对应的微服务模块发起调用
+
+未发现服务错误
+请求发起端未发现注册服务，产生错误。
+
+运行客户端服务
+
+```
+go run client.go --registry=consul
+```
+
+### TTL和时间间隔
+
+TTL机制和时间间隔机制。**TTL指定一次注册**在**注册组件中**的有效期，过期后删除，而间隔时间**注册表示定时向注册主键中重新注册**以确保服务在线。
+
+指令方式：通过指令选项来实现配置
+
+```
+go run main.go --regsitry=consul --registry_ttl=10 --registry_interval=5
+```
+
+
+   每隔五秒向服务注册组件注册一次，每次有效期限为10秒
+
+
+·编码方式实现; 在创建微服务时通过配置来完成 
+
+```go
+service：=micro.NewService(
+	micro.Name("student_service")
+ 	micro.Vsersion("....")
+	micro.RegisterTTL(10*time.Second)
+	micro.RegisterInserval(5*time.Second)
+)
+```
+
+
+通过micro下的配置项来配置两个选项
+
+
+
+## 事件驱动机制——解耦
+
+增加消息队列组件的目的:**实现模块程序的解耦**
+
+事件发布：用户服务中的某个**功能执行时**，触发相应的事件，并将**对应的用户数据发送到消息队列组件中**
+
+事件订阅：原先为**程序端**主动进行**程序调用**，现在需要**另一模块的程序**到**消息队列**组件中**主动获取需要相关数据**并及**逆行相关功能**调用，主动获取的过程称之为**订阅**
+
+基于消息发布/订阅的系统有多种框架的实现，常见的有 kafa、NSQ ActiveMQ 等
+
+Borker
+发布订阅通过接口实
+
+activeMQ 
+   启动  win64  active.bat  edge输入 http://localhost/admin
+
+消息组件初始化
+在创建服务时对消息组件进行初始化，并进行可选项配置
+
+```go
+server:=micro.NewService( micro.Name("...") micro.Version("...")micro.Boker(mqtt.NewBoker())
+```
+
+使用 micro.Broker来指定 特定的消息组件，并通过mqtt.NewBroker初始化实例对象，作为broker参数
+
+消息订阅：
+消息的发送方随时可能发布相关的事件，因此需要消息的接收方先进行订阅操作，避免遗漏消息，go-micro框架可以通过broker.Subscribe实现消息的订阅。
+
+```go
+pubSub:=service.Service().Options().Broker
+_,err;=pubsub.Subscribe("go.micro.srv.message",func(event  broker.Event)error{
+    var req*message.StudentRequest
+    if err:=json.Unmarshal(event.Message().Body,&req);err!=nil{
+	return err
+}
+     fmt.Println("接收到信息",req)
+     return nil 
+})
+```
+
+消息发布：
+在客户端实现消息的发布，在go-micro中使用broker.Publish进行消息的发布
+
+```go
+brok:=Service.Server().Options().Broker
+if err:=brok.Connect();err!nil{
+
+    log.Fatal("broker connection failed,err",err.Error())
+
+}
+	stduent:=&message.Student{Name:"..",Clsssess:"阮使",Grade:,Phone:"...."}
+       msgBody,err:=json.Marshal(stduent)// 序列化
+       if err!=nil{
+
+	log.Fatal(err.Error())
+	}
+	mesg:=&borker.Message{
+	 Header:map[string]string{
+	"name":student.Name,
+	},
+	Body:mesBody
+
+}
+
+err:=brokerl.Publish("go.micro.srv.message",msg)
+if err!=nil{
+   log.Fatal("消息发布失败",err.Error())
+	
+}else{
+
+  log.Print("消息发布成功")
+}
+```
+
+运行程序
+   mqtt服务器默认在1883端口进行监听
+
+go get github.com/eclipse/paho.mqtt.golang
+
+------
+
+## Micro中的负载均衡组件-Selector
+
+负载均衡器接收请求，并实现请求的分发，需要按照一定的规则进行转发处理
+
+用户先访问负载均衡器，再由负载均衡器对请求进行处理，进而分发到不同的服务器上的服务程序进行处理。
+负载均衡器主要处理 四种请求：**HTTP/HTTPS/UDP/TCP**
+
+### 负载均衡算法
+
+负载均衡器按照一定的规则实现请求的转发，其遵循的转发规则称之为负载均衡算法
+
+#### Round  Robin(轮训算法)： 
+
+按照一定的顺序进行**依次排队**分发，当前有请求队列需要转发时，为**第一个请求**选择可用列表中的**第一个服务器**，为下一个请求选择请求服务中的第二个服务器，直到选择到服务器列表的最后一个，当第一次列表转发完毕之后，重新选择第一个服务器进行分发，轮训
+
+#### **Least Connections(最小链接)**:
+
+因为分布式系统中有多台服务程序在运行，每台服务器在某一个时刻处理的连接请求数量是不一样的，因此 当有**新的**请求需要转发时，按照**最小连接数**原则，负载均衡器会有限选择当前连接数最小的服务器，依次为转发的原则
+
+#### Source(源)：
+
+将**请求的IP**进行 hsah计算，根据结构来匹配要转发的服务器，然后进行转发，这种方式在一定程度上保证用户能够连接到想用的服务器。
+
+### Mico的Selector
+
+selector运行在客户端实现负载均衡功能，当客户端需要调用服务端方法时，客户端会根据其内部的**selector组件**中指定的负载均衡策略，选择服务注册中的一个服务实例，GO-Micro中的Selector时基于 **register**模块构建的，提供负载均衡策略，同时还提供过滤，缓存和黑名单的功能。
+
+Selector接口定义中包含了Init、Option、Mark、Reset、Close、string
+其中  select实现复负载均衡器的策略，为核心方法
+**Mark** :标记服务节点的状态，
+**string**  :方法自定义负载均衡器的名称
+
+
+
+#### DeafaultSelector
+
+在selector包下，除了selector接口定义外，还包含了defaultSelector的定义，作为go-micro默认的负载均衡器而使用，通过**NewSelector**函数创建生成的
+
+在NewSelector中，实例化了registrySelector对象并进行了返回,在实例化的过程中，配置了Selector的Options选项，默认的配置是Random。我们进一步查看会发现Random是一个func
+
+
+该算法是go-micro中默认的负载均衡器，会随机选择一个服务节点进行分发；除了Random算法外，还可以看到RoundRobin算法
+
+registrySelector是selector包下default.go文件中的结构体定义，具体定义如下:
+
+```go
+type registrySelector struct {
+	so Options
+	rc cache.Cache
+}
+```
+
+### 缓存cache
+
+缓存组件，将自己查询到的服务列表数据缓存到本地Cache中，需要处理转发时，**先去Cache中寻找**，**存在即转发，不存在时，执行请求服务发现注册组件，然后缓存到本地**
+
+Mark方法可以用于标记服务注册和发现组件中的某一个节点的状态，这是因为在某些情况下，负载均衡器跟踪请求的执行情况。如果请求被转发到某天服务节点上，多次执行失败，就意味着该节点状态不正常，此时可以通过Mark方法设置节点变成黑名单，以过滤掉掉状态不正常的节点。
+
+## stream ：
+
+### rpc stream实现
+
+1. 连接服务器
+2. 客户端多次发送请求-> 服务端接受请求
+3. 服务端多次接受请求——> 客户端处理数据
+4. 关闭连接
+   当数据量较大时可以采用stream方式分批次传输数据，对于客户端、服务端无限制，
+   调用stream方式：
+
+```go
+rpc stream(modles.request)returns(stream model.reponse)
+rpc BidirectionalStream(stream model.SRequest) returns (stream model.SResponse) {}
+```
+
+### RESTful API 设计标准
+
+整体架构中划分为前台和后台
+**前台**负责**用户交互**、**展示数据**、**执行操作**。**后台**负责**业务逻辑处理**，**数据持久化**等操作。
+**内部调用**：**后台各个微服务之间**的互相调用，属于**系统后台内部的调用**
+外部调用：前台与后台的**接口请求**调用
+
+## 技术选型：
+
+**RPC调用**：**后台各个服务**之间的**互相调用**，为了实现高效率的服务的交互，通常采用RPC的方式进行实现。
+**REST**：对于前端客户端通过HTTP接口，与后台交互的场景，因为涉及到对不同资源的管理和操作，因此往往采用RESTful标准进行实现。
+
+GO-Micro **API** 网关
+安装  go get -u github.com/micro/micro
+
+shell输入  mircro --version  显示版本则安装成功
+
+## Micro API 工作原理
+
+micro工具提供了构建api网关服务的功能，并基于go-micro框架实现，作用则是把**rpc形式的服务代理成为支持HTTP协议的web API 请求**。
+
+运行micro API 服务
+micro  api
+
+反向代理的api服务启动
+支持多种处理请求路由的方式，Handler  包括 API Handler  RPC Handler  反向代理、Event Handler RPC  五种形式
+
+> 反向代理：
+> ·格式： /[server]
+> ·请求/响应： HTTP方式
+> ·micro api 启动时通过 --handler=proxy 设置
+> 反向代理的micro api的网关服务启动命令
+> micro api --handler=http
+
+go get github.com/micro/micro/v2/cmd/protoc-gen-micro@master
+编写proto 文件 
+运行 
+protoc --go_out=. --micro_out=. name.proto
+
+protoc --proto_path=$GOPATH/src:. --micro_out=. --go_out=. greeter.proto
+
+
+服务端实现 路由解析实现http请求处理
+
+
+google.golang.org/grpc 1.26后的版本是不支持clientv3的。
+
+也就是说要把这个改成1.26版本的就可以了。
+
+具体操作方法是在go.mod里加上：
+
+replace google.golang.org/grpc => google.golang.org/grpc v1.26.0
+replace github.com/lucas-clemente/quic-go => github.com/lucas-clemente/quic-go v0.14.1
+
+
+
+
+
+
+
+
+
+

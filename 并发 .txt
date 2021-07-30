@@ -1,0 +1,197 @@
+golang 对于并发的实现是靠协程`Goroutine`
+
+main 执行的为主goroutine   其外的为子goroutine
+执行过程 则是 主线程和子线程切换执行
+调用子线程方法的关键字  go eg： go func_name()
+主线程执行完程序直接结束 ，不论子线程是否执行完毕
+ 	     
+	      
+ 通信
+
+
+runtime 包下的 部分函数操作
+
+//  设置go程序运行最大的cpu数量[1,255] 一般用于程序开始
+	runtime.GOMAXPROCS(runtime.NumCPU())
+
+
+获取goroot
+runtime.GOROOT()
+
+获取操作系统
+runtime.GOOS
+
+获取逻辑cpu数量
+runtime.NUMCPU()
+
+
+// 让出时间切片，使别的goroutine先执行
+runtime.Sched()
+
+终止当前的gorutine
+runtime.GOexit()
+
+**********************************************************
+临界资源： 并发环境中多个进程/协程/线程共享的资源，在并发编程中临界资源处理不当，往往会导致数据不一致的问题
+
+
+
+WaitGroup 同步等待组
+
+	var wg sync.WaitGroup //  创建同步等待组的对象
+	Add(counter) 设置等待组中要执行的子goroutine的数量
+	Wait() 让主goroutine处于等待
+	Done() 让等待组中的counter-1  类似于Add(-1)
+
+***********************************************************
+互斥锁   sync.Mutex  
+    在使用互斥锁时，对资源操作完，必须解锁、释放资源，否则会出现程序异常，死锁等问题，可以使用defer语句 解锁
+
+
+var mutex sync.Mutex //  创建锁
+
+mutex.Lock() //上锁  此后只允许一个goroutine访问
+mutex.Unlock() // 解锁释放资源
+
+*******************读写锁**********************************
+RWMutex(读写锁) sync中包括两种锁类型 sync.Mutex和sync.RWMutex,其中RWMutex是基于Mutex实现的，只读锁的实现类似于引用计数器的功能
+
+RWMutex是读/写互斥锁，所可以由任意数量的读取器或单个编写器持有  可以让多个读操作并发执行，对于写操作是互斥
+
+多个goroutine可以同时读数据，
+写操作时，只能单个goroutine执行，同一时刻只能有一个写操作
+
+
+***********************channel通道***********************
+goroutine 的通道，实现多个goroutine共享数据
+goroutine间传递数据的通道，零值为nil‘
+
+通道为引用类型数据
+声明通道： var name chan var_type
+创建通道：如果通道为nil(即不存在)，需要先创建通道
+name=make(chan var_type)
+
+便捷写法：
+chan_name:=make(chan type)
+
+通道的使用语法：
+发送和接收
+data:=<-a // read from channel a
+a<-data // write to channel a
+在通道上箭头的方法指定数据是发送还是接收
+v,ok:=<-a //  从channel中读取数据
+
+
+注：1· 用于goroutine间传递消息 
+    2·通道，每个都有相关联的数据类型，nil chan 不能使用，类似于nil map 不能直接存储键值对
+    3· 使用通道传递数据：<    
+    chan<-data 发送数据到通道，向通道中写入数据
+    data:=<-chan 从通道中获取数据， 
+    4·阻塞： 发送数据：chan<-data，直到另一条goroutine，读取数据来解除阻塞，
+     读取数据:data<-chan，也是阻塞，直到另一条goroutine，写出数据接触阻塞
+    5·本身channel就是同步的，意味着同一时间，只能有一条goroutine来操作
+    6·channel是goroutine间的通信，发送和接收必须在不同的goroutine中执行
+
+发送和接收默认是阻塞的，当一个数据被发送到通道是，在发送语句中被阻塞，直到另一个goroutine从该通道读取数据，相对的读取被阻塞，直到另一个goroutine将数据写入到该通道
+
+死锁： 如果写入或读取数据没有对应的goroutine执行读取或写入，则会造成死锁
+
+
+关闭通道
+     发送者可以通过关闭信道，来通知接收方不会有更多的数据发送到channel
+	close(ch)
+
+
+接收者可以在接收来自通道的数据时使用额外的变量来检测通道是否已经关闭
+语法结构： v,ok:=<-ch 如果数据存在 v就是数据，如果不存在v就是对应数据类型的零值 类似于map操作 v,ok:=make[key]
+
+通道范围循环
+for v,ok :=range chan{}
+
+
+
+缓冲通道
+    通道带有缓冲区，发送到一个缓冲通道只有在缓冲区满时才被阻塞，类似的，从缓冲通道接收的信息只有在缓冲区为空时才会被阻塞
+语法 ch:=make(chan type ，capacity)
+     容量应该大于0，以便通道具有缓冲区，默认情况下，无缓冲通道的容量为0，因此在之前创建通道时省略了容量参数
+
+非缓冲通道：
+	     ch:=make(chan T ) 一次发送，一次接收都是阻塞的
+	缓冲通道
+	     ch:=make(chan T ,capacity)
+	     发送：缓冲区满才会阻塞
+	     接收：缓冲区数据为空才会阻塞
+		 类似于队列：数据先进先出
+
+
+
+
+双向通道  即 既可以发送数据，又可以接收数据 
+      ch<- data    data:=<-ch
+单向通道：又称为定向通道，只用来接收或者发送数据
+
+*******************************************************
+time中通道相关得函数
+      timer是一次性得时间出发时间， 与Ticker不同，Ticker是按照一定时间间隔持续触发的事件
+
+time.Tick函数返回一个channel，程序会周期性地像一个节拍器一样向这个channel发送事件。每一个事件的值是一个时间戳
+
+timer常见的创建方式：
+      t:=time.NewTimer(d)
+      t:=time.AfterFunc(d,f)
+      t:=time.After(d)
+    timer3要素： 
+          定时时间：d  
+          触发动作: f
+          事件channel：t.C
+
+time.After() 返回一个通道，chan 存储的时d时间间隔之后的当前时间
+        相当于NewTimer(d).C
+
+NewTimer创建一个新的计时器，该计时器将发送
+
+//至少持续时间d后其通道上的当前时间。
+
+*******************************************************
+SELECT 语句
+    select是go中的一个控制结构，select类似于switch语句，但是select会随机执行一个可运行的case，如果没有case可运行那么，他将会阻塞，只到有case可以运行
+
+语法： 
+   select{
+    case communication clause:
+      statement(s);
+    ......
+    default: // 可选
+    statement(s);
+}
+
+注： 每一个case都必须是一个通信
+    所有的channel表达式都会被求值
+    所有被发送的表达式都会被求值
+    如果有多个case都可以运行，select会随机公平地选出一个执行，其他不会执行
+    如果有default语句，则执行该语句
+    如果没有default语句，select将阻塞，知道某个通信可以运行，go不会重新对channel或值进行求值
+
+分支语句： if switch  select
+
+*******************************************************
+CSP 通信顺序进程，是一种并发编程模型，是一个很强大的并发数据模型
+
+golang CSP，
+   与主流语言通过共享内存来进行并发控制方式不同，go采取了csp模式，还是一种用于描述两个独立的并发实体通过共享的通讯Channel进行通信的并发模型，
+go仅仅是用了process和channel  p则是goroutine是实际并发执行的实体，每个实体之间是通过channel通讯来实现数据共享
+
+golang的csp模型是由协程Goroutine与通道channel实现：
+  ·goroutine：是一种轻量线程，他不是操作系统的线程，而是一个操作系统线程的分段使用，通过调用器实现协作式调度，是一种绿色的线程，微线程，他与Coroutine协程也有区别，能够在发现堵塞后启动新的微线程
+   ·通道channel：类似于Unix的Pipe，用于协程之间的通讯和同步，协程之间虽然解耦，但是他们和Channel有着耦合
+
+**************************反射**********************
+reflect 
+  在编译时不知道类型的情况下，可更新变量、运行时查看值、调用方法以及直接对他们的布局进行操作的机制，称为反射。
+反射使用TypeOf和ValueOf函数从接口中获取目标对象的信息，轻松完成目的   
+
+反射： 1）获取变量内部信息  reflect.ValueOf()获取输入参数接口中的数据的值，如果为空则返回0；
+     reflect.TypeOf()动态获取数据参数接口中的值的类型，如果为空则为nil
+       2）接口变量的 类型/值
+       
+

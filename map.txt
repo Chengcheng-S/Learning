@@ -1,0 +1,36 @@
+map： 映射
+一种无序的基于key:value的数据结构，必须初始化才能使用
+map[keytype]valuetype
+创建：
+1）var map1 map[key]value  创建出来的map为空 （nil） 无法直接使用
+2）make(map[key]value,cap) 
+
+3)map[key]value{...:...,...:...,}
+map的默认初始值为nil，需要使用make函数来分配内存
+make(map[keytype]valuetype,[cap]) cap可有可无 表示map的容量
+
+判断某个键是否存在
+value,ok :=map[key]  // 如果key存在 ok为true value为key对应的值，不存在ok为false，value为值类型的零值
+
+
+map的遍历：for k,v :=range nameMap{ fmt.Println(k,v)}
+遍历map时的元素顺序与添加键值对的顺序无关
+
+键值对删除：delete(map,key)
+
+
+排序  sort包下的排序函数
+
+map.go
+
+
+
+/*
+    把map放入到slice中
+     */
+    s1:=make([]map[int]string,0,1)
+	s1 = append(s1, map[int]string{1:"牢记",2:"不忘初心",3:"golang"})
+	for key,vlaue:=range s1{
+		fmt.Printf("第几个信息：%d\n",key+1)
+		fmt.Printf("值：%s\n",vlaue[2])
+	}

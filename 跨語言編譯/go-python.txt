@@ -1,0 +1,2522 @@
+linux  
+sudo apt-get python3-devel
+sudo install golang-go
+sudo apt-get cython
+
+常量:
+
+```go
+const(
+	MethVarArgs  MethodDefFlages= C.METH_VARARGS
+	MethKeyWords				= C.METH_KEYWORDS
+	MethNoArgs                  = C.METH_NOARGS
+    MethO                       = C.METH_O
+    MethOldArgs                 = C.METH_OLDARGS
+    MethClass                   = C.METH_CLASS
+    MethStatic                  = C.METH_STATIC
+    MethCoexist                 = C.METH_COEXIST
+)
+```
+
+const(
+	PyBUF_SIMPLE       = PyBUF_Flag(C.PyBUF_SIMPLE)
+    PyBUF_WRITABLE     = PyBUF_Flag(C.PyBUF_WRITABLE)
+    PyBUF_STRIDES      = PyBUF_Flag(C.PyBUF_STRIDES)
+    PyBUF_ND           = PyBUF_Flag(C.PyBUF_ND)
+    PyBUF_C_CONTIGUOUS = PyBUF_Flag(C.PyBUF_C_CONTIGUOUS)
+    PyBUF_INDIRECT     = PyBUF_Flag(C.PyBUF_INDIRECT)
+    PyBUF_FORMAT       = PyBUF_Flag(C.PyBUF_FORMAT)
+    PyBUF_STRIDED      = PyBUF_Flag(C.PyBUF_STRIDED)
+    PyBUF_STRIDED_RO   = PyBUF_Flag(C.PyBUF_STRIDED_RO)
+    PyBUF_RECORDS      = PyBUF_Flag(C.PyBUF_RECORDS)
+    PyBUF_RECORDS_RO   = PyBUF_Flag(C.PyBUF_RECORDS_RO)
+    PyBUF_FULL         = PyBUF_Flag(C.PyBUF_FULL)
+    PyBUF_FULL_RO      = PyBUF_Flag(C.PyBUF_FULL_RO)
+    PyBUF_CONTIG       = PyBUF_Flag(C.PyBUF_CONTIG)
+    PyBUF_CONTIG_RO    = PyBUF_Flag(C.PyBUF_CONTIG_RO)
+)
+
+const Py_MARSHAL_VERSION=2   // FIXME:get it from the define
+
+
+变量：
+var(
+	PyExc_BaseException       = togo(C.PyExc_BaseException)
+    PyExc_Exception           = togo(C.PyExc_Exception)
+    PyExc_StandardError       = togo(C.PyExc_StandardError)
+    PyExc_ArithmeticError     = togo(C.PyExc_ArithmeticError)
+    PyExc_LookupError         = togo(C.PyExc_LookupError)
+    PyExc_AssertionError      = togo(C.PyExc_AssertionError)
+    PyExc_AttributeError      = togo(C.PyExc_AttributeError)
+    PyExc_EOFError            = togo(C.PyExc_EOFError)
+    PyExc_EnvironmentError    = togo(C.PyExc_EnvironmentError)
+    PyExc_FloatingPointError  = togo(C.PyExc_FloatingPointError)
+    PyExc_IOError             = togo(C.PyExc_IOError)
+    PyExc_ImportError         = togo(C.PyExc_ImportError)
+    PyExc_IndexError          = togo(C.PyExc_IndexError)
+    PyExc_KeyError            = togo(C.PyExc_KeyError)
+    PyExc_KeyboardInterrupt   = togo(C.PyExc_KeyboardInterrupt)
+    PyExc_MemoryError         = togo(C.PyExc_MemoryError)
+    PyExc_NameError           = togo(C.PyExc_NameError)
+    PyExc_NotImplementedError = togo(C.PyExc_NotImplementedError)
+    PyExc_OSError             = togo(C.PyExc_OSError)
+    PyExc_OverflowError       = togo(C.PyExc_OverflowError)
+    PyExc_ReferenceError      = togo(C.PyExc_ReferenceError)
+    PyExc_RuntimeError        = togo(C.PyExc_RuntimeError)
+    PyExc_SyntaxError         = togo(C.PyExc_SyntaxError)
+    PyExc_SystemError         = togo(C.PyExc_SystemError)
+    PyExc_SystemExit          = togo(C.PyExc_SystemExit)
+    PyExc_TypeError           = togo(C.PyExc_TypeError)
+    PyExc_ValueError          = togo(C.PyExc_ValueError)
+
+    PyExc_ZeroDivisionError = togo(C.PyExc_ZeroDivisionError)
+)
+
+python错误对象：
+此对象无方法，在引用计数方面，需要像其他对象一样处理
+var Py_False=&PyObject{ptr:C._gopy_pyfalse()}
+
+pynone对象，表示缺少值，此对象无方法，在计数方面，和其他对象一致处理
+var Py_None=&Py0bject{ptr:C._gopy_pynone()}
+
+PyObject  Py_Ture真是对象，此对象无方法，在引用计数方面，需要像其他对象一样处理
+var Py_True=&PyObject{prt:C.__gopy_pytrue()}
+
+func  Finalize:
+func Finalize() error
+ 完成关闭py解释器
+
+func 初始化
+func Initialize() error
+初始化py解释器  GIL
+
+PyBool_Check
+func PyBool_Check(self *PyObject)bool
+int  PyBool_Check(Py0bject_o) 如果o的类型为PyBool_Type 返回True
+
+func PyBuffer_FillContiguousStrides
+func PyBuffer_FillContiguousStrides(ndim int, shape, strides []int, itemsize int, fortran string)
+空PyBuffer_FillContiguousStrides（int ndim，Py_ssize_t [形状， Py_ssize_t _sa，Py_ssize_t项大小， 字符 fortran） 填充步进数组与连续的字节步进 （C 样式，如果 fortran 是 'C' 或 Fortran 样式，如果 fortran 是给定形状的'F' 数组与给定的字节每个元素的给定数。
+
+func PyBuffer_IsContiguous
+func PyBuffer_IsContiguous(self *Py_buffer,fortrain string)bool
+如果视图定义的内存为C样式(fortran是"c")或fortran样式(fortrain为“F”)或者任意(fortrain为“A”)则返回1，否则返回0
+
+
+PyBuffer_Release
+func PyBuffer_Release(self *Py_buffer)
+无效pybuffer_release释放缓冲区视图，不在使用缓冲区时，调用该方法，释放资源
+
+PyBuffer_SizeFromFormat
+PyBuffer_SizeFromFormat(self *Py_buffer)int
+从结构型py_buffer.format返回隐含的__Py_buffer.itemsize大小
+
+
+PyByteArray_AS_STRING
+func PyByteArray_AS_STRING(slef *PyObject)string
+pyobject 字节数组 的宏版本
+
+PyByteArray_AsBytesN
+func  PyByteArray_AsBytesN(self *pyobjec,length int)[]byte
+将字节 数组的内容返回为字节，大小长度
+
+
+pyByteArray_AsString
+arg： slef *pyobject  
+return : string
+检查null指针后将字节数组的内容作为字符串返回
+
+PyByteArray_Check
+arg：*pyobject
+return: bool
+如果对象0时字节数组对象或字节数组类型的子类型的实例，则返回true
+
+PyByteArray_CheckExact
+arg：*pyobject
+return：bool
+如果对象时字节数组对象，但不是字节数组类型的子类型实例，返回True
+
+
+PyByteArray_GET_SIZE
+arg：pyobjec
+return：int
+pybytearray_size的宏版本
+
+PyByteArray_Resize
+arg：pyobject， int
+return：error
+将字节数组的内部缓冲区调整到len
+
+
+PyByteArray_Size
+arg：pyobject
+return： int
+检查null指针后返回字节数组的大小
+
+PyCallter_Check
+arg：*pyobjcet
+return： bool
+检测是否为PyCallter_Type
+
+
+PyCapsule_CheckExact
+arg： pyobjcet
+return：bool
+检测是否为PyCapsule
+
+
+PyCapsule_GetContext
+arg： pyobject
+return *C.char
+返回储存在pyobjcet中的上下文，发生故障时，，设置异常并返回nil
+具有nil上下文为合法，使用PyCapsule_IsValid（）或PyErr_Occurred（）来消除歧义。
+
+--------------------------------------------------------------------------------------
+前方高能
+
+
+GoDoc
+Home
+About
+Search
+Pkg.go.dev is a new destination for Go discovery & docs. Check it out at pkg.go.dev/github.com/sbinet/go-python and share your feedback.
+Always use pkg.go.dev Learn more
+go-python: github.com/sbinet/go-pythonIndex | Files
+package python
+import "github.com/sbinet/go-python"
+
+simplistic wrapper around the python C-API
+
+Index
+Constants
+Variables
+func Finalize() error
+func Initialize() error
+func PyBool_Check(self *PyObject) bool
+func PyBuffer_FillContiguousStrides(ndim int, shape, strides []int, itemsize int, fortran string)
+func PyBuffer_IsContiguous(self *Py_buffer, fortran string) bool
+func PyBuffer_Release(self *Py_buffer)
+func PyBuffer_SizeFromFormat(self *Py_buffer) int
+func PyByteArray_AS_STRING(self *PyObject) string
+func PyByteArray_AsBytes(self *PyObject) []byte
+func PyByteArray_AsBytesN(self *PyObject, length int) []byte
+func PyByteArray_AsString(self *PyObject) string
+func PyByteArray_Check(self *PyObject) bool
+func PyByteArray_CheckExact(self *PyObject) bool
+func PyByteArray_GET_SIZE(self *PyObject) int
+func PyByteArray_Resize(self *PyObject, sz int) error
+func PyByteArray_Size(self *PyObject) int
+func PyCallIter_Check(op *PyObject) bool
+func PyCapsule_CheckExact(p *PyObject) bool
+func PyCapsule_GetContext(capsule *PyObject) *C.char
+func PyCapsule_GetDestructor(capsule *PyObject) C.PyCapsule_Destructor
+func PyCapsule_GetName(capsule *PyObject) string
+func PyCapsule_GetPointer(capsule *PyObject, name string) *C.char
+func PyCapsule_Import(name string, no_block bool) *C.char
+func PyCapsule_IsValid(capsule *PyObject, name string) bool
+func PyCapsule_SetContext(capsule *PyObject, context *C.char) error
+func PyCapsule_SetDestructor(capsule *PyObject, dtor C.PyCapsule_Destructor) error
+func PyCapsule_SetName(capsule *PyObject, name string) error
+func PyCapsule_SetPointer(capsule *PyObject, pointer *C.char) error
+func PyClass_Check(o *PyObject) bool
+func PyClass_IsSubclass(klass, base *PyObject) bool
+func PyComplex_AsCComplex(op *PyObject) C.Py_complex
+func PyComplex_Check(self *PyObject) bool
+func PyComplex_CheckExact(self *PyObject) bool
+func PyComplex_ImagAsDouble(op *PyObject) float64
+func PyComplex_RealAsDouble(op *PyObject) float64
+func PyDict_Check(self *PyObject) bool
+func PyDict_CheckExact(self *PyObject) bool
+func PyDict_Clear(self *PyObject)
+func PyDict_Contains(self, key *PyObject) (bool, error)
+func PyDict_DelItem(self, key *PyObject) error
+func PyDict_Merge(a, b *PyObject, override int) error
+func PyDict_MergeFromSeq2(a, seq2 *PyObject, override int) error
+func PyDict_Next(self *PyObject, pos *int, key, value **PyObject) bool
+func PyDict_SetItem(self, key, val *PyObject) error
+func PyDict_Size(self *PyObject) int
+func PyDict_Update(a, b *PyObject) error
+func PyErr_BadArgument() bool
+func PyErr_BadInternalCall()
+func PyErr_CheckSignals() bool
+func PyErr_Clear()
+func PyErr_ExceptionMatches(exc *PyObject) bool
+func PyErr_GivenExceptionMatches(given, exc *PyObject) bool
+func PyErr_NormalizeException(exc, val, tb *PyObject) (*PyObject, *PyObject, *PyObject)
+func PyErr_Print()
+func PyErr_PrintEx(set_sys_last_vars bool)
+func PyErr_Restore(typ, value, traceback *PyObject)
+func PyErr_SetInterrupt()
+func PyErr_SetNone(typ *PyObject)
+func PyErr_SetObject(typ, value *PyObject)
+func PyErr_SetString(typ *PyObject, message string)
+func PyErr_WarnEx(category *PyObject, message string, stacklevel int) error
+func PyErr_WarnExplicit(category *PyObject, message, filename string, lineno int, module string, registry *PyObject) error
+func PyErr_WarnPy3k(message string, stacklevel int) error
+func PyErr_WriteUnraisable(obj *PyObject)
+func PyEval_GetFuncDesc(fct *PyObject) string
+func PyEval_GetFuncName(fct *PyObject) string
+func PyEval_GetRestricted() bool
+func PyEval_RestoreThread(state *PyThreadState)
+func PyFloat_AS_DOUBLE(self *PyObject) float64
+func PyFloat_AsDouble(self *PyObject) float64
+func PyFloat_AsReprString(buf []byte, v *C.PyFloatObject)
+func PyFloat_AsString(buf []byte, v *C.PyFloatObject)
+func PyFloat_Check(self *PyObject) bool
+func PyFloat_CheckExact(self *PyObject) bool
+func PyFloat_ClearFreeList() int
+func PyFloat_GetMax() float64
+func PyFloat_GetMin() float64
+func PyFrame_GetLineNumber(frame *PyFrameObject) int
+func PyFunction_Check(o *PyObject) bool
+func PyFunction_SetClosure(op, closure *PyObject) error
+func PyFunction_SetDefaults(op, defaults *PyObject) error
+func PyGILState_Release(state PyGILState)
+func PyGen_Check(ob *PyObject) bool
+func PyGen_CheckExact(ob *PyObject) bool
+func PyImport_GetMagicNumber() int64
+func PyImport_ImportFrozenModule(name string) error
+func PyInstance_Check(obj *PyObject) bool
+func PyInt_AS_LONG(self *PyObject) int
+func PyInt_AsLong(self *PyObject) int
+func PyInt_AsSsize_t(self *PyObject) int
+func PyInt_AsUnsignedLongLongMask(self *PyObject) uint
+func PyInt_AsUnsignedLongMask(self *PyObject) uint
+func PyInt_Check(self *PyObject) bool
+func PyInt_CheckExact(self *PyObject) bool
+func PyInt_ClearFreeList()
+func PyInt_GetMax() int
+func PyList_Append(self, item *PyObject) error
+func PyList_Check(self *PyObject) bool
+func PyList_CheckExact(self *PyObject) bool
+func PyList_GET_SIZE(self *PyObject) int
+func PyList_Insert(self *PyObject, index int, item *PyObject) error
+func PyList_Reverse(self *PyObject) error
+func PyList_SET_ITEM(self *PyObject, index int, o *PyObject)
+func PyList_SetItem(self *PyObject, index int, item *PyObject) error
+func PyList_SetSlice(self *PyObject, low, high int, itemlist *PyObject) error
+func PyList_Size(self *PyObject) int
+func PyList_Sort(self *PyObject) error
+func PyLong_AsDouble(self *PyObject) float64
+func PyLong_AsLong(self *PyObject) int64
+func PyLong_AsLongLong(self *PyObject) int64
+func PyLong_AsLongLongAndOverflow(self *PyObject) (value int64, overflow int)
+func PyLong_AsSsize_t(self *PyObject) int
+func PyLong_AsUnsignedLong(self *PyObject) uint64
+func PyLong_AsUnsignedLongLong(self *PyObject) uint64
+func PyLong_AsUnsignedLongLongMask(self *PyObject) uint64
+func PyLong_AsUnsignedLongMask(self *PyObject) uint64
+func PyLong_AsVoidPtr(self *PyObject) *C.char
+func PyLong_Check(self *PyObject) bool
+func PyLong_CheckExact(self *PyObject) bool
+func PyLong_FromUnicode(self *C.Py_UNICODE, length, base int)
+func PyMarshal_ReadLongFromFile(file *C.FILE) int64
+func PyMarshal_ReadShortFromFile(file *C.FILE) int
+func PyMarshal_WriteLongToFile(value int64, file *C.FILE, version int)
+func PyMarshal_WriteObjectToFile(value *PyObject, file *C.FILE, version int)
+func PyMemoryView_Check(obj *PyObject) bool
+func PyMethod_Check(o *PyObject) bool
+func PyMethod_ClearFreeList() int
+func PyModule_AddIntConstant(self *PyObject, name string, value int) error
+func PyModule_AddIntMacro(self *PyObject, macro interface{}) error
+func PyModule_AddObject(self *PyObject, name string, value *PyObject) error
+func PyModule_AddStringConstant(self *PyObject, name, value string) error
+func PyModule_AddStringMacro(self *PyObject, macro interface{}) error
+func PyModule_Check(self *PyObject) bool
+func PyModule_CheckExact(self *PyObject) bool
+func PyModule_GetFilename(self *PyObject) string
+func PyModule_GetName(self *PyObject) string
+func PyOS_AfterFork()
+func PyOS_CheckStack() bool
+func PyOS_getsig(i int) C.PyOS_sighandler_t
+func PyOS_setsig(i int, h C.PyOS_sighandler_t) C.PyOS_sighandler_t
+func PyObject_CheckBuffer(self *PyObject) bool
+func PyObject_CopyToObject(self *PyObject, buf []byte, fortran string) error
+func PyRun_SimpleFile(filename string) error
+func PyRun_SimpleString(command string) int
+func PySeqIter_Check(op *PyObject) bool
+func PySignal_SetWakeupFd(fd int) int
+func PySlice_Check(ob *PyObject) bool
+func PySlice_GetIndices(slice *PySliceObject, length int) (start, stop, step int, err error)
+func PySlice_GetIndicesEx(slice *PySliceObject, length int) (start, stop, step, slicelength int, err error)
+func PyString_AS_STRING(self *PyObject) string
+func PyString_AsString(self *PyObject) string
+func PyString_AsStringAndSize(self *PyObject, sz int) (str string, err int)
+func PyString_Check(self *PyObject) bool
+func PyString_GET_SIZE(self *PyObject) int
+func PyString_InternInPlace(self *PyObject)
+func PyString_Size(self *PyObject) int
+func PySys_AddWarnOption(s string)
+func PySys_GetFile(name string, def *C.FILE) *C.FILE
+func PySys_ResetWarnOptions()
+func PySys_SetArgv(argv []string)
+func PySys_SetObject(name string, v *PyObject) error
+func PySys_SetPath(path string)
+func PySys_WriteStderr(format string, args ...interface{})
+func PySys_WriteStdout(format string, args ...interface{})
+func PyTuple_Check(self *PyObject) bool
+func PyTuple_CheckExact(self *PyObject) bool
+func PyTuple_ClearFreeList()
+func PyTuple_GET_SIZE(self *PyObject) int
+func PyTuple_Resize(self *PyObject, newsize int) error
+func PyTuple_SET_ITEM(self *PyObject, pos int, o *PyObject)
+func PyTuple_SetItem(self *PyObject, pos int, o *PyObject) error
+func PyTuple_Size(self *PyObject) int
+func PyType_Check(self *PyObject) bool
+func PyType_CheckExact(self *PyObject) bool
+func PyType_ClearCache() uint
+func PyType_HasFeature(self *PyObject, feature int) bool
+func PyType_IS_GC(self *PyObject) bool
+func PyType_IsSubtype(a, b *PyTypeObject) bool
+func PyType_Modified(self *PyTypeObject)
+func PyType_Ready(self *PyTypeObject) error
+func Py_AtExit(fct func()) error
+func Py_Exit(status int)
+func Py_FatalError(message string)
+func Py_FdIsInteractive(fp *C.FILE, fname string) bool
+func Py_GetProgramName() string
+func Py_GetPythonHome() string
+func Py_Main(args []string) int
+func Py_SetProgramName(name string)
+func Py_SetPythonHome(home string)
+func SetStderr(f *os.File) error
+func SetStdin(f *os.File) error
+func SetStdout(f *os.File) error
+type MethodDefFlags
+type PyBUF_Flag
+type PyCFunction
+type PyCapsule_Destructor
+type PyFrameObject
+func PyEval_GetFrame() *PyFrameObject
+type PyGILState
+func PyGILState_Ensure() PyGILState
+type PyMethodDef
+type PyObject
+func FromFile(f *os.File, mode string) *PyObject
+func PyBool_FromLong(v int) *PyObject
+func PyByteArray_Concat(a, b *PyObject) *PyObject
+func PyByteArray_FromObject(self *PyObject) *PyObject
+func PyByteArray_FromStringAndSize(str string) *PyObject
+func PyCallIter_New(callable, sentinel *PyObject) *PyObject
+func PyCapsule_New(pointer *C.char, name string, dtor C.PyCapsule_Destructor) *PyObject
+func PyCode_NewEmpty(filename string, funcname string, firstlineno int) *PyObject
+func PyComplex_FromCComplex(v C.Py_complex) *PyObject
+func PyComplex_FromDoubles(real, imag float64) *PyObject
+func PyDictProxy_New(self *PyObject) *PyObject
+func PyDict_Copy(self *PyObject) *PyObject
+func PyDict_GetItem(self, key *PyObject) *PyObject
+func PyDict_GetItemString(self *PyObject, key string) *PyObject
+func PyDict_Items(self *PyObject) *PyObject
+func PyDict_Keys(self *PyObject) *PyObject
+func PyDict_New() *PyObject
+func PyDict_Values(self *PyObject) *PyObject
+func PyErr_Fetch() (exc, val, tb *PyObject)
+func PyErr_Format(exception *PyObject, format string, args ...interface{}) *PyObject
+func PyErr_NewException(name string, base, dict *PyObject) *PyObject
+func PyErr_NewExceptionWithDoc(name, doc string, base, dict *PyObject) *PyObject
+func PyErr_NoMemory() *PyObject
+func PyErr_Occurred() *PyObject
+func PyErr_SetExcFromWindowsErr(typ *PyObject, ierr bool) *PyObject
+func PyErr_SetExcFromWindowsErrWithFilename(typ *PyObject, ierr bool, filename string) *PyObject
+func PyErr_SetFromErrno(typ *PyObject) *PyObject
+func PyErr_SetFromErrnoWithFilename(typ *PyObject, filename string) *PyObject
+func PyErr_SetFromWindowsErr(ierr bool) *PyObject
+func PyErr_SetFromWindowsErrWithFilename(ierr bool, filename string) *PyObject
+func PyEval_GetBuiltins() *PyObject
+func PyEval_GetGlobals() *PyObject
+func PyEval_GetLocals() *PyObject
+func PyFloat_FromDouble(v float64) *PyObject
+func PyFloat_FromString(str *PyObject) *PyObject
+func PyFloat_GetInfo() *PyObject
+func PyFunction_GetClosure(op *PyObject) *PyObject
+func PyFunction_GetCode(op *PyObject) *PyObject
+func PyFunction_GetDefaults(op *PyObject) *PyObject
+func PyFunction_GetGlobals(op *PyObject) *PyObject
+func PyFunction_GetModule(op *PyObject) *PyObject
+func PyFunction_New(code, globals *PyObject) *PyObject
+func PyGen_New(frame *PyFrameObject) *PyObject
+func PyImport_AddModule(name string) *PyObject
+func PyImport_ExecCodeModule(name string, co *PyObject) *PyObject
+func PyImport_ExecCodeModuleEx(name string, co *PyObject, pathname string) *PyObject
+func PyImport_GetImporter(path *PyObject) *PyObject
+func PyImport_GetModuleDict() *PyObject
+func PyImport_Import(name *PyObject) *PyObject
+func PyImport_ImportModule(name string) *PyObject
+func PyImport_ImportModuleEx(name string, globals, locals, fromlist *PyObject) *PyObject
+func PyImport_ImportModuleLevel(name string, globals, locals, fromlist *PyObject, level int) *PyObject
+func PyImport_ImportModuleNoBlock(name string) *PyObject
+func PyImport_ReloadModule(m *PyObject) *PyObject
+func PyInstance_New(class, arg, kw *PyObject) *PyObject
+func PyInstance_NewRaw(class, dict *PyObject) *PyObject
+func PyInt_FromLong(val int) *PyObject
+func PyInt_FromSize_t(val int) *PyObject
+func PyInt_FromSsize_t(val int) *PyObject
+func PyInt_FromString(str string, pend, base int) *PyObject
+func PyIter_Next(op *PyObject) *PyObject
+func PyList_AsTuple(self *PyObject) *PyObject
+func PyList_GET_ITEM(self *PyObject, index int) *PyObject
+func PyList_GetItem(self *PyObject, index int) *PyObject
+func PyList_New(sz int) *PyObject
+func PyLong_FromDouble(v float64) *PyObject
+func PyLong_FromLong(v int) *PyObject
+func PyLong_FromLongLong(v int64) *PyObject
+func PyLong_FromSize_t(v int) *PyObject
+func PyLong_FromSsize_t(v int) *PyObject
+func PyLong_FromString(str string, pend, base int) *PyObject
+func PyLong_FromUnsignedLong(v uint) *PyObject
+func PyLong_FromUnsignedLongLong(v uint64) *PyObject
+func PyLong_FromVoidPtr(v interface{}) *PyObject
+func PyMarshal_ReadLastObjectFromFile(file *C.FILE) *PyObject
+func PyMarshal_ReadObjectFromFile(file *C.FILE) *PyObject
+func PyMarshal_ReadObjectFromString(str string) *PyObject
+func PyMarshal_WriteObjectToString(value *PyObject, version int) *PyObject
+func PyMemoryView_FromBuffer(view *Py_buffer) *PyObject
+func PyMemoryView_FromObject(obj *PyObject) *PyObject
+func PyMemoryView_GetContiguous(obj *PyObject, buffertype int, order string) *PyObject
+func PyMethod_Class(meth *PyObject) *PyObject
+func PyMethod_Function(meth *PyObject) *PyObject
+func PyMethod_GET_CLASS(meth *PyObject) *PyObject
+func PyMethod_GET_FUNCTION(meth *PyObject) *PyObject
+func PyMethod_GET_SELF(meth *PyObject) *PyObject
+func PyMethod_New(fct, self, class *PyObject) *PyObject
+func PyMethod_Self(meth *PyObject) *PyObject
+func PyModule_GetDict(self *PyObject) *PyObject
+func PyModule_New(name string) *PyObject
+func PyObject_FromVoidPtr(ptr unsafe.Pointer) *PyObject
+func PySeqIter_New(seq *PyObject) *PyObject
+func PySlice_New(start, stop, step *PyObject) *PyObject
+func PyStringFromFormatV(format string, args ...interface{}) *PyObject
+func PyString_AsDecodedObject(self *PyObject, encoding, errors string) *PyObject
+func PyString_AsEncodedObject(self *PyObject, encoding, errors string) *PyObject
+func PyString_Concat(self, newpart *PyObject) *PyObject
+func PyString_ConcatAndDel(self, newpart *PyObject) *PyObject
+func PyString_Decode(s string, sz int, encoding, errors string) *PyObject
+func PyString_Encode(s, encoding, errors string) *PyObject
+func PyString_Format(format, args *PyObject) *PyObject
+func PyString_FromFormat(format string, args ...interface{}) *PyObject
+func PyString_FromString(v string) *PyObject
+func PyString_FromStringAndSize(v string, sz int) *PyObject
+func PyString_InternFromString(v string) *PyObject
+func PySys_GetObject(name string) *PyObject
+func PyTuple_GET_ITEM(self *PyObject, pos int) *PyObject
+func PyTuple_GetItem(self *PyObject, pos int) *PyObject
+func PyTuple_GetSlice(self *PyObject, low, high int) *PyObject
+func PyTuple_New(sz int) *PyObject
+func PyTuple_Pack(n int, objs ...*PyObject) *PyObject
+func PyType_GenericAlloc(self *PyTypeObject, nitems int) *PyObject
+func PyType_GenericNew(self *PyTypeObject, args, kwds *PyObject) *PyObject
+func Py_BuildValue(format string, args ...interface{}) *PyObject
+func Py_InitModule(name string, methods []PyMethodDef) (*PyObject, error)
+func Py_InitModule3(name string, methods []PyMethodDef, doc string) (*PyObject, error)
+func (self *PyObject) Bytes() *PyObject
+func (self *PyObject) Call(args, kw *PyObject) *PyObject
+func (self *PyObject) CallFunction(args ...interface{}) *PyObject
+func (self *PyObject) CallFunctionObjArgs(format string, args ...interface{}) *PyObject
+func (self *PyObject) CallMethod(method string, args ...interface{}) *PyObject
+func (self *PyObject) CallMethodObjArgs(method string, args ...interface{}) *PyObject
+func (self *PyObject) CallObject(args *PyObject) *PyObject
+func (self *PyObject) Check_Callable() bool
+func (self *PyObject) Clear()
+func (self *PyObject) Cmp(o2 *PyObject) (err, result int)
+func (self *PyObject) Compare(o2 *PyObject) int
+func (self *PyObject) DecRef()
+func (self *PyObject) DelAttr(attr_name *PyObject) int
+func (self *PyObject) DelAttrString(attr_name string) int
+func (self *PyObject) GenericGetAttr(name *PyObject) *PyObject
+func (self *PyObject) GenericSetAttr(name, value *PyObject) int
+func (self *PyObject) GetAttr(attr_name *PyObject) *PyObject
+func (self *PyObject) GetAttrString(attr_name string) *PyObject
+func (self *PyObject) GetCPointer() *C.PyObject
+func (self *PyObject) HasAttr(attr_name *PyObject) int
+func (self *PyObject) HasAttrString(attr_name string) int
+func (self *PyObject) Hash() int64
+func (self *PyObject) HashNotImplemented() bool
+func (self *PyObject) IncRef()
+func (self *PyObject) IsInstance(cls *PyObject) int
+func (self *PyObject) IsSubclass(cls *PyObject) int
+func (self *PyObject) IsTrue() bool
+func (self *PyObject) Not() bool
+func (self *PyObject) PyObject_Dir() *PyObject
+func (self *PyObject) Repr() *PyObject
+func (self *PyObject) RichCompare(o2 *PyObject, opid Py_OPID) *PyObject
+func (self *PyObject) RichCompareBool(o2 *PyObject, opid Py_OPID) int
+func (self *PyObject) SetAttr(attr_name, v *PyObject) int
+func (self *PyObject) SetAttrString(attr_name string, v *PyObject) int
+func (self *PyObject) Str() *PyObject
+func (self *PyObject) String() string
+func (self *PyObject) Type() *PyObject
+func (self *PyObject) Unicode() *PyObject
+type PySliceObject
+type PyString
+type PyThreadState
+func PyEval_SaveThread() *PyThreadState
+type PyTypeObject
+type Py_OPID
+type Py_buffer
+func PyBuffer_FillInfo(self *PyObject, buf []byte, readonly bool, infoflags int) (buffer *Py_buffer, err error)
+func PyMemoryView_GET_BUFFER(obj *PyObject) *Py_buffer
+func PyObject_GetBuffer(self *PyObject, flags PyBUF_Flag) (buf *Py_buffer, err error)
+Package Files
+capi.go cgoflags_unix.go dict.go exceptions.go exceptions_posix.go file.go go-python.go heap.go init.go none.go numeric.go object.go object_posix.go otherobjects.go python.go sequence.go type.go utilities.go veryhigh.go
+
+Constants
+const (
+    MethVarArgs  MethodDefFlags = C.METH_VARARGS
+    MethKeyWords                = C.METH_KEYWORDS
+    MethNoArgs                  = C.METH_NOARGS
+    MethO                       = C.METH_O
+    MethOldArgs                 = C.METH_OLDARGS
+    MethClass                   = C.METH_CLASS
+    MethStatic                  = C.METH_STATIC
+    MethCoexist                 = C.METH_COEXIST
+)
+const (
+    PyBUF_SIMPLE       = PyBUF_Flag(C.PyBUF_SIMPLE)
+    PyBUF_WRITABLE     = PyBUF_Flag(C.PyBUF_WRITABLE)
+    PyBUF_STRIDES      = PyBUF_Flag(C.PyBUF_STRIDES)
+    PyBUF_ND           = PyBUF_Flag(C.PyBUF_ND)
+    PyBUF_C_CONTIGUOUS = PyBUF_Flag(C.PyBUF_C_CONTIGUOUS)
+    PyBUF_INDIRECT     = PyBUF_Flag(C.PyBUF_INDIRECT)
+    PyBUF_FORMAT       = PyBUF_Flag(C.PyBUF_FORMAT)
+    PyBUF_STRIDED      = PyBUF_Flag(C.PyBUF_STRIDED)
+    PyBUF_STRIDED_RO   = PyBUF_Flag(C.PyBUF_STRIDED_RO)
+    PyBUF_RECORDS      = PyBUF_Flag(C.PyBUF_RECORDS)
+    PyBUF_RECORDS_RO   = PyBUF_Flag(C.PyBUF_RECORDS_RO)
+    PyBUF_FULL         = PyBUF_Flag(C.PyBUF_FULL)
+    PyBUF_FULL_RO      = PyBUF_Flag(C.PyBUF_FULL_RO)
+    PyBUF_CONTIG       = PyBUF_Flag(C.PyBUF_CONTIG)
+    PyBUF_CONTIG_RO    = PyBUF_Flag(C.PyBUF_CONTIG_RO)
+)
+const Py_MARSHAL_VERSION = 2 // FIXME: get it from the #define !
+/// marshal /////
+
+Variables
+var (
+    PyExc_BaseException       = togo(C.PyExc_BaseException)
+    PyExc_Exception           = togo(C.PyExc_Exception)
+    PyExc_StandardError       = togo(C.PyExc_StandardError)
+    PyExc_ArithmeticError     = togo(C.PyExc_ArithmeticError)
+    PyExc_LookupError         = togo(C.PyExc_LookupError)
+    PyExc_AssertionError      = togo(C.PyExc_AssertionError)
+    PyExc_AttributeError      = togo(C.PyExc_AttributeError)
+    PyExc_EOFError            = togo(C.PyExc_EOFError)
+    PyExc_EnvironmentError    = togo(C.PyExc_EnvironmentError)
+    PyExc_FloatingPointError  = togo(C.PyExc_FloatingPointError)
+    PyExc_IOError             = togo(C.PyExc_IOError)
+    PyExc_ImportError         = togo(C.PyExc_ImportError)
+    PyExc_IndexError          = togo(C.PyExc_IndexError)
+    PyExc_KeyError            = togo(C.PyExc_KeyError)
+    PyExc_KeyboardInterrupt   = togo(C.PyExc_KeyboardInterrupt)
+    PyExc_MemoryError         = togo(C.PyExc_MemoryError)
+    PyExc_NameError           = togo(C.PyExc_NameError)
+    PyExc_NotImplementedError = togo(C.PyExc_NotImplementedError)
+    PyExc_OSError             = togo(C.PyExc_OSError)
+    PyExc_OverflowError       = togo(C.PyExc_OverflowError)
+    PyExc_ReferenceError      = togo(C.PyExc_ReferenceError)
+    PyExc_RuntimeError        = togo(C.PyExc_RuntimeError)
+    PyExc_SyntaxError         = togo(C.PyExc_SyntaxError)
+    PyExc_SystemError         = togo(C.PyExc_SystemError)
+    PyExc_SystemExit          = togo(C.PyExc_SystemExit)
+    PyExc_TypeError           = togo(C.PyExc_TypeError)
+    PyExc_ValueError          = togo(C.PyExc_ValueError)
+
+    PyExc_ZeroDivisionError = togo(C.PyExc_ZeroDivisionError)
+)
+var Py_False = &PyObject{ptr: C._gopy_pyfalse()}
+The Python False object. This object has no methods. It needs to be treated just like any other object with respect to reference counts.
+
+var Py_None = &PyObject{ptr: C._gopy_pynone()}
+The Python None object, denoting lack of value. This object has no methods. It needs to be treated just like any other object with respect to reference counts.
+
+var Py_True = &PyObject{ptr: C._gopy_pytrue()}
+PyObject* Py_True The Python True object. This object has no methods. It needs to be treated just like any other object with respect to reference counts.
+
+func Finalize
+func Finalize() error
+Finalize shutdowns the python interpreter
+
+func Initialize
+func Initialize() error
+Initialize initializes the python interpreter and its GIL
+
+func PyBool_Check
+func PyBool_Check(self *PyObject) bool
+int PyBool_Check(PyObject *o) Return true if o is of type PyBool_Type.
+
+New in version 2.3.
+
+func PyBuffer_FillContiguousStrides
+func PyBuffer_FillContiguousStrides(ndim int, shape, strides []int, itemsize int, fortran string)
+void PyBuffer_FillContiguousStrides(int ndim, Py_ssize_t *shape, Py_ssize_t *strides, Py_ssize_t itemsize, char fortran) Fill the strides array with byte-strides of a contiguous (C-style if fortran is 'C' or Fortran-style if fortran is 'F' array of the given shape with the given number of bytes per element.
+
+func PyBuffer_IsContiguous
+func PyBuffer_IsContiguous(self *Py_buffer, fortran string) bool
+int PyBuffer_IsContiguous(Py_buffer *view, char fortran) Return 1 if the memory defined by the view is C-style (fortran is 'C') or Fortran-style (fortran is 'F') contiguous or either one (fortran is 'A'). Return 0 otherwise.
+
+func PyBuffer_Release
+func PyBuffer_Release(self *Py_buffer)
+void PyBuffer_Release(Py_buffer *view) Release the buffer view. This should be called when the buffer is no longer being used as it may free memory from it.
+
+func PyBuffer_SizeFromFormat
+func PyBuffer_SizeFromFormat(self *Py_buffer) int
+Py_ssize_t PyBuffer_SizeFromFormat(const char *) Return the implied ~Py_buffer.itemsize from the struct-stype ~Py_buffer.format.
+
+func PyByteArray_AS_STRING
+func PyByteArray_AS_STRING(self *PyObject) string
+char* PyByteArray_AS_STRING(PyObject *bytearray) Macro version of PyByteArray_AsString().
+
+func PyByteArray_AsBytes
+func PyByteArray_AsBytes(self *PyObject) []byte
+PyByteArray_AsBytes returns the contents of bytearray as []bytes
+
+func PyByteArray_AsBytesN
+func PyByteArray_AsBytesN(self *PyObject, length int) []byte
+PyByteArray_AsBytesN returns the contents of bytearray as []bytes, size length
+
+func PyByteArray_AsString
+func PyByteArray_AsString(self *PyObject) string
+char* PyByteArray_AsString(PyObject *bytearray) Return the contents of bytearray as a char array after checking for a NULL pointer.
+
+func PyByteArray_Check
+func PyByteArray_Check(self *PyObject) bool
+int PyByteArray_Check(PyObject *o) Return true if the object o is a bytearray object or an instance of a subtype of the bytearray type.
+
+func PyByteArray_CheckExact
+func PyByteArray_CheckExact(self *PyObject) bool
+int PyByteArray_CheckExact(PyObject *o) Return true if the object o is a bytearray object, but not an instance of a subtype of the bytearray type.
+
+func PyByteArray_GET_SIZE
+func PyByteArray_GET_SIZE(self *PyObject) int
+Py_ssize_t PyByteArray_GET_SIZE(PyObject *bytearray) Macro version of PyByteArray_Size().
+
+func PyByteArray_Resize
+func PyByteArray_Resize(self *PyObject, sz int) error
+int PyByteArray_Resize(PyObject *bytearray, Py_ssize_t len) Resize the internal buffer of bytearray to len.
+
+func PyByteArray_Size
+func PyByteArray_Size(self *PyObject) int
+Py_ssize_t PyByteArray_Size(PyObject *bytearray) Return the size of bytearray after checking for a NULL pointer.
+
+func PyCallIter_Check
+func PyCallIter_Check(op *PyObject) bool
+int PyCallIter_Check(op) Return true if the type of op is PyCallIter_Type.
+
+New in version 2.2.
+
+func PyCapsule_CheckExact
+func PyCapsule_CheckExact(p *PyObject) bool
+int PyCapsule_CheckExact（PyObject _p） 返回 true，如果它的参数是 PyCapsule。
+
+乐趣PyCapsule_GetContext
+func PyCapsule_GetContext(capsule *PyObject) *C.char
+虚空* PyCapsule_GetContext（皮Object _胶囊）返回存储在胶囊中的当前上下文。发生故障时，设置异常并返回 NULL。
+
+胶囊具有 NULL 上下文是合法的。这使得 NULL 返回代码有点含糊不清;使用PyCapsule_IsValid（）或PyErr_Occurred（）来消除歧义。
+
+乐趣PyCapsule_GetDestructor
+func PyCapsule_GetDestructor(capsule *PyObject) C.PyCapsule_Destructor
+PyCapsule_Destructor PyCapsule_GetDestructor（皮塔图+胶囊）返回存储在胶囊中的电流析构物。发生故障时，设置异常并返回 NULL。
+
+胶囊具有 NULL 析构函数是合法的。这使得 NULL 返回代码有点含糊不清;使用PyCapsule_IsValid（）或PyErr_Occurred（）来消除歧义。
+
+乐趣PyCapsule_GetName
+func PyCapsule_GetName(capsule *PyObject) string
+PyCapsule_GetName（皮塔斯特[胶囊]）返回存储在胶囊中的当前名称。发生故障时，设置异常并返回 NULL。
+
+胶囊具有 NULL 名称是合法的。这使得 NULL 返回代码有点含糊不清;使用PyCapsule_IsValid（）或PyErr_Occurred（）来消除歧义。
+
+乐趣PyCapsule_GetPointer
+func PyCapsule_GetPointer(capsule *PyObject, name string) *C.char
+虚空* PyCapsule_GetPointer（PyObject _胶囊，const 字符 [名称） 检索存储在胶囊中的指针。发生故障时，设置异常并返回 NULL。
+
+名称参数必须与存储在胶囊中的名称精确比较。如果存储在胶囊中的名称为 NULL，则传入的名称也必须为 NULL。Python 使用 C 函数 strcmp（） 来比较胶囊名称。
+
+乐趣PyCapsule_Import
+func PyCapsule_Import(name string, no_block bool) *C.char
+void_ PyCapsule_Import（字符 [名称， int no_block） 从模块中的胶囊属性导入指向 C 对象的指针。名称参数应指定属性的全名，如模块.属性中。存储在胶囊中的名称必须与此字符串完全匹配。如果no_block为 true，则导入模块时不阻塞（使用PyImport_ImportModuleNoBlock（））。如果no_block为 false，则常规地导入模块（使用PyImport_ImportModule（））。
+
+返回胶囊的内部指针成功。发生故障时，设置异常并返回 NULL。但是，如果 PyCapsule_Import（） 未能导入模块，并且no_block为 true，则不设置异常。
+
+乐趣PyCapsule_IsValid
+func PyCapsule_IsValid(capsule *PyObject, name string) bool
+int PyCapsule_IsValid （PyObject _胶囊， const 字符 #名称） 确定胶囊是否是一个有效的胶囊.有效的胶囊是非 NULL，通过PyCapsule_CheckExact（），其中存储了一个非 NULL 指针，其内部名称与名称参数匹配。（有关如何比较胶囊名称的信息，请参阅 PyCapsule_GetPointer（）。
+
+换句话说，如果PyCapsule_IsValid（）返回一个真实值，则对任何访问器的调用（以PyCapsule_Get（）开头的任何函数）都保证成功。
+
+如果对象有效，并且与传入的名称匹配，则返回非零值。否则返回 0。此功能不会失败。
+
+乐趣PyCapsule_SetContext
+func PyCapsule_SetContext(capsule *PyObject, context *C.char) error
+int PyCapsule_SetContext （PyObject _胶囊， 空 \ 上下文） 将胶囊内的上下文指针设置为上下文。
+
+成功返回 0。返回非零并在故障时设置异常。
+
+乐趣PyCapsule_SetDestructor
+func PyCapsule_SetDestructor(capsule *PyObject, dtor C.PyCapsule_Destructor) error
+int PyCapsule_SetDestructor（PyObject_胶囊，PyCapsule_Destructor析构物）将胶囊内的析构物设置为析构函数。
+
+成功返回 0。返回非零并在故障时设置异常。
+
+乐趣PyCapsule_SetName
+func PyCapsule_SetName(capsule *PyObject, name string) error
+int PyCapsule_SetName （PyObject _胶囊， const 字符 _name） 设置胶囊内的名称命名.如果非 NULL，名称必须比胶囊存活。如果存储在胶囊中的先前名称不是 NULL，则不会尝试释放它。
+
+成功返回 0。返回非零并在故障时设置异常。
+
+乐趣PyCapsule_SetPointer
+func PyCapsule_SetPointer(capsule *PyObject, pointer *C.char) error
+int PyCapsule_SetPointer （PyObject _胶囊， 空 = 指针） 将胶囊内的空空指针设置为指针。指针可能不是 NULL。
+
+成功返回 0。返回非零并在故障时设置异常。
+
+乐趣PyClass_Check
+func PyClass_Check(o *PyObject) bool
+如果对象 o 是类对象，则 int PyClass_Check（PyObject _o） 返回 true，包括派生自标准类对象的类型实例。在所有其他情况下返回 false。
+
+乐趣PyClass_IsSubclass
+func PyClass_IsSubclass(klass, base *PyObject) bool
+如果克拉斯是基的子类，则 int PyClass_IsSubclass（PyObject _klas，PyObject _base）返回 true。在所有其他情况下返回 false。特定于实例对象的函数很少。
+
+乐趣PyComplex_AsCComplex
+func PyComplex_AsCComplex(op *PyObject) C.Py_complex
+Py_complex PyComplex_AsCComplex（PyObject _op） 返回复数操作Py_complex值。
+
+版本 2.6 中更改：如果 op 不是 Python 复数对象，但具有__complex__（） 方法，则将首先调用此方法将 op 转换为 Python 复数对象。
+
+乐趣PyComplex_Check
+func PyComplex_Check(self *PyObject) bool
+如果 int PyComplex_Check（PyObject _p） 返回 true，如果它的参数是 PyComplexObject 或 PyComplexObject 的子类型。
+
+版本 2.2 中已更改：允许接受子类型。
+
+乐趣PyComplex_CheckExact
+func PyComplex_CheckExact(self *PyObject) bool
+如果 int PyComplex_CheckExact（PyObject _p） 返回 true（如果它的参数是 PyComplexObject，但不是 PyComplexObject 的子类型）。
+
+版本 2.2 中的新增功能。
+
+乐趣PyComplex_ImagAsDouble
+func PyComplex_ImagAsDouble(op *PyObject) float64
+双PyComplex_ImagAsDouble（PyObject _op）将操作的虚部分作为 C 双返回。
+
+乐趣PyComplex_RealAsDouble
+func PyComplex_RealAsDouble(op *PyObject) float64
+双PyComplex_RealAsDouble（PyObject _op）返回操作的实际部分为 C 双。
+
+乐趣PyDict_Check
+func PyDict_Check(self *PyObject) bool
+如果 p 是 dict 对象或 dict 类型的子类型的实例，则 int PyDict_Check（PyObject _p） 返回 true。
+
+版本 2.2 中已更改：允许接受子类型。
+
+乐趣PyDict_CheckExact
+func PyDict_CheckExact(self *PyObject) bool
+PyDict_CheckExact 如果 p 是 dict 对象，但返回 true，而不是 dict 类型的子类型的实例。
+
+New in version 2.4.
+
+乐趣PyDict_Clear
+func PyDict_Clear(self *PyObject)
+空PyDict_Clear（PyObject _p） 清空所有键值对的现有字典。
+
+乐趣PyDict_Contains
+func PyDict_Contains(self, key *PyObject) (bool, error)
+int PyDict_Contains（PyObject _p，PyObject _key）确定字典 p 是否包含键。如果 p 中的项与键匹配，则返回 1，否则返回 0。出错时，返回 -1。这等效于 p 中的 Python 表达式键。
+
+New in version 2.4.
+
+乐趣PyDict_DelItem
+func PyDict_DelItem(self, key *PyObject) error
+int PyDict_DelItem （PyObject _p， PyObject _key） 删除字典 p 中的条目与键。键必须是可哈希的;如果不是，则引发 TypeError。成功时返回 0 或失败时返回 -1。int PyDict_DelItemString （PyObject _p， 字符 _key） 删除字典 p 中的条目，该条目具有字符串键指定的键。成功时返回 0 或失败时返回 -1。
+
+乐趣PyDict_Merge
+func PyDict_Merge(a, b *PyObject, override int) error
+int PyDict_Merge（PyObject _a， PyObject _b， int 覆盖） 迭代映射对象 b 向字典 a. b 添加键值对，可以是字典，或任何支持PyMapping_Keys（） 和PyObject_GetItem（） 的对象。如果覆盖为 true，则如果在 b 中找到匹配键，则替换 a 中的现有对，否则只有在 a. 成功时返回 0 或引发异常时返回 0 时才会添加对。
+
+版本 2.2 中的新增功能。
+
+乐趣PyDict_MergeFromSeq2
+func PyDict_MergeFromSeq2(a, seq2 *PyObject, override int) error
+int PyDict_MergeFromSeq2（PyObject _a，PyObject _seq2，int 覆盖）从 seq2 中的键值对更新或合并到字典 a。seq2 必须是可迭代的对象，生成长度为 2 的可迭代对象，被视为键值对。如果重复键，如果重写为 true，则最后获胜，否则第一个获胜。如果引发异常，则在成功时返回 0 或 -1。等效 Python（返回值除外）：
+
+def PyDict_MergeFromSeq2（a，seq2，覆盖）：
+
+for key, value in seq2:
+    if override or key not in a:
+        a[key] = value
+版本 2.2 中的新增功能。
+
+乐趣PyDict_Next
+func PyDict_Next(self *PyObject, pos *int, key, value **PyObject) bool
+int PyDict_Next（PyObject _p，Py_ssize_t _ppos，PyObject _pkey，PyObject _pvalue）迭代字典 p 中的所有键值对。ppos 引用Py_ssize_t必须在首次调用此函数以启动迭代之前初始化为 0;函数返回 true 字典中的每个对，并在报告所有对后为 false。参数 pkey 和 pvalue 应指向 PyObject® 变量，这些变量将分别用每个键和值填充，也可以为 NULL。通过它们返回的任何引用都是借用的。不应在迭代期间更改 ppos。其值表示内部字典结构中的偏移量，并且由于结构是稀疏的，因此偏移不是连续的。
+
+例如：
+
+PyObject =键，=值;Py_ssize_t位 = 0;
+
+而（PyDict_Next（自>dict，&pos，键，和价值））]=
+
+// do something interesting with the values...
+...
+• 字典 p 不应在迭代期间发生突变。在字典上迭代时修改键的值是安全的（因为 Python 2.1），但前提是密钥集不更改。例如：
+
+PyObject =键，=值;Py_ssize_t位 = 0;
+
+而（PyDict_Next（自>dict，&pos，键，和价值））]=
+
+int i = PyInt_AS_LONG(value) + 1;
+PyObject *o = PyInt_FromLong(i);
+if (o == NULL)
+    return -1;
+if (PyDict_SetItem(self->dict, key, o) < 0) {
+    Py_DECREF(o);
+    return -1;
+}
+Py_DECREF(o);
+} Changed in version 2.5: This function used an int * type for ppos. This might require changes in your code for properly supporting 64-bit systems.
+
+func PyDict_SetItem
+func PyDict_SetItem(self, key, val *PyObject) error
+int PyDict_SetItem(PyObject *p, PyObject *key, PyObject *val) Insert value into the dictionary p with a key of key. key must be hashable; if it isn’t, TypeError will be raised. Return 0 on success or -1 on failure. int PyDict_SetItemString(PyObject *p, const char *key, PyObject *val) Insert value into the dictionary p using key as a key. key should be a char*. The key object is created using PyString_FromString(key). Return 0 on success or -1 on failure.
+
+func PyDict_Size
+func PyDict_Size(self *PyObject) int
+Changed in version 2.5: This function returned an int type. This might require changes in your code for properly supporting 64-bit systems.
+
+func PyDict_Update
+func PyDict_Update(a, b *PyObject) error
+int PyDict_Update(PyObject *a, PyObject *b) This is the same as PyDict_Merge(a, b, 1) in C, or a.update(b) in Python. Return 0 on success or -1 if an exception was raised.
+
+New in version 2.2.
+
+func PyErr_BadArgument
+func PyErr_BadArgument() bool
+int PyErr_BadArgument() This is a shorthand for PyErr_SetString(PyExc_TypeError, message), where message indicates that a built-in operation was invoked with an illegal argument. It is mostly for internal use.
+
+func PyErr_BadInternalCall
+func PyErr_BadInternalCall()
+void PyErr_BadInternalCall() This is a shorthand for PyErr_SetString(PyExc_SystemError, message), where message indicates that an internal operation (e.g. a Python/C API function) was invoked with an illegal argument. It is mostly for internal use.
+
+func PyErr_CheckSignals
+func PyErr_CheckSignals() bool
+int PyErr_CheckSignals() This function interacts with Python’s signal handling. It checks whether a signal has been sent to the processes and if so, invokes the corresponding signal handler. If the signal module is supported, this can invoke a signal handler written in Python. In all cases, the default effect for SIGINT is to raise the KeyboardInterrupt exception. If an exception is raised the error indicator is set and the function returns -1; otherwise the function returns 0. The error indicator may or may not be cleared if it was previously set.
+
+func PyErr_Clear
+func PyErr_Clear()
+void PyErr_Clear() Clear the error indicator. If the error indicator is not set, there is no effect.
+
+func PyErr_ExceptionMatches
+func PyErr_ExceptionMatches(exc *PyObject) bool
+int PyErr_ExceptionMatches(PyObject *exc) Equivalent to PyErr_GivenExceptionMatches(PyErr_Occurred(), exc). This should only be called when an exception is actually set; a memory access violation will occur if no exception has been raised.
+
+func PyErr_GivenExceptionMatches
+func PyErr_GivenExceptionMatches(given, exc *PyObject) bool
+int PyErr_GivenExceptionMatches(PyObject *given, PyObject *exc) Return true if the given exception matches the exception in exc. If exc is a class object, this also returns true when given is an instance of a subclass. If exc is a tuple, all exceptions in the tuple (and recursively in subtuples) are searched for a match.
+
+func PyErr_NormalizeException
+func PyErr_NormalizeException(exc, val, tb *PyObject) (*PyObject, *PyObject, *PyObject)
+void PyErr_NormalizeException(PyObject**exc, PyObject**val, PyObject**tb) Under certain circumstances, the values returned by PyErr_Fetch() below can be “unnormalized”, meaning that *exc is a class object but *val is not an instance of the same class. This function can be used to instantiate the class in that case. If the values are already normalized, nothing happens. The delayed normalization is implemented to improve performance.
+
+func PyErr_Print
+func PyErr_Print()
+void PyErr_Print() Alias for PyErr_PrintEx(1).
+
+func PyErr_PrintEx
+func PyErr_PrintEx(set_sys_last_vars bool)
+void PyErr_PrintEx(int set_sys_last_vars) Print a standard traceback to sys.stderr and clear the error indicator. Call this function only when the error indicator is set. (Otherwise it will cause a fatal error!)
+
+If set_sys_last_vars is nonzero, the variables sys.last_type, sys.last_value and sys.last_traceback will be set to the type, value and traceback of the printed exception, respectively.
+
+func PyErr_Restore
+func PyErr_Restore(typ, value, traceback *PyObject)
+void PyErr_Restore(PyObject *type, PyObject *value, PyObject *traceback) Set the error indicator from the three objects. If the error indicator is already set, it is cleared first. If the objects are NULL, the error indicator is cleared. Do not pass a NULL type and non-NULL value or traceback. The exception type should be a class. Do not pass an invalid exception type or value. (Violating these rules will cause subtle problems later.) This call takes away a reference to each object: you must own a reference to each object before the call and after the call you no longer own these references. (If you don’t understand this, don’t use this function. I warned you.)
+
+Note This function is normally only used by code that needs to save and restore the error indicator temporarily; use PyErr_Fetch() to save the current exception state.
+
+func PyErr_SetInterrupt
+func PyErr_SetInterrupt()
+void PyErr_SetInterrupt() This function simulates the effect of a SIGINT signal arriving — the next time PyErr_CheckSignals() is called, KeyboardInterrupt will be raised. It may be called without holding the interpreter lock.
+
+func PyErr_SetNone
+func PyErr_SetNone(typ *PyObject)
+void PyErr_SetNone(PyObject *type) This is a shorthand for PyErr_SetObject(type, Py_None).
+
+func PyErr_SetObject
+func PyErr_SetObject(typ, value *PyObject)
+void PyErr_SetObject(PyObject *type, PyObject *value) This function is similar to PyErr_SetString() but lets you specify an arbitrary Python object for the “value” of the exception.
+
+func PyErr_SetString
+func PyErr_SetString(typ *PyObject, message string)
+void PyErr_SetString(PyObject *type, const char *message) This is the most common way to set the error indicator. The first argument specifies the exception type; it is normally one of the standard exceptions, e.g. PyExc_RuntimeError. You need not increment its reference count. The second argument is an error message; it is converted to a string object.
+
+func PyErr_WarnEx
+func PyErr_WarnEx(category *PyObject, message string, stacklevel int) error
+int PyErr_WarnEx(PyObject *category, char *message, int stacklevel) Issue a warning message. The category argument is a warning category (see below) or NULL; the message argument is a message string. stacklevel is a positive number giving a number of stack frames; the warning will be issued from the currently executing line of code in that stack frame. A stacklevel of 1 is the function calling PyErr_WarnEx(), 2 is the function above that, and so forth.
+
+This function normally prints a warning message to sys.stderr; however, it is also possible that the user has specified that warnings are to be turned into errors, and in that case this will raise an exception. It is also possible that the function raises an exception because of a problem with the warning machinery (the implementation imports the warnings module to do the heavy lifting). The return value is 0 if no exception is raised, or -1 if an exception is raised. (It is not possible to determine whether a warning message is actually printed, nor what the reason is for the exception; this is intentional.) If an exception is raised, the caller should do its normal exception handling (for example, Py_DECREF() owned references and return an error value).
+
+Warning categories must be subclasses of Warning; the default warning category is RuntimeWarning. The standard Python warning categories are available as global variables whose names are PyExc_ followed by the Python exception name. These have the type PyObject*; they are all class objects. Their names are PyExc_Warning, PyExc_UserWarning, PyExc_UnicodeWarning, PyExc_DeprecationWarning, PyExc_SyntaxWarning, PyExc_RuntimeWarning, and PyExc_FutureWarning. PyExc_Warning is a subclass of PyExc_Exception; the other warning categories are subclasses of PyExc_Warning.
+
+For information about warning control, see the documentation for the warnings module and the -W option in the command line documentation. There is no C API for warning control.
+
+func PyErr_WarnExplicit
+func PyErr_WarnExplicit(category *PyObject, message, filename string, lineno int, module string, registry *PyObject) error
+int PyErr_WarnExplicit(PyObject *category, const char *message, const char *filename, int lineno, const char *module, PyObject *registry) Issue a warning message with explicit control over all warning attributes. This is a straightforward wrapper around the Python function warnings.warn_explicit(), see there for more information. The module and registry arguments may be set to NULL to get the default effect described there.
+
+func PyErr_WarnPy3k
+func PyErr_WarnPy3k(message string, stacklevel int) error
+int PyErr_WarnPy3k(char *message, int stacklevel) Issue a DeprecationWarning with the given message and stacklevel if the Py_Py3kWarningFlag flag is enabled. New in version 2.6.
+
+func PyErr_WriteUnraisable
+func PyErr_WriteUnraisable(obj *PyObject)
+void PyErr_WriteUnraisable(PyObject *obj) This utility function prints a warning message to sys.stderr when an exception has been set but it is impossible for the interpreter to actually raise the exception. It is used, for example, when an exception occurs in an __del__() method. The function is called with a single argument obj that identifies the context in which the unraisable exception occurred. The repr of obj will be printed in the warning message.
+
+func PyEval_GetFuncDesc
+func PyEval_GetFuncDesc(fct *PyObject) string
+const char* PyEval_GetFuncDesc(PyObject *func) Return a description string, depending on the type of func. Return values include “()” for functions and methods, ” constructor”, ” instance”, and ” object”. Concatenated with the result of PyEval_GetFuncName(), the result will be a description of func.
+
+func PyEval_GetFuncName
+func PyEval_GetFuncName(fct *PyObject) string
+const char* PyEval_GetFuncName(PyObject *func) Return the name of func if it is a function, class or instance object, else the name of funcs type.
+
+func PyEval_GetRestricted
+func PyEval_GetRestricted() bool
+int PyEval_GetRestricted() If there is a current frame and it is executing in restricted mode, return true, otherwise false.
+
+func PyEval_RestoreThread
+func PyEval_RestoreThread(state *PyThreadState)
+void PyEval_RestoreThread(PyThreadState *tstate) Acquire the global interpreter lock (if it has been created and thread support is enabled) and set the thread state to tstate, which must not be NULL. If the lock has been created, the current thread must not have acquired it, otherwise deadlock ensues. (This function is available even when thread support is disabled at compile time.)
+
+func PyFloat_AS_DOUBLE
+func PyFloat_AS_DOUBLE(self *PyObject) float64
+double PyFloat_AS_DOUBLE(PyObject *pyfloat) Return a C double representation of the contents of pyfloat, but without error checking.
+
+func PyFloat_AsDouble
+func PyFloat_AsDouble(self *PyObject) float64
+double PyFloat_AsDouble(PyObject *pyfloat) Return a C double representation of the contents of pyfloat. If pyfloat is not a Python floating point object but has a __float__() method, this method will first be called to convert pyfloat into a float.
+
+func PyFloat_AsReprString
+func PyFloat_AsReprString(buf []byte, v *C.PyFloatObject)
+void PyFloat_AsReprString(char *buf, PyFloatObject *v) Same as PyFloat_AsString, except uses the same rules as repr(). The length of buf should be at least 100.
+
+This function is unsafe to call because it writes to a buffer whose length it does not know.
+
+Deprecated since version 2.7: Use PyObject_Repr() or PyOS_double_to_string() instead.
+
+func PyFloat_AsString
+func PyFloat_AsString(buf []byte, v *C.PyFloatObject)
+void PyFloat_AsString(char *buf, PyFloatObject *v) Convert the argument v to a string, using the same rules as str(). The length of buf should be at least 100.
+
+This function is unsafe to call because it writes to a buffer whose length it does not know.
+
+Deprecated since version 2.7: Use PyObject_Str() or PyOS_double_to_string() instead.
+
+func PyFloat_Check
+func PyFloat_Check(self *PyObject) bool
+int PyFloat_Check(PyObject *p) Return true if its argument is a PyFloatObject or a subtype of PyFloatObject.
+
+Changed in version 2.2: Allowed subtypes to be accepted.
+
+func PyFloat_CheckExact
+func PyFloat_CheckExact(self *PyObject) bool
+int PyFloat_CheckExact(PyObject *p) Return true if its argument is a PyFloatObject, but not a subtype of PyFloatObject.
+
+New in version 2.2.
+
+func PyFloat_ClearFreeList
+func PyFloat_ClearFreeList() int
+int PyFloat_ClearFreeList() Clear the float free list. Return the number of items that could not be freed.
+
+New in version 2.6.
+
+func PyFloat_GetMax
+func PyFloat_GetMax() float64
+double PyFloat_GetMax() Return the maximum representable finite float DBL_MAX as C double.
+
+New in version 2.6.
+
+func PyFloat_GetMin
+func PyFloat_GetMin() float64
+double PyFloat_GetMin() Return the minimum normalized positive float DBL_MIN as C double.
+
+New in version 2.6.
+
+func PyFrame_GetLineNumber
+func PyFrame_GetLineNumber(frame *PyFrameObject) int
+int PyFrame_GetLineNumber(PyFrameObject *frame) Return the line number that frame is currently executing.
+
+func PyFunction_Check
+func PyFunction_Check(o *PyObject) bool
+int PyFunction_Check(PyObject *o) Return true if o is a function object (has type PyFunction_Type). The parameter must not be NULL.
+
+func PyFunction_SetClosure
+func PyFunction_SetClosure(op, closure *PyObject) error
+int PyFunction_SetClosure(PyObject *op, PyObject *closure) Set the closure associated with the function object op. closure must be Py_None or a tuple of cell objects.
+
+Raises SystemError and returns -1 on failure.
+
+func PyFunction_SetDefaults
+func PyFunction_SetDefaults(op, defaults *PyObject) error
+int PyFunction_SetDefaults(PyObject *op, PyObject *defaults) Set the argument default values for the function object op. defaults must be Py_None or a tuple.
+
+Raises SystemError and returns -1 on failure.
+
+func PyGILState_Release
+func PyGILState_Release(state PyGILState)
+void PyGILState_Release(PyGILState_STATE) Release any resources previously acquired. After this call, Python’s state will be the same as it was prior to the corresponding PyGILState_Ensure() call (but generally this state will be unknown to the caller, hence the use of the GILState API).
+
+Every call to PyGILState_Ensure() must be matched by a call to PyGILState_Release() on the same thread.
+
+New in version 2.3.
+
+func PyGen_Check
+func PyGen_Check(ob *PyObject) bool
+int PyGen_Check(PyObject *ob) Return true if ob is a generator object; ob must not be NULL.
+
+func PyGen_CheckExact
+func PyGen_CheckExact(ob *PyObject) bool
+int PyGen_CheckExact(ob) Return true if ob‘s type is PyGen_Type is a generator object; ob must not be NULL.
+
+func PyImport_GetMagicNumber
+func PyImport_GetMagicNumber() int64
+long PyImport_GetMagicNumber() Return the magic number for Python bytecode files (a.k.a. .pyc and .pyo files). The magic number should be present in the first four bytes of the bytecode file, in little-endian byte order.
+
+func PyImport_ImportFrozenModule
+func PyImport_ImportFrozenModule(name string) error
+int PyImport_ImportFrozenModule(char *name) Load a frozen module named name. Return 1 for success, 0 if the module is not found, and -1 with an exception set if the initialization failed. To access the imported module on a successful load, use PyImport_ImportModule(). (Note the misnomer — this function would reload the module if it was already imported.)
+
+func PyInstance_Check
+func PyInstance_Check(obj *PyObject) bool
+int PyInstance_Check(PyObject *obj) Return true if obj is an instance.
+
+func PyInt_AS_LONG
+func PyInt_AS_LONG(self *PyObject) int
+long PyInt_AS_LONG(PyObject *io) Return the value of the object io. No error checking is performed.
+
+func PyInt_AsLong
+func PyInt_AsLong(self *PyObject) int
+long PyInt_AsLong(PyObject *io) Will first attempt to cast the object to a PyIntObject, if it is not already one, and then return its value. If there is an error, -1 is returned, and the caller should check PyErr_Occurred() to find out whether there was an error, or whether the value just happened to be -1.
+
+func PyInt_AsSsize_t
+func PyInt_AsSsize_t(self *PyObject) int
+Py_ssize_t PyInt_AsSsize_t(PyObject *io) Will first attempt to cast the object to a PyIntObject or PyLongObject, if it is not already one, and then return its value as Py_ssize_t.
+
+New in version 2.5.
+
+func PyInt_AsUnsignedLongLongMask
+func PyInt_AsUnsignedLongLongMask(self *PyObject) uint
+unsigned PY_LONG_LONG PyInt_AsUnsignedLongLongMask(PyObject *io) Will first attempt to cast the object to a PyIntObject or PyLongObject, if it is not already one, and then return its value as unsigned long long, without checking for overflow.
+
+New in version 2.3.
+
+func PyInt_AsUnsignedLongMask
+func PyInt_AsUnsignedLongMask(self *PyObject) uint
+unsigned long PyInt_AsUnsignedLongMask(PyObject *io) Will first attempt to cast the object to a PyIntObject or PyLongObject, if it is not already one, and then return its value as unsigned long. This function does not check for overflow.
+
+New in version 2.3.
+
+func PyInt_Check
+func PyInt_Check(self *PyObject) bool
+int PyInt_Check(PyObject *o) Return true if o is of type PyInt_Type or a subtype of PyInt_Type.
+
+Changed in version 2.2: Allowed subtypes to be accepted.
+
+func PyInt_CheckExact
+func PyInt_CheckExact(self *PyObject) bool
+int PyInt_CheckExact(PyObject *o) Return true if o is of type PyInt_Type, but not a subtype of PyInt_Type.
+
+New in version 2.2.
+
+func PyInt_ClearFreeList
+func PyInt_ClearFreeList()
+int PyInt_ClearFreeList() Clear the integer free list. Return the number of items that could not be freed.
+
+New in version 2.6.
+
+func PyInt_GetMax
+func PyInt_GetMax() int
+long PyInt_GetMax() Return the system’s idea of the largest integer it can handle (LONG_MAX, as defined in the system header files).
+
+func PyList_Append
+func PyList_Append(self, item *PyObject) error
+int PyList_Append(PyObject *list, PyObject *item) Append the object item at the end of list list. Return 0 if successful; return -1 and set an exception if unsuccessful. Analogous to list.append(item). PyObject* PyList_GetSlice(PyObject *list, Py_ssize_t low, Py_ssize_t high) Return value: New reference. Return a list of the objects in list containing the objects between low and high. Return NULL and set an exception if unsuccessful. Analogous to list[low:high]. Negative indices, as when slicing from Python, are not supported.
+
+Changed in version 2.5: This function used an int for low and high. This might require changes in your code for properly supporting 64-bit systems.
+
+func PyList_Check
+func PyList_Check(self *PyObject) bool
+int PyList_Check(PyObject *p) Return true if p is a list object or an instance of a subtype of the list type.
+
+Changed in version 2.2: Allowed subtypes to be accepted.
+
+func PyList_CheckExact
+func PyList_CheckExact(self *PyObject) bool
+int PyList_CheckExact(PyObject *p) Return true if p is a list object, but not an instance of a subtype of the list type.
+
+New in version 2.2.
+
+func PyList_GET_SIZE
+func PyList_GET_SIZE(self *PyObject) int
+Py_ssize_t PyList_GET_SIZE(PyObject *list) Macro form of PyList_Size() without error checking.
+
+Changed in version 2.5: This macro returned an int. This might require changes in your code for properly supporting 64-bit systems.
+
+func PyList_Insert
+func PyList_Insert(self *PyObject, index int, item *PyObject) error
+int PyList_Insert(PyObject *list, Py_ssize_t index, PyObject *item) Insert the item item into list list in front of index index. Return 0 if successful; return -1 and set an exception if unsuccessful. Analogous to list.insert(index, item).
+
+Changed in version 2.5: This function used an int for index. This might require changes in your code for properly supporting 64-bit systems.
+
+func PyList_Reverse
+func PyList_Reverse(self *PyObject) error
+int PyList_Reverse(PyObject *list) Reverse the items of list in place. Return 0 on success, -1 on failure. This is the equivalent of list.reverse().
+
+func PyList_SET_ITEM
+func PyList_SET_ITEM(self *PyObject, index int, o *PyObject)
+void PyList_SET_ITEM(PyObject *list, Py_ssize_t i, PyObject *o) Macro form of PyList_SetItem() without error checking. This is normally only used to fill in new lists where there is no previous content.
+
+Note This macro “steals” a reference to item, and, unlike PyList_SetItem(), does not discard a reference to any item that it being replaced; any reference in list at position i will be leaked. Changed in version 2.5: This macro used an int for i. This might require changes in your code for properly supporting 64-bit systems.
+
+func PyList_SetItem
+func PyList_SetItem(self *PyObject, index int, item *PyObject) error
+int PyList_SetItem(PyObject *list, Py_ssize_t index, PyObject *item) Set the item at index index in list to item. Return 0 on success or -1 on failure.
+
+Note This function “steals” a reference to item and discards a reference to an item already in the list at the affected position. Changed in version 2.5: This function used an int for index. This might require changes in your code for properly supporting 64-bit systems.
+
+func PyList_SetSlice
+func PyList_SetSlice(self *PyObject, low, high int, itemlist *PyObject) error
+int PyList_SetSlice(PyObject *list, Py_ssize_t low, Py_ssize_t high, PyObject *itemlist) Set the slice of list between low and high to the contents of itemlist. Analogous to list[low:high] = itemlist. The itemlist may be NULL, indicating the assignment of an empty list (slice deletion). Return 0 on success, -1 on failure. Negative indices, as when slicing from Python, are not supported.
+
+Changed in version 2.5: This function used an int for low and high. This might require changes in your code for properly supporting 64-bit systems.
+
+func PyList_Size
+func PyList_Size(self *PyObject) int
+Py_ssize_t PyList_Size(PyObject *list) Return the length of the list object in list; this is equivalent to len(list) on a list object.
+
+Changed in version 2.5: This function returned an int. This might require changes in your code for properly supporting 64-bit systems.
+
+func PyList_Sort
+func PyList_Sort(self *PyObject) error
+int PyList_Sort(PyObject *list) Sort the items of list in place. Return 0 on success, -1 on failure. This is equivalent to list.sort().
+
+func PyLong_AsDouble
+func PyLong_AsDouble(self *PyObject) float64
+double PyLong_AsDouble(PyObject *pylong) Return a C double representation of the contents of pylong. If pylong cannot be approximately represented as a double, an OverflowError exception is raised and -1.0 will be returned.
+
+func PyLong_AsLong
+func PyLong_AsLong(self *PyObject) int64
+long PyLong_AsLong(PyObject *pylong) Return a C long representation of the contents of pylong. If pylong is greater than LONG_MAX, an OverflowError is raised and -1 will be returned.
+
+long PyLong_AsLongAndOverflow(PyObject *pylong, int *overflow) Return a C long representation of the contents of pylong. If pylong is greater than LONG_MAX or less than LONG_MIN, set *overflow to 1 or -1, respectively, and return -1; otherwise, set *overflow to 0. If any other exception occurs (for example a TypeError or MemoryError), then -1 will be returned and *overflow will be 0.
+
+New in version 2.7.
+
+func PyLong_AsLongLong
+func PyLong_AsLongLong(self *PyObject) int64
+PY_LONG_LONG PyLong_AsLongLong(PyObject *pylong) Return a C long long from a Python long integer. If pylong cannot be represented as a long long, an OverflowError is raised and -1 is returned.
+
+New in version 2.2.
+
+func PyLong_AsLongLongAndOverflow
+func PyLong_AsLongLongAndOverflow(self *PyObject) (value int64, overflow int)
+PY_LONG_LONG PyLong_AsLongLongAndOverflow(PyObject *pylong, int *overflow) Return a C long long representation of the contents of pylong. If pylong is greater than PY_LLONG_MAX or less than PY_LLONG_MIN, set *overflow to 1 or -1, respectively, and return -1; otherwise, set *overflow to 0. If any other exception occurs (for example a TypeError or MemoryError), then -1 will be returned and *overflow will be 0.
+
+New in version 2.7.
+
+func PyLong_AsSsize_t
+func PyLong_AsSsize_t(self *PyObject) int
+Py_ssize_t PyLong_AsSsize_t(PyObject *pylong) Return a C Py_ssize_t representation of the contents of pylong. If pylong is greater than PY_SSIZE_T_MAX, an OverflowError is raised and -1 will be returned.
+
+New in version 2.6.
+
+func PyLong_AsUnsignedLong
+func PyLong_AsUnsignedLong(self *PyObject) uint64
+unsigned long PyLong_AsUnsignedLong(PyObject *pylong) Return a C unsigned long representation of the contents of pylong. If pylong is greater than ULONG_MAX, an OverflowError is raised.
+
+func PyLong_AsUnsignedLongLong
+func PyLong_AsUnsignedLongLong(self *PyObject) uint64
+unsigned PY_LONG_LONG PyLong_AsUnsignedLongLong(PyObject *pylong) Return a C unsigned long long from a Python long integer. If pylong cannot be represented as an unsigned long long, an OverflowError is raised and (unsigned long long)-1 is returned.
+
+New in version 2.2.
+
+Changed in version 2.7: A negative pylong now raises OverflowError, not TypeError.
+
+func PyLong_AsUnsignedLongLongMask
+func PyLong_AsUnsignedLongLongMask(self *PyObject) uint64
+unsigned PY_LONG_LONG PyLong_AsUnsignedLongLongMask(PyObject *io) Return a C unsigned long long from a Python long integer, without checking for overflow.
+
+New in version 2.3.
+
+func PyLong_AsUnsignedLongMask
+func PyLong_AsUnsignedLongMask(self *PyObject) uint64
+unsigned long PyLong_AsUnsignedLongMask(PyObject *io) Return a C unsigned long from a Python long integer, without checking for overflow.
+
+New in version 2.3.
+
+func PyLong_AsVoidPtr
+func PyLong_AsVoidPtr(self *PyObject) *C.char
+void* PyLong_AsVoidPtr(PyObject *pylong) Convert a Python integer or long integer pylong to a C void pointer. If pylong cannot be converted, an OverflowError will be raised. This is only assured to produce a usable void pointer for values created with PyLong_FromVoidPtr().
+
+New in version 1.5.2.
+
+Changed in version 2.5: For values outside 0..LONG_MAX, both signed and unsigned integers are accepted.
+
+func PyLong_Check
+func PyLong_Check(self *PyObject) bool
+int PyLong_Check(PyObject *p) Return true if its argument is a PyLongObject or a subtype of PyLongObject.
+
+Changed in version 2.2: Allowed subtypes to be accepted.
+
+func PyLong_CheckExact
+func PyLong_CheckExact(self *PyObject) bool
+int PyLong_CheckExact(PyObject *p) Return true if its argument is a PyLongObject, but not a subtype of PyLongObject.
+
+New in version 2.2.
+
+func PyLong_FromUnicode
+func PyLong_FromUnicode(self *C.Py_UNICODE, length, base int)
+PyObject* PyLong_FromUnicode(Py_UNICODE *u, Py_ssize_t length, int base) Return value: New reference. Convert a sequence of Unicode digits to a Python long integer value. The first parameter, u, points to the first character of the Unicode string, length gives the number of characters, and base is the radix for the conversion. The radix must be in the range [2, 36]; if it is out of range, ValueError will be raised.
+
+New in version 1.6.
+
+Changed in version 2.5: This function used an int for length. This might require changes in your code for properly supporting 64-bit systems.
+
+func PyMarshal_ReadLongFromFile
+func PyMarshal_ReadLongFromFile(file *C.FILE) int64
+long PyMarshal_ReadLongFromFile(FILE *file) Return a C long from the data stream in a FILE* opened for reading. Only a 32-bit value can be read in using this function, regardless of the native size of long.
+
+func PyMarshal_ReadShortFromFile
+func PyMarshal_ReadShortFromFile(file *C.FILE) int
+int PyMarshal_ReadShortFromFile(FILE *file) Return a C short from the data stream in a FILE* opened for reading. Only a 16-bit value can be read in using this function, regardless of the native size of short.
+
+func PyMarshal_WriteLongToFile
+func PyMarshal_WriteLongToFile(value int64, file *C.FILE, version int)
+void PyMarshal_WriteLongToFile(long value, FILE *file, int version) Marshal a long integer, value, to file. This will only write the least-significant 32 bits of value; regardless of the size of the native long type.
+
+Changed in version 2.4: version indicates the file format.
+
+func PyMarshal_WriteObjectToFile
+func PyMarshal_WriteObjectToFile(value *PyObject, file *C.FILE, version int)
+void PyMarshal_WriteObjectToFile(PyObject *value, FILE *file, int version) Marshal a Python object, value, to file.
+
+Changed in version 2.4: version indicates the file format.
+
+func PyMemoryView_Check
+func PyMemoryView_Check(obj *PyObject) bool
+int PyMemoryView_Check(PyObject *obj) Return true if the object obj is a memoryview object. It is not currently allowed to create subclasses of memoryview.
+
+func PyMethod_Check
+func PyMethod_Check(o *PyObject) bool
+int PyMethod_Check(PyObject *o) Return true if o is a method object (has type PyMethod_Type). The parameter must not be NULL.
+
+func PyMethod_ClearFreeList
+func PyMethod_ClearFreeList() int
+int PyMethod_ClearFreeList() Clear the free list. Return the total number of freed items.
+
+New in version 2.6.
+
+func PyModule_AddIntConstant
+func PyModule_AddIntConstant(self *PyObject, name string, value int) error
+int PyModule_AddIntConstant(PyObject *module, const char *name, long value) Add an integer constant to module as name. This convenience function can be used from the module’s initialization function. Return -1 on error, 0 on success.
+
+New in version 2.0.
+
+func PyModule_AddIntMacro
+func PyModule_AddIntMacro(self *PyObject, macro interface{}) error
+int PyModule_AddIntMacro(PyObject *module, macro) Add an int constant to module. The name and the value are taken from macro. For example PyModule_AddConstant(module, AF_INET) adds the int constant AF_INET with the value of AF_INET to module. Return -1 on error, 0 on success.
+
+New in version 2.6.
+
+func PyModule_AddObject
+func PyModule_AddObject(self *PyObject, name string, value *PyObject) error
+int PyModule_AddObject(PyObject *module, const char *name, PyObject *value) Add an object to module as name. This is a convenience function which can be used from the module’s initialization function. This steals a reference to value. Return -1 on error, 0 on success.
+
+New in version 2.0.
+
+func PyModule_AddStringConstant
+func PyModule_AddStringConstant(self *PyObject, name, value string) error
+int PyModule_AddStringConstant(PyObject *module, const char *name, const char *value) Add a string constant to module as name. This convenience function can be used from the module’s initialization function. The string value must be null-terminated. Return -1 on error, 0 on success.
+
+New in version 2.0.
+
+func PyModule_AddStringMacro
+func PyModule_AddStringMacro(self *PyObject, macro interface{}) error
+int PyModule_AddStringMacro(PyObject *module, macro) Add a string constant to module. New in version 2.6.
+
+func PyModule_Check
+func PyModule_Check(self *PyObject) bool
+int PyModule_Check(PyObject *p) Return true if p is a module object, or a subtype of a module object.
+
+Changed in version 2.2: Allowed subtypes to be accepted.
+
+func PyModule_CheckExact
+func PyModule_CheckExact(self *PyObject) bool
+int PyModule_CheckExact(PyObject *p) Return true if p is a module object, but not a subtype of PyModule_Type.
+
+New in version 2.2.
+
+func PyModule_GetFilename
+func PyModule_GetFilename(self *PyObject) string
+char* PyModule_GetFilename(PyObject *module) Return the name of the file from which module was loaded using module‘s __file__ attribute. If this is not defined, or if it is not a string, raise SystemError and return NULL.
+
+func PyModule_GetName
+func PyModule_GetName(self *PyObject) string
+char* PyModule_GetName(PyObject *module) Return module‘s __name__ value. If the module does not provide one, or if it is not a string, SystemError is raised and NULL is returned.
+
+func PyOS_AfterFork
+func PyOS_AfterFork()
+void PyOS_AfterFork() Function to update some internal state after a process fork; this should be called in the new process if the Python interpreter will continue to be used. If a new executable is loaded into the new process, this function does not need to be called.
+
+func PyOS_CheckStack
+func PyOS_CheckStack() bool
+int PyOS_CheckStack() Return true when the interpreter runs out of stack space. This is a reliable check, but is only available when USE_STACKCHECK is defined (currently on Windows using the Microsoft Visual C++ compiler). USE_STACKCHECK will be defined automatically; you should never change the definition in your own code.
+
+func PyOS_getsig
+func PyOS_getsig(i int) C.PyOS_sighandler_t
+PyOS_sighandler_t PyOS_getsig(int i) Return the current signal handler for signal i. This is a thin wrapper around either sigaction() or signal(). Do not call those functions directly! PyOS_sighandler_t is a typedef alias for void (*)(int).
+
+func PyOS_setsig
+func PyOS_setsig(i int, h C.PyOS_sighandler_t) C.PyOS_sighandler_t
+PyOS_sighandler_t PyOS_setsig(int i, PyOS_sighandler_t h) Set the signal handler for signal i to be h; return the old signal handler. This is a thin wrapper around either sigaction() or signal(). Do not call those functions directly! PyOS_sighandler_t is a typedef alias for void (*)(int).
+
+func PyObject_CheckBuffer
+func PyObject_CheckBuffer(self *PyObject) bool
+int PyObject_CheckBuffer(PyObject *obj) Return 1 if obj supports the buffer interface otherwise 0.
+
+func PyObject_CopyToObject
+func PyObject_CopyToObject(self *PyObject, buf []byte, fortran string) error
+int PyObject_CopyToObject(PyObject *obj, void *buf, Py_ssize_t len, char fortran) Copy len bytes of data pointed to by the contiguous chunk of memory pointed to by buf into the buffer exported by obj. The buffer must of course be writable. Return 0 on success and return -1 and raise an error on failure. If the object does not have a writable buffer, then an error is raised. If fortran is 'F', then if the object is multi-dimensional, then the data will be copied into the array in Fortran-style (first dimension varies the fastest). If fortran is 'C', then the data will be copied into the array in C-style (last dimension varies the fastest). If fortran is 'A', then it does not matter and the copy will be made in whatever way is more efficient.
+
+func PyRun_SimpleFile
+func PyRun_SimpleFile(filename string) error
+PyRun_SimpleFile executes the given python script synchronously. Note that unlike the corresponding C API, this will internally open and close the file for you.
+
+func PyRun_SimpleString
+func PyRun_SimpleString(command string) int
+int PyRun_SimpleString(const char *command) This is a simplified interface to PyRun_SimpleStringFlags() below, leaving the PyCompilerFlags* argument set to NULL.
+
+func PySeqIter_Check
+func PySeqIter_Check(op *PyObject) bool
+int PySeqIter_Check(op) Return true if the type of op is PySeqIter_Type.
+
+New in version 2.2.
+
+func PySignal_SetWakeupFd
+func PySignal_SetWakeupFd(fd int) int
+int PySignal_SetWakeupFd(int fd) This utility function specifies a file descriptor to which a '\0' byte will be written whenever a signal is received. It returns the previous such file descriptor. The value -1 disables the feature; this is the initial state. This is equivalent to signal.set_wakeup_fd() in Python, but without any error checking. fd should be a valid file descriptor. The function should only be called from the main thread.
+
+func PySlice_Check
+func PySlice_Check(ob *PyObject) bool
+int PySlice_Check(PyObject *ob) Return true if ob is a slice object; ob must not be NULL.
+
+func PySlice_GetIndices
+func PySlice_GetIndices(slice *PySliceObject, length int) (start, stop, step int, err error)
+int PySlice_GetIndices(PySliceObject *slice, Py_ssize_t length, Py_ssize_t *start, Py_ssize_t *stop, Py_ssize_t *step) Retrieve the start, stop and step indices from the slice object slice, assuming a sequence of length length. Treats indices greater than length as errors.
+
+Returns 0 on success and -1 on error with no exception set (unless one of the indices was not None and failed to be converted to an integer, in which case -1 is returned with an exception set).
+
+You probably do not want to use this function. If you want to use slice objects in versions of Python prior to 2.3, you would probably do well to incorporate the source of PySlice_GetIndicesEx(), suitably renamed, in the source of your extension.
+
+Changed in version 2.5: This function used an int type for length and an int * type for start, stop, and step. This might require changes in your code for properly supporting 64-bit systems.
+
+func PySlice_GetIndicesEx
+func PySlice_GetIndicesEx(slice *PySliceObject, length int) (start, stop, step, slicelength int, err error)
+int PySlice_GetIndicesEx(PySliceObject *slice, Py_ssize_t length, Py_ssize_t *start, Py_ssize_t *stop, Py_ssize_t *step, Py_ssize_t *slicelength) Usable replacement for PySlice_GetIndices(). Retrieve the start, stop, and step indices from the slice object slice assuming a sequence of length length, and store the length of the slice in slicelength. Out of bounds indices are clipped in a manner consistent with the handling of normal slices.
+
+Returns 0 on success and -1 on error with exception set.
+
+New in version 2.3.
+
+Changed in version 2.5: This function used an int type for length and an int * type for start, stop, step, and slicelength. This might require changes in your code for properly supporting 64-bit systems.
+
+func PyString_AS_STRING
+func PyString_AS_STRING(self *PyObject) string
+char* PyString_AS_STRING(PyObject *string) Macro form of PyString_AsString() but without error checking. Only string objects are supported; no Unicode objects should be passed.
+
+func PyString_AsString
+func PyString_AsString(self *PyObject) string
+char* PyString_AsString(PyObject *string) Return a NUL-terminated representation of the contents of string. The pointer refers to the internal buffer of string, not a copy. The data must not be modified in any way, unless the string was just created using PyString_FromStringAndSize(NULL, size). It must not be deallocated. If string is a Unicode object, this function computes the default encoding of string and operates on that. If string is not a string object at all, PyString_AsString() returns NULL and raises TypeError.
+
+func PyString_AsStringAndSize
+func PyString_AsStringAndSize(self *PyObject, sz int) (str string, err int)
+int PyString_AsStringAndSize(PyObject *obj, char **buffer, Py_ssize_t *length) Return a NUL-terminated representation of the contents of the object obj through the output variables buffer and length.
+
+The function accepts both string and Unicode objects as input. For Unicode objects it returns the default encoded version of the object. If length is NULL, the resulting buffer may not contain NUL characters; if it does, the function returns -1 and a TypeError is raised.
+
+The buffer refers to an internal string buffer of obj, not a copy. The data must not be modified in any way, unless the string was just created using PyString_FromStringAndSize(NULL, size). It must not be deallocated. If string is a Unicode object, this function computes the default encoding of string and operates on that. If string is not a string object at all, PyString_AsStringAndSize() returns -1 and raises TypeError.
+
+Changed in version 2.5: This function used an int * type for length. This might require changes in your code for properly supporting 64-bit systems.
+
+func PyString_Check
+func PyString_Check(self *PyObject) bool
+int PyString_Check(PyObject *o) Return true if the object o is a string object or an instance of a subtype of the string type.
+
+Changed in version 2.2: Allowed subtypes to be accepted.
+
+func PyString_GET_SIZE
+func PyString_GET_SIZE(self *PyObject) int
+Py_ssize_t PyString_GET_SIZE(PyObject *string) Macro form of PyString_Size() but without error checking.
+
+Changed in version 2.5: This macro returned an int type. This might require changes in your code for properly supporting 64-bit systems.
+
+func PyString_InternInPlace
+func PyString_InternInPlace(self *PyObject)
+void PyString_InternInPlace(PyObject **string) Intern the argument *string in place. The argument must be the address of a pointer variable pointing to a Python string object. If there is an existing interned string that is the same as *string, it sets *string to it (decrementing the reference count of the old string object and incrementing the reference count of the interned string object), otherwise it leaves *string alone and interns it (incrementing its reference count). (Clarification: even though there is a lot of talk about reference counts, think of this function as reference-count-neutral; you own the object after the call if and only if you owned it before the call.)
+
+Note This function is not available in 3.x and does not have a PyBytes alias.
+
+func PyString_Size
+func PyString_Size(self *PyObject) int
+Py_ssize_t PyString_Size(PyObject *string) Return the length of the string in string object string.
+
+Changed in version 2.5: This function returned an int type. This might require changes in your code for properly supporting 64-bit systems.
+
+func PySys_AddWarnOption
+func PySys_AddWarnOption(s string)
+void PySys_AddWarnOption(char *s) Append s to sys.warnoptions.
+
+func PySys_GetFile
+func PySys_GetFile(name string, def *C.FILE) *C.FILE
+FILE *PySys_GetFile(char *name, FILE *def) Return the FILE* associated with the object name in the sys module, or def if name is not in the module or is not associated with a FILE*.
+
+func PySys_ResetWarnOptions
+func PySys_ResetWarnOptions()
+void PySys_ResetWarnOptions() Reset sys.warnoptions to an empty list.
+
+func PySys_SetArgv
+func PySys_SetArgv(argv []string)
+PySys_SetArgv initializes the 'sys.argv' array in python.
+
+func PySys_SetObject
+func PySys_SetObject(name string, v *PyObject) error
+int PySys_SetObject(char *name, PyObject *v) Set name in the sys module to v unless v is NULL, in which case name is deleted from the sys module. Returns 0 on success, -1 on error.
+
+func PySys_SetPath
+func PySys_SetPath(path string)
+void PySys_SetPath(char *path) Set sys.path to a list object of paths found in path which should be a list of paths separated with the platform’s search path delimiter (: on Unix, ; on Windows).
+
+func PySys_WriteStderr
+func PySys_WriteStderr(format string, args ...interface{})
+void PySys_WriteStderr(const char *format, ...) As above, but write to sys.stderr or stderr instead.
+
+func PySys_WriteStdout
+func PySys_WriteStdout(format string, args ...interface{})
+void PySys_WriteStdout(const char *format, ...) Write the output string described by format to sys.stdout. No exceptions are raised, even if truncation occurs (see below).
+
+format should limit the total size of the formatted output string to 1000 bytes or less – after 1000 bytes, the output string is truncated. In particular, this means that no unrestricted “%s” formats should occur; these should be limited using “%.<N>s” where <N> is a decimal number calculated so that <N> plus the maximum size of other formatted text does not exceed 1000 bytes. Also watch out for “%f”, which can print hundreds of digits for very large numbers.
+
+If a problem occurs, or sys.stdout is unset, the formatted message is written to the real (C level) stdout.
+
+func PyTuple_Check
+func PyTuple_Check(self *PyObject) bool
+int PyTuple_Check(PyObject *p) Return true if p is a tuple object or an instance of a subtype of the tuple type.
+
+Changed in version 2.2: Allowed subtypes to be accepted.
+
+func PyTuple_CheckExact
+func PyTuple_CheckExact(self *PyObject) bool
+int PyTuple_CheckExact(PyObject *p) Return true if p is a tuple object, but not an instance of a subtype of the tuple type.
+
+New in version 2.2.
+
+func PyTuple_ClearFreeList
+func PyTuple_ClearFreeList()
+int PyTuple_ClearFreeList() Clear the free list. Return the total number of freed items.
+
+New in version 2.6.
+
+func PyTuple_GET_SIZE
+func PyTuple_GET_SIZE(self *PyObject) int
+Py_ssize_t PyTuple_GET_SIZE(PyObject *p) Return the size of the tuple p, which must be non-NULL and point to a tuple; no error checking is performed.
+
+Changed in version 2.5: This function returned an int type. This might require changes in your code for properly supporting 64-bit systems.
+
+func PyTuple_Resize
+func PyTuple_Resize(self *PyObject, newsize int) error
+int _PyTuple_Resize(PyObject **p, Py_ssize_t newsize) Can be used to resize a tuple. newsize will be the new length of the tuple. Because tuples are supposed to be immutable, this should only be used if there is only one reference to the object. Do not use this if the tuple may already be known to some other part of the code. The tuple will always grow or shrink at the end. Think of this as destroying the old tuple and creating a new one, only more efficiently. Returns 0 on success. Client code should never assume that the resulting value of *p will be the same as before calling this function. If the object referenced by *p is replaced, the original *p is destroyed. On failure, returns -1 and sets *p to NULL, and raises MemoryError or SystemError.
+
+Changed in version 2.2: Removed unused third parameter, last_is_sticky.
+
+Changed in version 2.5: This function used an int type for newsize. This might require changes in your code for properly supporting 64-bit systems.
+
+func PyTuple_SET_ITEM
+func PyTuple_SET_ITEM(self *PyObject, pos int, o *PyObject)
+void PyTuple_SET_ITEM(PyObject *p, Py_ssize_t pos, PyObject *o) Like PyTuple_SetItem(), but does no error checking, and should only be used to fill in brand new tuples.
+
+Note This function “steals” a reference to o. Changed in version 2.5: This function used an int type for pos. This might require changes in your code for properly supporting 64-bit systems.
+
+func PyTuple_SetItem
+func PyTuple_SetItem(self *PyObject, pos int, o *PyObject) error
+int PyTuple_SetItem(PyObject *p, Py_ssize_t pos, PyObject *o) Insert a reference to object o at position pos of the tuple pointed to by p. Return 0 on success.
+
+Note This function “steals” a reference to o. Changed in version 2.5: This function used an int type for pos. This might require changes in your code for properly supporting 64-bit systems.
+
+func PyTuple_Size
+func PyTuple_Size(self *PyObject) int
+Py_ssize_t PyTuple_Size(PyObject *p) Take a pointer to a tuple object, and return the size of that tuple.
+
+Changed in version 2.5: This function returned an int type. This might require changes in your code for properly supporting 64-bit systems.
+
+func PyType_Check
+func PyType_Check(self *PyObject) bool
+int PyType_Check(PyObject *o) Return true if the object o is a type object, including instances of types derived from the standard type object. Return false in all other cases.
+
+func PyType_CheckExact
+func PyType_CheckExact(self *PyObject) bool
+int PyType_CheckExact(PyObject *o) Return true if the object o is a type object, but not a subtype of the standard type object. Return false in all other cases.
+
+New in version 2.2.
+
+func PyType_ClearCache
+func PyType_ClearCache() uint
+unsigned int PyType_ClearCache() Clear the internal lookup cache. Return the current version tag.
+
+New in version 2.6.
+
+func PyType_HasFeature
+func PyType_HasFeature(self *PyObject, feature int) bool
+int PyType_HasFeature(PyObject *o, int feature) Return true if the type object o sets the feature feature. Type features are denoted by single bit flags.
+
+func PyType_IS_GC
+func PyType_IS_GC(self *PyObject) bool
+int PyType_IS_GC(PyObject *o) Return true if the type object includes support for the cycle detector; this tests the type flag Py_TPFLAGS_HAVE_GC.
+
+New in version 2.0.
+
+func PyType_IsSubtype
+func PyType_IsSubtype(a, b *PyTypeObject) bool
+int PyType_IsSubtype(PyTypeObject *a, PyTypeObject *b) Return true if a is a subtype of b.
+
+New in version 2.2.
+
+func PyType_Modified
+func PyType_Modified(self *PyTypeObject)
+void PyType_Modified(PyTypeObject *type) Invalidate the internal lookup cache for the type and all of its subtypes. This function must be called after any manual modification of the attributes or base classes of the type.
+
+New in version 2.6.
+
+func PyType_Ready
+func PyType_Ready(self *PyTypeObject) error
+int PyType_Ready(PyTypeObject *type) Finalize a type object. This should be called on all type objects to finish their initialization. This function is responsible for adding inherited slots from a type’s base class. Return 0 on success, or return -1 and sets an exception on error.
+
+New in version 2.2.
+
+func Py_AtExit
+func Py_AtExit(fct func()) error
+int Py_AtExit(void (*func) ()) Register a cleanup function to be called by Py_Finalize(). The cleanup function will be called with no arguments and should return no value. At most 32 cleanup functions can be registered. When the registration is successful, Py_AtExit() returns 0; on failure, it returns -1. The cleanup function registered last is called first. Each cleanup function will be called at most once. Since Python’s internal finalization will have completed before the cleanup function, no Python APIs should be called by func.
+
+func Py_Exit
+func Py_Exit(status int)
+void Py_Exit(int status) Exit the current process. This calls Py_Finalize() and then calls the standard C library function exit(status).
+
+func Py_FatalError
+func Py_FatalError(message string)
+void Py_FatalError(const char *message) Print a fatal error message and kill the process. No cleanup is performed. This function should only be invoked when a condition is detected that would make it dangerous to continue using the Python interpreter; e.g., when the object administration appears to be corrupted. On Unix, the standard C library function abort() is called which will attempt to produce a core file.
+
+func Py_FdIsInteractive
+func Py_FdIsInteractive(fp *C.FILE, fname string) bool
+int Py_FdIsInteractive(FILE *fp, const char *filename) Return true (nonzero) if the standard I/O file fp with name filename is deemed interactive. This is the case for files for which isatty(fileno(fp)) is true. If the global flag Py_InteractiveFlag is true, this function also returns true if the filename pointer is NULL or if the name is equal to one of the strings '<stdin>' or '???'.
+
+func Py_GetProgramName
+func Py_GetProgramName() string
+Py_GetProgramName returns the program name set with Py_SetProgramName(), or the default. The returned string points into static storage; the caller should not modify its value.
+
+func Py_GetPythonHome
+func Py_GetPythonHome() string
+Return the default “home”, that is, the value set by a previous call to Py_SetPythonHome(), or the value of the PYTHONHOME environment variable if it is set.
+
+func Py_Main
+func Py_Main(args []string) int
+int Py_Main(int argc, char **argv) The main program for the standard interpreter. This is made available for programs which embed Python. The argc and argv parameters should be prepared exactly as those which are passed to a C program’s main() function. It is important to note that the argument list may be modified (but the contents of the strings pointed to by the argument list are not). The return value will be the integer passed to the sys.exit() function, 1 if the interpreter exits due to an exception, or 2 if the parameter list does not represent a valid Python command line.
+
+Note that if an otherwise unhandled SystemError is raised, this function will not return 1, but exit the process, as long as Py_InspectFlag is not set.
+
+func Py_SetProgramName
+func Py_SetProgramName(name string)
+Py_SetProgramName should be called before Py_Initialize() is called for the first time, if it is called at all. It tells the interpreter the value of the argv[0] argument to the main() function of the program. This is used by Py_GetPath() and some other functions below to find the Python run-time libraries relative to the interpreter executable. The default value is 'python'. The argument should point to a zero-terminated character string in static storage whose contents will not change for the duration of the program’s execution. No code in the Python interpreter will change the contents of this storage.
+
+func Py_SetPythonHome
+func Py_SetPythonHome(home string)
+Set the default “home” directory, that is, the location of the standard Python libraries. See PYTHONHOME for the meaning of the argument string.
+
+The argument should point to a zero-terminated character string in static storage whose contents will not change for the duration of the program’s execution. No code in the Python interpreter will change the contents of this storage.
+
+func SetStderr
+func SetStderr(f *os.File) error
+SetStderr sets a sys.stderr to a specified file descriptor.
+
+func SetStdin
+func SetStdin(f *os.File) error
+SetStdin sets a sys.stdin to a specified file descriptor.
+
+func SetStdout
+func SetStdout(f *os.File) error
+SetStdout sets a sys.stdout to a specified file descriptor.
+
+type MethodDefFlags
+type MethodDefFlags int
+type PyBUF_Flag
+type PyBUF_Flag int
+type PyCFunction
+type PyCFunction C.PyCFunction
+type PyCapsule_Destructor
+type PyCapsule_Destructor func(*PyObject)
+/// capsule /////
+
+type PyFrameObject
+type PyFrameObject struct {
+    // contains filtered or unexported fields
+}
+func PyEval_GetFrame
+func PyEval_GetFrame() *PyFrameObject
+PyFrameObject* PyEval_GetFrame() Return value: Borrowed reference. Return the current thread state’s frame, which is NULL if no frame is currently executing.
+
+type PyGILState
+type PyGILState C.PyGILState_STATE
+PyGILState is the Go alias for the PyGILState_STATE enum
+
+func PyGILState_Ensure
+func PyGILState_Ensure() PyGILState
+Ensure that the current thread is ready to call the Python C API regardless of the current state of Python, or of the global interpreter lock. This may be called as many times as desired by a thread as long as each call is matched with a call to PyGILState_Release(). In general, other thread-related APIs may be used between PyGILState_Ensure() and PyGILState_Release() calls as long as the thread state is restored to its previous state before the Release(). For example, normal usage of the Py_BEGIN_ALLOW_THREADS and Py_END_ALLOW_THREADS macros is acceptable.
+
+The return value is an opaque “handle” to the thread state when PyGILState_Ensure() was called, and must be passed to PyGILState_Release() to ensure Python is left in the same state. Even though recursive calls are allowed, these handles cannot be shared - each unique call to PyGILState_Ensure() must save the handle for its call to PyGILState_Release().
+
+When the function returns, the current thread will hold the GIL and be able to call arbitrary Python code. Failure is a fatal error.
+
+New in version 2.3.
+
+type PyMethodDef
+type PyMethodDef struct {
+    Name  string // name of the method
+    Meth  PyCFunction
+    Flags MethodDefFlags
+    Doc   string
+}
+PyMethodDef ml_name char * name of the method ml_meth PyCFunction pointer to the C implementation ml_flags int flag bits indicating how the call should be constructed ml_doc char * points to the contents of the docstring
+
+type PyObject
+type PyObject struct {
+    // contains filtered or unexported fields
+}
+PyObject layer
+
+func FromFile
+func FromFile(f *os.File, mode string) *PyObject
+FromFile converts a Go file to Python file object. Calling close from Python will not close a file descriptor.
+
+func PyBool_FromLong
+func PyBool_FromLong(v int) *PyObject
+PyObject* PyBool_FromLong(long v) Return value: New reference. Return a new reference to Py_True or Py_False depending on the truth value of v.
+
+New in version 2.3.
+
+func PyByteArray_Concat
+func PyByteArray_Concat(a, b *PyObject) *PyObject
+PyObject* PyByteArray_Concat(PyObject *a, PyObject *b) Concat bytearrays a and b and return a new bytearray with the result.
+
+func PyByteArray_FromObject
+func PyByteArray_FromObject(self *PyObject) *PyObject
+PyObject* PyByteArray_FromObject(PyObject *o) Return a new bytearray object from any object, o, that implements the buffer protocol.
+
+func PyByteArray_FromStringAndSize
+func PyByteArray_FromStringAndSize(str string) *PyObject
+PyObject* PyByteArray_FromStringAndSize(const char *string, Py_ssize_t len) Create a new bytearray object from string and its length, len. On failure, NULL is returned.
+
+func PyCallIter_New
+func PyCallIter_New(callable, sentinel *PyObject) *PyObject
+PyObject* PyCallIter_New(PyObject *callable, PyObject *sentinel) Return value: New reference. Return a new iterator. The first parameter, callable, can be any Python callable object that can be called with no parameters; each call to it should return the next item in the iteration. When callable returns a value equal to sentinel, the iteration will be terminated.
+
+New in version 2.2.
+
+func PyCapsule_New
+func PyCapsule_New(pointer *C.char, name string, dtor C.PyCapsule_Destructor) *PyObject
+PyObject* PyCapsule_New(void *pointer, const char *name, PyCapsule_Destructor destructor) Return value: New reference. Create a PyCapsule encapsulating the pointer. The pointer argument may not be NULL.
+
+On failure, set an exception and return NULL.
+
+The name string may either be NULL or a pointer to a valid C string. If non-NULL, this string must outlive the capsule. (Though it is permitted to free it inside the destructor.)
+
+If the destructor argument is not NULL, it will be called with the capsule as its argument when it is destroyed.
+
+If this capsule will be stored as an attribute of a module, the name should be specified as modulename.attributename. This will enable other modules to import the capsule using PyCapsule_Import().
+
+func PyCode_NewEmpty
+func PyCode_NewEmpty(filename string, funcname string, firstlineno int) *PyObject
+PyCodeObject* PyCode_NewEmpty(char *filename, char *funcname, int firstlineno) Return value: New reference. Return an empty CodePythonObject that corresponds to the file name, func name and line number in the source file it points to.
+
+func PyComplex_FromCComplex
+func PyComplex_FromCComplex(v C.Py_complex) *PyObject
+PyObject* PyComplex_FromCComplex(Py_complex v) Return value: New reference. Create a new Python complex number object from a C Py_complex value.
+
+func PyComplex_FromDoubles
+func PyComplex_FromDoubles(real, imag float64) *PyObject
+PyObject* PyComplex_FromDoubles(double real, double imag) Return value: New reference. Return a new PyComplexObject object from real and imag.
+
+func PyDictProxy_New
+func PyDictProxy_New(self *PyObject) *PyObject
+PyObject* PyDictProxy_New(PyObject *dict) Return value: New reference. Return a proxy object for a mapping which enforces read-only behavior. This is normally used to create a proxy to prevent modification of the dictionary for non-dynamic class types.
+
+New in version 2.2.
+
+func PyDict_Copy
+func PyDict_Copy(self *PyObject) *PyObject
+PyObject* PyDict_Copy(PyObject *p) Return value: New reference. Return a new dictionary that contains the same key-value pairs as p.
+
+New in version 1.6.
+
+func PyDict_GetItem
+func PyDict_GetItem(self, key *PyObject) *PyObject
+PyObject* PyDict_GetItem(PyObject *p, PyObject *key) Return value: Borrowed reference. Return the object from dictionary p which has a key key. Return NULL if the key key is not present, but without setting an exception.
+
+func PyDict_GetItemString
+func PyDict_GetItemString(self *PyObject, key string) *PyObject
+PyObject* PyDict_GetItemString(PyObject *p, const char *key) Return value: Borrowed reference. This is the same as PyDict_GetItem(), but key is specified as a char*, rather than a PyObject*.
+
+func PyDict_Items
+func PyDict_Items(self *PyObject) *PyObject
+PyObject* PyDict_Items(PyObject *p) Return value: New reference. Return a PyListObject containing all the items from the dictionary, as in the dictionary method dict.items().
+
+func PyDict_Keys
+func PyDict_Keys(self *PyObject) *PyObject
+PyObject* PyDict_Keys(PyObject *p) Return value: New reference. Return a PyListObject containing all the keys from the dictionary, as in the dictionary method dict.keys().
+
+func PyDict_New
+func PyDict_New() *PyObject
+PyObject* PyDict_New() Return value: New reference. Return a new empty dictionary, or NULL on failure.
+
+func PyDict_Values
+func PyDict_Values(self *PyObject) *PyObject
+PyObject* PyDict_Values(PyObject *p) Return value: New reference. Return a PyListObject containing all the values from the dictionary p, as in the dictionary method dict.values().
+
+func PyErr_Fetch
+func PyErr_Fetch() (exc, val, tb *PyObject)
+void PyErr_Fetch(PyObject **ptype, PyObject **pvalue, PyObject **ptraceback) Retrieve the error indicator into three variables whose addresses are passed. If the error indicator is not set, set all three variables to NULL. If it is set, it will be cleared and you own a reference to each object retrieved. The value and traceback object may be NULL even when the type object is not.
+
+Note This function is normally only used by code that needs to handle exceptions or by code that needs to save and restore the error indicator temporarily.
+
+func PyErr_Format
+func PyErr_Format(exception *PyObject, format string, args ...interface{}) *PyObject
+PyObject* PyErr_Format(PyObject *exception, const char *format, ...) Return value: Always NULL. This function sets the error indicator and returns NULL. exception should be a Python exception class. The format and subsequent parameters help format the error message; they have the same meaning and values as in PyString_FromFormat().
+
+func PyErr_NewException
+func PyErr_NewException(name string, base, dict *PyObject) *PyObject
+PyObject* PyErr_NewException(char *name, PyObject *base, PyObject *dict) Return value: New reference. This utility function creates and returns a new exception object. The name argument must be the name of the new exception, a C string of the form module.class. The base and dict arguments are normally NULL. This creates a class object derived from Exception (accessible in C as PyExc_Exception).
+
+The __module__ attribute of the new class is set to the first part (up to the last dot) of the name argument, and the class name is set to the last part (after the last dot). The base argument can be used to specify alternate base classes; it can either be only one class or a tuple of classes. The dict argument can be used to specify a dictionary of class variables and methods.
+
+func PyErr_NewExceptionWithDoc
+func PyErr_NewExceptionWithDoc(name, doc string, base, dict *PyObject) *PyObject
+PyObject* PyErr_NewExceptionWithDoc(char *name, char *doc, PyObject *base, PyObject *dict) Return value: New reference. Same as PyErr_NewException(), except that the new exception class can easily be given a docstring: If doc is non-NULL, it will be used as the docstring for the exception class.
+
+New in version 2.7.
+
+func PyErr_NoMemory
+func PyErr_NoMemory() *PyObject
+PyObject* PyErr_NoMemory() Return value: Always NULL. This is a shorthand for PyErr_SetNone(PyExc_MemoryError); it returns NULL so an object allocation function can write return PyErr_NoMemory(); when it runs out of memory.
+
+func PyErr_Occurred
+func PyErr_Occurred() *PyObject
+PyObject* PyErr_Occurred() Return value: Borrowed reference. Test whether the error indicator is set. If set, return the exception type (the first argument to the last call to one of the PyErr_Set*() functions or to PyErr_Restore()). If not set, return NULL. You do not own a reference to the return value, so you do not need to Py_DECREF() it.
+
+Note Do not compare the return value to a specific exception; use PyErr_ExceptionMatches() instead, shown below. (The comparison could easily fail since the exception may be an instance instead of a class, in the case of a class exception, or it may the a subclass of the expected exception.)
+
+func PyErr_SetExcFromWindowsErr
+func PyErr_SetExcFromWindowsErr(typ *PyObject, ierr bool) *PyObject
+PyObject* PyErr_SetExcFromWindowsErr(PyObject *type, int ierr) Return value: Always NULL. Similar to PyErr_SetFromWindowsErr(), with an additional parameter specifying the exception type to be raised. Availability: Windows.
+
+New in version 2.3.
+
+func PyErr_SetExcFromWindowsErrWithFilename
+func PyErr_SetExcFromWindowsErrWithFilename(typ *PyObject, ierr bool, filename string) *PyObject
+PyObject* PyErr_SetExcFromWindowsErrWithFilename(PyObject *type, int ierr, char *filename) Return value: Always NULL. Similar to PyErr_SetFromWindowsErrWithFilename(), with an additional parameter specifying the exception type to be raised. Availability: Windows.
+
+New in version 2.3.
+
+func PyErr_SetFromErrno
+func PyErr_SetFromErrno(typ *PyObject) *PyObject
+PyObject* PyErr_SetFromErrno(PyObject *type) Return value: Always NULL. This is a convenience function to raise an exception when a C library function has returned an error and set the C variable errno. It constructs a tuple object whose first item is the integer errno value and whose second item is the corresponding error message (gotten from strerror()), and then calls PyErr_SetObject(type, object). On Unix, when the errno value is EINTR, indicating an interrupted system call, this calls PyErr_CheckSignals(), and if that set the error indicator, leaves it set to that. The function always returns NULL, so a wrapper function around a system call can write return PyErr_SetFromErrno(type); when the system call returns an error.
+
+func PyErr_SetFromErrnoWithFilename
+func PyErr_SetFromErrnoWithFilename(typ *PyObject, filename string) *PyObject
+PyObject* PyErr_SetFromErrnoWithFilename(PyObject *type, const char *filename) Return value: Always NULL. Similar to PyErr_SetFromErrno(), with the additional behavior that if filename is not NULL, it is passed to the constructor of type as a third parameter. In the case of exceptions such as IOError and OSError, this is used to define the filename attribute of the exception instance.
+
+func PyErr_SetFromWindowsErr
+func PyErr_SetFromWindowsErr(ierr bool) *PyObject
+PyObject* PyErr_SetFromWindowsErr(int ierr) Return value: Always NULL. This is a convenience function to raise WindowsError. If called with ierr of 0, the error code returned by a call to GetLastError() is used instead. It calls the Win32 function FormatMessage() to retrieve the Windows description of error code given by ierr or GetLastError(), then it constructs a tuple object whose first item is the ierr value and whose second item is the corresponding error message (gotten from FormatMessage()), and then calls PyErr_SetObject(PyExc_WindowsError, object). This function always returns NULL. Availability: Windows.
+
+func PyErr_SetFromWindowsErrWithFilename
+func PyErr_SetFromWindowsErrWithFilename(ierr bool, filename string) *PyObject
+PyObject* PyErr_SetFromWindowsErrWithFilename(int ierr, const char *filename) Return value: Always NULL. Similar to PyErr_SetFromWindowsErr(), with the additional behavior that if filename is not NULL, it is passed to the constructor of WindowsError as a third parameter. Availability: Windows.
+
+func PyEval_GetBuiltins
+func PyEval_GetBuiltins() *PyObject
+PyObject* PyEval_GetBuiltins() Return value: Borrowed reference. Return a dictionary of the builtins in the current execution frame, or the interpreter of the thread state if no frame is currently executing.
+
+func PyEval_GetGlobals
+func PyEval_GetGlobals() *PyObject
+PyObject* PyEval_GetGlobals() Return value: Borrowed reference. Return a dictionary of the global variables in the current execution frame, or NULL if no frame is currently executing.
+
+func PyEval_GetLocals
+func PyEval_GetLocals() *PyObject
+PyObject* PyEval_GetLocals() Return value: Borrowed reference. Return a dictionary of the local variables in the current execution frame, or NULL if no frame is currently executing.
+
+func PyFloat_FromDouble
+func PyFloat_FromDouble(v float64) *PyObject
+PyObject* PyFloat_FromDouble(double v) Return value: New reference. Create a PyFloatObject object from v, or NULL on failure.
+
+func PyFloat_FromString
+func PyFloat_FromString(str *PyObject) *PyObject
+PyObject* PyFloat_FromString(PyObject *str, char **pend) Return value: New reference. Create a PyFloatObject object based on the string value in str, or NULL on failure. The pend argument is ignored. It remains only for backward compatibility.
+
+func PyFloat_GetInfo
+func PyFloat_GetInfo() *PyObject
+PyObject* PyFloat_GetInfo(void) Return a structseq instance which contains information about the precision, minimum and maximum values of a float. It’s a thin wrapper around the header file float.h.
+
+New in version 2.6.
+
+func PyFunction_GetClosure
+func PyFunction_GetClosure(op *PyObject) *PyObject
+PyObject* PyFunction_GetClosure(PyObject *op) Return value: Borrowed reference. Return the closure associated with the function object op. This can be NULL or a tuple of cell objects.
+
+func PyFunction_GetCode
+func PyFunction_GetCode(op *PyObject) *PyObject
+PyObject* PyFunction_GetCode(PyObject *op) Return value: Borrowed reference. Return the code object associated with the function object op.
+
+func PyFunction_GetDefaults
+func PyFunction_GetDefaults(op *PyObject) *PyObject
+PyObject* PyFunction_GetDefaults(PyObject *op) Return value: Borrowed reference. Return the argument default values of the function object op. This can be a tuple of arguments or NULL.
+
+func PyFunction_GetGlobals
+func PyFunction_GetGlobals(op *PyObject) *PyObject
+PyObject* PyFunction_GetGlobals(PyObject *op) Return value: Borrowed reference. Return the globals dictionary associated with the function object op.
+
+func PyFunction_GetModule
+func PyFunction_GetModule(op *PyObject) *PyObject
+PyObject* PyFunction_GetModule(PyObject *op) Return value: Borrowed reference. Return the __module__ attribute of the function object op. This is normally a string containing the module name, but can be set to any other object by Python code.
+
+func PyFunction_New
+func PyFunction_New(code, globals *PyObject) *PyObject
+PyObject* PyFunction_New(PyObject *code, PyObject *globals) Return value: New reference. Return a new function object associated with the code object code. globals must be a dictionary with the global variables accessible to the function.
+
+The function’s docstring, name and __module__ are retrieved from the code object, the argument defaults and closure are set to NULL.
+
+func PyGen_New
+func PyGen_New(frame *PyFrameObject) *PyObject
+PyObject* PyGen_New(PyFrameObject *frame) Return value: New reference. Create and return a new generator object based on the frame object. A reference to frame is stolen by this function. The parameter must not be NULL.
+
+func PyImport_AddModule
+func PyImport_AddModule(name string) *PyObject
+PyObject* PyImport_AddModule(const char *name) Return value: Borrowed reference. Return the module object corresponding to a module name. The name argument may be of the form package.module. First check the modules dictionary if there’s one there, and if not, create a new one and insert it in the modules dictionary. Return NULL with an exception set on failure.
+
+Note This function does not load or import the module; if the module wasn’t already loaded, you will get an empty module object. Use PyImport_ImportModule() or one of its variants to import a module. Package structures implied by a dotted name for name are not created if not already present.
+
+func PyImport_ExecCodeModule
+func PyImport_ExecCodeModule(name string, co *PyObject) *PyObject
+PyObject* PyImport_ExecCodeModule(char *name, PyObject *co) Return value: New reference. Given a module name (possibly of the form package.module) and a code object read from a Python bytecode file or obtained from the built-in function compile(), load the module. Return a new reference to the module object, or NULL with an exception set if an error occurred. Before Python 2.4, the module could still be created in error cases. Starting with Python 2.4, name is removed from sys.modules in error cases, and even if name was already in sys.modules on entry to PyImport_ExecCodeModule(). Leaving incompletely initialized modules in sys.modules is dangerous, as imports of such modules have no way to know that the module object is an unknown (and probably damaged with respect to the module author’s intents) state.
+
+The module’s __file__ attribute will be set to the code object’s co_filename.
+
+This function will reload the module if it was already imported. See PyImport_ReloadModule() for the intended way to reload a module.
+
+If name points to a dotted name of the form package.module, any package structures not already created will still not be created.
+
+Changed in version 2.4: name is removed from sys.modules in error cases.
+
+func PyImport_ExecCodeModuleEx
+func PyImport_ExecCodeModuleEx(name string, co *PyObject, pathname string) *PyObject
+PyObject* PyImport_ExecCodeModuleEx(char *name, PyObject *co, char *pathname) Return value: New reference. Like PyImport_ExecCodeModule(), but the __file__ attribute of the module object is set to pathname if it is non-NULL.
+
+func PyImport_GetImporter
+func PyImport_GetImporter(path *PyObject) *PyObject
+PyObject* PyImport_GetImporter(PyObject *path) Return an importer object for a sys.path/pkg.__path__ item path, possibly by fetching it from the sys.path_importer_cache dict. If it wasn’t yet cached, traverse sys.path_hooks until a hook is found that can handle the path item. Return None if no hook could; this tells our caller it should fall back to the built-in import mechanism. Cache the result in sys.path_importer_cache. Return a new reference to the importer object.
+
+New in version 2.6.
+
+func PyImport_GetModuleDict
+func PyImport_GetModuleDict() *PyObject
+PyObject* PyImport_GetModuleDict() Return value: Borrowed reference. Return the dictionary used for the module administration (a.k.a. sys.modules). Note that this is a per-interpreter variable.
+
+func PyImport_Import
+func PyImport_Import(name *PyObject) *PyObject
+PyObject* PyImport_Import(PyObject *name) Return value: New reference. This is a higher-level interface that calls the current “import hook function”. It invokes the __import__() function from the __builtins__ of the current globals. This means that the import is done using whatever import hooks are installed in the current environment, e.g. by rexec or ihooks.
+
+Changed in version 2.6: Always uses absolute imports.
+
+func PyImport_ImportModule
+func PyImport_ImportModule(name string) *PyObject
+PyObject* PyImport_ImportModule(const char *name) Return value: New reference. This is a simplified interface to PyImport_ImportModuleEx() below, leaving the globals and locals arguments set to NULL and level set to 0. When the name argument contains a dot (when it specifies a submodule of a package), the fromlist argument is set to the list ['*'] so that the return value is the named module rather than the top-level package containing it as would otherwise be the case. (Unfortunately, this has an additional side effect when name in fact specifies a subpackage instead of a submodule: the submodules specified in the package’s __all__ variable are loaded.) Return a new reference to the imported module, or NULL with an exception set on failure. Before Python 2.4, the module may still be created in the failure case — examine sys.modules to find out. Starting with Python 2.4, a failing import of a module no longer leaves the module in sys.modules.
+
+Changed in version 2.4: Failing imports remove incomplete module objects.
+
+Changed in version 2.6: Always uses absolute imports.
+
+func PyImport_ImportModuleEx
+func PyImport_ImportModuleEx(name string, globals, locals, fromlist *PyObject) *PyObject
+PyObject* PyImport_ImportModuleEx(char *name, PyObject *globals, PyObject *locals, PyObject *fromlist) Return value: New reference. Import a module. This is best described by referring to the built-in Python function __import__(), as the standard __import__() function calls this function directly.
+
+The return value is a new reference to the imported module or top-level package, or NULL with an exception set on failure (before Python 2.4, the module may still be created in this case). Like for __import__(), the return value when a submodule of a package was requested is normally the top-level package, unless a non-empty fromlist was given.
+
+Changed in version 2.4: Failing imports remove incomplete module objects.
+
+Changed in version 2.6: The function is an alias for PyImport_ImportModuleLevel() with -1 as level, meaning relative import.
+
+func PyImport_ImportModuleLevel
+func PyImport_ImportModuleLevel(name string, globals, locals, fromlist *PyObject, level int) *PyObject
+PyObject* PyImport_ImportModuleLevel(char *name, PyObject *globals, PyObject *locals, PyObject *fromlist, int level) Return value: New reference. Import a module. This is best described by referring to the built-in Python function __import__(), as the standard __import__() function calls this function directly.
+
+The return value is a new reference to the imported module or top-level package, or NULL with an exception set on failure. Like for __import__(), the return value when a submodule of a package was requested is normally the top-level package, unless a non-empty fromlist was given.
+
+New in version 2.5.
+
+func PyImport_ImportModuleNoBlock
+func PyImport_ImportModuleNoBlock(name string) *PyObject
+PyObject* PyImport_ImportModuleNoBlock(const char *name) This version of PyImport_ImportModule() does not block. It’s intended to be used in C functions that import other modules to execute a function. The import may block if another thread holds the import lock. The function PyImport_ImportModuleNoBlock() never blocks. It first tries to fetch the module from sys.modules and falls back to PyImport_ImportModule() unless the lock is held, in which case the function will raise an ImportError.
+
+New in version 2.6.
+
+func PyImport_ReloadModule
+func PyImport_ReloadModule(m *PyObject) *PyObject
+PyObject* PyImport_ReloadModule(PyObject *m) Return value: New reference. Reload a module. This is best described by referring to the built-in Python function reload(), as the standard reload() function calls this function directly. Return a new reference to the reloaded module, or NULL with an exception set on failure (the module still exists in this case).
+
+func PyInstance_New
+func PyInstance_New(class, arg, kw *PyObject) *PyObject
+PyObject* PyInstance_New(PyObject *class, PyObject *arg, PyObject *kw) Return value: New reference. Create a new instance of a specific class. The parameters arg and kw are used as the positional and keyword parameters to the object’s constructor.
+
+func PyInstance_NewRaw
+func PyInstance_NewRaw(class, dict *PyObject) *PyObject
+PyObject* PyInstance_NewRaw(PyObject *class, PyObject *dict) Return value: New reference. Create a new instance of a specific class without calling its constructor. class is the class of new object. The dict parameter will be used as the object’s __dict__; if NULL, a new dictionary will be created for the instance.
+
+func PyInt_FromLong
+func PyInt_FromLong(val int) *PyObject
+PyObject* PyInt_FromLong(long ival) Return value: New reference. Create a new integer object with a value of ival.
+
+The current implementation keeps an array of integer objects for all integers between -5 and 256, when you create an int in that range you actually just get back a reference to the existing object. So it should be possible to change the value of 1. I suspect the behaviour of Python in this case is undefined. :-)
+
+func PyInt_FromSize_t
+func PyInt_FromSize_t(val int) *PyObject
+PyObject* PyInt_FromSize_t(size_t ival) Create a new integer object with a value of ival. If the value exceeds LONG_MAX, a long integer object is returned.
+
+New in version 2.5.
+
+func PyInt_FromSsize_t
+func PyInt_FromSsize_t(val int) *PyObject
+PyObject* PyInt_FromSsize_t(Py_ssize_t ival) Return value: New reference. Create a new integer object with a value of ival. If the value is larger than LONG_MAX or smaller than LONG_MIN, a long integer object is returned.
+
+New in version 2.5.
+
+func PyInt_FromString
+func PyInt_FromString(str string, pend, base int) *PyObject
+PyObject* PyInt_FromString(char *str, char **pend, int base) Return value: New reference. Return a new PyIntObject or PyLongObject based on the string value in str, which is interpreted according to the radix in base. If pend is non-NULL, *pend will point to the first character in str which follows the representation of the number. If base is 0, the radix will be determined based on the leading characters of str: if str starts with '0x' or '0X', radix 16 will be used; if str starts with '0', radix 8 will be used; otherwise radix 10 will be used. If base is not 0, it must be between 2 and 36, inclusive. Leading spaces are ignored. If there are no digits, ValueError will
+
+be raised. If the string represents a number too large to be contained within
+the machine’s long int type and overflow warnings are being suppressed, a
+PyLongObject will be returned. If overflow warnings are not being suppressed, NULL will be returned in this case.
+
+func PyIter_Next
+func PyIter_Next(op *PyObject) *PyObject
+PyObject* PyIter_Next(PyObject *o) Return value: New reference.
+
+Return the next value from the iteration o. The object must be an iterator (it is up to the caller to check this). If there are no remaining values, returns NULL with no exception set. If an error occurs while retrieving the item, returns NULL and passes along the exception.
+
+func PyList_AsTuple
+func PyList_AsTuple(self *PyObject) *PyObject
+PyObject* PyList_AsTuple(PyObject *list) Return value: New reference. Return a new tuple object containing the contents of list; equivalent to tuple(list).
+
+func PyList_GET_ITEM
+func PyList_GET_ITEM(self *PyObject, index int) *PyObject
+PyObject* PyList_GET_ITEM(PyObject *list, Py_ssize_t i) Return value: Borrowed reference. Macro form of PyList_GetItem() without error checking.
+
+Changed in version 2.5: This macro used an int for i. This might require changes in your code for properly supporting 64-bit systems.
+
+func PyList_GetItem
+func PyList_GetItem(self *PyObject, index int) *PyObject
+PyObject* PyList_GetItem(PyObject *list, Py_ssize_t index) Return value: Borrowed reference. Return the object at position pos in the list pointed to by p. The position must be positive, indexing from the end of the list is not supported. If pos is out of bounds, return NULL and set an IndexError exception.
+
+Changed in version 2.5: This function used an int for index. This might require changes in your code for properly supporting 64-bit systems.
+
+func PyList_New
+func PyList_New(sz int) *PyObject
+PyObject* PyList_New(Py_ssize_t len) Return value: New reference. Return a new list of length len on success, or NULL on failure.
+
+Note If length is greater than zero, the returned list object’s items are set to NULL. Thus you cannot use abstract API functions such as PySequence_SetItem() or expose the object to Python code before setting all items to a real object with PyList_SetItem(). Changed in version 2.5: This function used an int for size. This might require changes in your code for properly supporting 64-bit systems.
+
+func PyLong_FromDouble
+func PyLong_FromDouble(v float64) *PyObject
+PyObject* PyLong_FromDouble(double v) Return value: New reference. Return a new PyLongObject object from the integer part of v, or NULL on failure.
+
+func PyLong_FromLong
+func PyLong_FromLong(v int) *PyObject
+PyObject* PyLong_FromLong(long v) Return value: New reference. Return a new PyLongObject object from v, or NULL on failure.
+
+func PyLong_FromLongLong
+func PyLong_FromLongLong(v int64) *PyObject
+PyObject* PyLong_FromLongLong(PY_LONG_LONG v) Return value: New reference. Return a new PyLongObject object from a C long long, or NULL on failure.
+
+func PyLong_FromSize_t
+func PyLong_FromSize_t(v int) *PyObject
+PyObject* PyLong_FromSize_t(size_t v) Return value: New reference. Return a new PyLongObject object from a C size_t, or NULL on failure.
+
+New in version 2.6.
+
+func PyLong_FromSsize_t
+func PyLong_FromSsize_t(v int) *PyObject
+PyObject* PyLong_FromSsize_t(Py_ssize_t v) Return value: New reference. Return a new PyLongObject object from a C Py_ssize_t, or NULL on failure.
+
+New in version 2.6.
+
+func PyLong_FromString
+func PyLong_FromString(str string, pend, base int) *PyObject
+PyObject* PyLong_FromString(char *str, char **pend, int base) Return value: New reference. Return a new PyLongObject based on the string value in str, which is interpreted according to the radix in base. If pend is non-NULL, *pend will point to the first character in str which follows the representation of the number. If base is 0, the radix will be determined based on the leading characters of str: if str starts with '0x' or '0X', radix 16 will be used; if str starts with '0', radix 8 will be used; otherwise radix 10 will be used. If base is not 0, it must be between 2 and 36, inclusive. Leading spaces are ignored. If there are no digits, ValueError will be raised.
+
+func PyLong_FromUnsignedLong
+func PyLong_FromUnsignedLong(v uint) *PyObject
+PyObject* PyLong_FromUnsignedLong(unsigned long v) Return value: New reference. Return a new PyLongObject object from a C unsigned long, or NULL on failure.
+
+func PyLong_FromUnsignedLongLong
+func PyLong_FromUnsignedLongLong(v uint64) *PyObject
+PyObject* PyLong_FromUnsignedLongLong(unsigned PY_LONG_LONG v) Return value: New reference. Return a new PyLongObject object from a C unsigned long long, or NULL on failure.
+
+func PyLong_FromVoidPtr
+func PyLong_FromVoidPtr(v interface{}) *PyObject
+PyObject* PyLong_FromVoidPtr(void *p) Return value: New reference. Create a Python integer or long integer from the pointer p. The pointer value can be retrieved from the resulting value using PyLong_AsVoidPtr().
+
+New in version 1.5.2.
+
+Changed in version 2.5: If the integer is larger than LONG_MAX, a positive long integer is returned.
+
+func PyMarshal_ReadLastObjectFromFile
+func PyMarshal_ReadLastObjectFromFile(file *C.FILE) *PyObject
+PyObject* PyMarshal_ReadLastObjectFromFile(FILE *file) Return value: New reference. Return a Python object from the data stream in a FILE* opened for reading. Unlike PyMarshal_ReadObjectFromFile(), this function assumes that no further objects will be read from the file, allowing it to aggressively load file data into memory so that the de-serialization can operate from data in memory rather than reading a byte at a time from the file. Only use these variant if you are certain that you won’t be reading anything else from the file. On error, sets the appropriate exception (EOFError or TypeError) and returns NULL.
+
+func PyMarshal_ReadObjectFromFile
+func PyMarshal_ReadObjectFromFile(file *C.FILE) *PyObject
+PyObject* PyMarshal_ReadObjectFromFile(FILE *file) Return value: New reference. Return a Python object from the data stream in a FILE* opened for reading. On error, sets the appropriate exception (EOFError or TypeError) and returns NULL.
+
+func PyMarshal_ReadObjectFromString
+func PyMarshal_ReadObjectFromString(str string) *PyObject
+PyObject* PyMarshal_ReadObjectFromString(char *string, Py_ssize_t len) Return value: New reference. Return a Python object from the data stream in a character buffer containing len bytes pointed to by string. On error, sets the appropriate exception (EOFError or TypeError) and returns NULL.
+
+Changed in version 2.5: This function used an int type for len. This might require changes in your code for properly supporting 64-bit systems.
+
+func PyMarshal_WriteObjectToString
+func PyMarshal_WriteObjectToString(value *PyObject, version int) *PyObject
+PyObject* PyMarshal_WriteObjectToString(PyObject *value, int version) Return value: New reference. Return a string object containing the marshalled representation of value.
+
+Changed in version 2.4: version indicates the file format.
+
+func PyMemoryView_FromBuffer
+func PyMemoryView_FromBuffer(view *Py_buffer) *PyObject
+PyObject *PyMemoryView_FromBuffer(Py_buffer *view) Create a memoryview object wrapping the given buffer-info structure view. The memoryview object then owns the buffer, which means you shouldn’t try to release it yourself: it will be released on deallocation of the memoryview object.
+
+func PyMemoryView_FromObject
+func PyMemoryView_FromObject(obj *PyObject) *PyObject
+A memoryview object exposes the new C level buffer interface as a Python object which can then be passed around like any other object.
+
+PyObject *PyMemoryView_FromObject(PyObject *obj) Create a memoryview object from an object that defines the new buffer interface.
+
+func PyMemoryView_GetContiguous
+func PyMemoryView_GetContiguous(obj *PyObject, buffertype int, order string) *PyObject
+PyObject *PyMemoryView_GetContiguous(PyObject *obj, int buffertype, char order) Create a memoryview object to a contiguous chunk of memory (in either ‘C’ or ‘F’ortran order) from an object that defines the buffer interface. If memory is contiguous, the memoryview object points to the original memory. Otherwise copy is made and the memoryview points to a new bytes object.
+
+func PyMethod_Class
+func PyMethod_Class(meth *PyObject) *PyObject
+PyObject* PyMethod_Class(PyObject *meth) Return value: Borrowed reference. Return the class object from which the method meth was created; if this was created from an instance, it will be the class of the instance.
+
+func PyMethod_Function
+func PyMethod_Function(meth *PyObject) *PyObject
+PyObject* PyMethod_Function(PyObject *meth) Return value: Borrowed reference. Return the function object associated with the method meth.
+
+func PyMethod_GET_CLASS
+func PyMethod_GET_CLASS(meth *PyObject) *PyObject
+PyObject* PyMethod_GET_CLASS(PyObject *meth) Return value: Borrowed reference. Macro version of PyMethod_Class() which avoids error checking.
+
+func PyMethod_GET_FUNCTION
+func PyMethod_GET_FUNCTION(meth *PyObject) *PyObject
+PyObject* PyMethod_GET_FUNCTION(PyObject *meth) Return value: Borrowed reference. Macro version of PyMethod_Function() which avoids error checking.
+
+func PyMethod_GET_SELF
+func PyMethod_GET_SELF(meth *PyObject) *PyObject
+PyObject* PyMethod_GET_SELF(PyObject *meth) Return value: Borrowed reference. Macro version of PyMethod_Self() which avoids error checking.
+
+func PyMethod_New
+func PyMethod_New(fct, self, class *PyObject) *PyObject
+PyObject* PyMethod_New(PyObject *func, PyObject *self, PyObject *class) Return value: New reference. Return a new method object, with func being any callable object; this is the function that will be called when the method is called. If this method should be bound to an instance, self should be the instance and class should be the class of self, otherwise self should be NULL and class should be the class which provides the unbound method..
+
+func PyMethod_Self
+func PyMethod_Self(meth *PyObject) *PyObject
+PyObject* PyMethod_Self(PyObject *meth) Return value: Borrowed reference. Return the instance associated with the method meth if it is bound, otherwise return NULL.
+
+func PyModule_GetDict
+func PyModule_GetDict(self *PyObject) *PyObject
+PyObject* PyModule_GetDict(PyObject *module) Return value: Borrowed reference. Return the dictionary object that implements module‘s namespace; this object is the same as the __dict__ attribute of the module object. This function never fails. It is recommended extensions use other PyModule_*() and PyObject_*() functions rather than directly manipulate a module’s __dict__.
+
+func PyModule_New
+func PyModule_New(name string) *PyObject
+PyObject* PyModule_New(const char *name) Return value: New reference. Return a new module object with the __name__ attribute set to name. Only the module’s __doc__ and __name__ attributes are filled in; the caller is responsible for providing a __file__ attribute.
+
+func PyObject_FromVoidPtr
+func PyObject_FromVoidPtr(ptr unsafe.Pointer) *PyObject
+PyObject_FromVoidPtr converts a PyObject from an unsafe.Pointer
+
+func PySeqIter_New
+func PySeqIter_New(seq *PyObject) *PyObject
+PyObject* PySeqIter_New(PyObject *seq) Return value: New reference. Return an iterator that works with a general sequence object, seq. The iteration ends when the sequence raises IndexError for the subscripting operation.
+
+New in version 2.2.
+
+PyTypeObject PyCallIter_Type Type object for iterator objects returned by PyCallIter_New() and the two-argument form of the iter() built-in function.
+
+New in version 2.2.
+
+func PySlice_New
+func PySlice_New(start, stop, step *PyObject) *PyObject
+PyObject* PySlice_New(PyObject *start, PyObject *stop, PyObject *step) Return value: New reference. Return a new slice object with the given values. The start, stop, and step parameters are used as the values of the slice object attributes of the same names. Any of the values may be NULL, in which case the None will be used for the corresponding attribute. Return NULL if the new object could not be allocated.
+
+func PyStringFromFormatV
+func PyStringFromFormatV(format string, args ...interface{}) *PyObject
+PyObject* PyString_FromFormatV(const char *format, va_list vargs) Return value: New reference. Identical to PyString_FromFormat() except that it takes exactly two arguments.
+
+func PyString_AsDecodedObject
+func PyString_AsDecodedObject(self *PyObject, encoding, errors string) *PyObject
+Note This function is not available in 3.x and does not have a PyBytes alias.
+
+func PyString_AsEncodedObject
+func PyString_AsEncodedObject(self *PyObject, encoding, errors string) *PyObject
+PyObject* PyString_AsEncodedObject(PyObject *str, const char *encoding, const char *errors) Return value: New reference. Encode a string object using the codec registered for encoding and return the result as Python object. encoding and errors have the same meaning as the parameters of the same name in the string encode() method. The codec to be used is looked up using the Python codec registry. Return NULL if an exception was raised by the codec.
+
+Note This function is not available in 3.x and does not have a PyBytes alias.
+
+func PyString_Concat
+func PyString_Concat(self, newpart *PyObject) *PyObject
+void PyString_Concat(PyObject **string, PyObject *newpart) Create a new string object in *string containing the contents of newpart appended to string; the caller will own the new reference. The reference to the old value of string will be stolen. If the new string cannot be created, the old reference to string will still be discarded and the value of *string will be set to NULL; the appropriate exception will be set.
+
+func PyString_ConcatAndDel
+func PyString_ConcatAndDel(self, newpart *PyObject) *PyObject
+void PyString_ConcatAndDel(PyObject **string, PyObject *newpart) Create a new string object in *string containing the contents of newpart appended to string. This version decrements the reference count of newpart. int _PyString_Resize(PyObject **string, Py_ssize_t newsize) A way to resize a string object even though it is “immutable”. Only use this to build up a brand new string object; don’t use this if the string may already be known in other parts of the code. It is an error to call this function if the refcount on the input string object is not one. Pass the address of an existing string object as an lvalue (it may be written into), and the new size desired. On success, *string holds the resized string object and 0 is returned; the address in *string may differ from its input value. If the reallocation fails, the original string object at *string is deallocated, *string is set to NULL, a memory exception is set, and -1 is returned.
+
+Changed in version 2.5: This function used an int type for newsize. This might require changes in your code for properly supporting 64-bit systems.
+
+func PyString_Decode
+func PyString_Decode(s string, sz int, encoding, errors string) *PyObject
+Note This function is not available in 3.x and does not have a PyBytes alias. PyObject* PyString_Decode(const char *s, Py_ssize_t size, const char *encoding, const char *errors) Return value: New reference. Create an object by decoding size bytes of the encoded buffer s using the codec registered for encoding. encoding and errors have the same meaning as the parameters of the same name in the unicode() built-in function. The codec to be used is looked up using the Python codec registry. Return NULL if an exception was raised by the codec.
+
+Note This function is not available in 3.x and does not have a PyBytes alias. Changed in version 2.5: This function used an int type for size. This might require changes in your code for properly supporting 64-bit systems.
+
+func PyString_Encode
+func PyString_Encode(s, encoding, errors string) *PyObject
+PyObject* PyString_Encode(const char *s, Py_ssize_t size, const char *encoding, const char *errors) Return value: New reference. Encode the char buffer of the given size by passing it to the codec registered for encoding and return a Python object. encoding and errors have the same meaning as the parameters of the same name in the string encode() method. The codec to be used is looked up using the Python codec registry. Return NULL if an exception was raised by the codec.
+
+Note This function is not available in 3.x and does not have a PyBytes alias. Changed in version 2.5: This function used an int type for size. This might require changes in your code for properly supporting 64-bit systems.
+
+func PyString_Format
+func PyString_Format(format, args *PyObject) *PyObject
+PyObject* PyString_Format(PyObject *format, PyObject *args) Return value: New reference. Return a new string object from format and args. Analogous to format % args. The args argument must be a tuple.
+
+func PyString_FromFormat
+func PyString_FromFormat(format string, args ...interface{}) *PyObject
+PyObject* PyString_FromFormat(const char *format, ...) Return value: New reference. Take a C printf()-style format string and a variable number of arguments, calculate the size of the resulting Python string and return a string with the values formatted into it. The variable arguments must be C types and must correspond exactly to the format characters in the format string. The following format characters are allowed:
+
+Format Characters Type Comment %% n/a The literal % character. %c int A single character, represented as an C int. %d int Exactly equivalent to printf("%d"). %u unsigned int Exactly equivalent to printf("%u"). %ld long Exactly equivalent to printf("%ld"). %lu unsigned long Exactly equivalent to printf("%lu"). %lld long long Exactly equivalent to printf("%lld"). %llu unsigned long long Exactly equivalent to printf("%llu"). %zd Py_ssize_t Exactly equivalent to printf("%zd"). %zu size_t Exactly equivalent to printf("%zu"). %i int Exactly equivalent to printf("%i"). %x int Exactly equivalent to printf("%x"). %s char* A null-terminated C character array. %p void* The hex representation of a C pointer. Mostly equivalent to printf("%p") except that it is guaranteed to start with the literal 0x regardless of what the platform’s printf yields. An unrecognized format character causes all the rest of the format string to be copied as-is to the result string, and any extra arguments discarded.
+
+Note The “%lld” and “%llu” format specifiers are only available when HAVE_LONG_LONG is defined. Changed in version 2.7: Support for “%lld” and “%llu” added.
+
+func PyString_FromString
+func PyString_FromString(v string) *PyObject
+PyObject* PyString_FromString(const char *v) Return value: New reference. Return a new string object with a copy of the string v as value on success, and NULL on failure. The parameter v must not be NULL; it will not be checked.
+
+func PyString_FromStringAndSize
+func PyString_FromStringAndSize(v string, sz int) *PyObject
+PyObject* PyString_FromStringAndSize(const char *v, Py_ssize_t len) Return value: New reference. Return a new string object with a copy of the string v as value and length len on success, and NULL on failure. If v is NULL, the contents of the string are uninitialized.
+
+Changed in version 2.5: This function used an int type for len. This might require changes in your code for properly supporting 64-bit systems.
+
+func PyString_InternFromString
+func PyString_InternFromString(v string) *PyObject
+PyObject* PyString_InternFromString(const char *v) Return value: New reference. A combination of PyString_FromString() and PyString_InternInPlace(), returning either a new string object that has been interned, or a new (“owned”) reference to an earlier interned string object with the same value.
+
+func PySys_GetObject
+func PySys_GetObject(name string) *PyObject
+PyObject *PySys_GetObject(char *name) Return value: Borrowed reference. Return the object name from the sys module or NULL if it does not exist, without setting an exception.
+
+func PyTuple_GET_ITEM
+func PyTuple_GET_ITEM(self *PyObject, pos int) *PyObject
+PyObject* PyTuple_GET_ITEM(PyObject *p, Py_ssize_t pos) Return value: Borrowed reference. Like PyTuple_GetItem(), but does no checking of its arguments.
+
+Changed in version 2.5: This function used an int type for pos. This might require changes in your code for properly supporting 64-bit systems.
+
+func PyTuple_GetItem
+func PyTuple_GetItem(self *PyObject, pos int) *PyObject
+PyObject* PyTuple_GetItem(PyObject *p, Py_ssize_t pos) Return value: Borrowed reference. Return the object at position pos in the tuple pointed to by p. If pos is out of bounds, return NULL and sets an IndexError exception.
+
+Changed in version 2.5: This function used an int type for pos. This might require changes in your code for properly supporting 64-bit systems.
+
+func PyTuple_GetSlice
+func PyTuple_GetSlice(self *PyObject, low, high int) *PyObject
+PyObject* PyTuple_GetSlice(PyObject *p, Py_ssize_t low, Py_ssize_t high) Return value: New reference. Take a slice of the tuple pointed to by p from low to high and return it as a new tuple.
+
+Changed in version 2.5: This function used an int type for low and high. This might require changes in your code for properly supporting 64-bit systems.
+
+func PyTuple_New
+func PyTuple_New(sz int) *PyObject
+PyObject* PyTuple_New(Py_ssize_t len) Return value: New reference. Return a new tuple object of size len, or NULL on failure.
+
+Changed in version 2.5: This function used an int type for len. This might require changes in your code for properly supporting 64-bit systems.
+
+func PyTuple_Pack
+func PyTuple_Pack(n int, objs ...*PyObject) *PyObject
+PyObject* PyTuple_Pack(Py_ssize_t n, ...) Return value: New reference. Return a new tuple object of size n, or NULL on failure. The tuple values are initialized to the subsequent n C arguments pointing to Python objects. PyTuple_Pack(2, a, b) is equivalent to Py_BuildValue("(OO)", a, b).
+
+New in version 2.4.
+
+Changed in version 2.5: This function used an int type for n. This might require changes in your code for properly supporting 64-bit systems.
+
+func PyType_GenericAlloc
+func PyType_GenericAlloc(self *PyTypeObject, nitems int) *PyObject
+PyObject* PyType_GenericAlloc(PyTypeObject *type, Py_ssize_t nitems) Return value: New reference. New in version 2.2.
+
+Changed in version 2.5: This function used an int type for nitems. This might require changes in your code for properly supporting 64-bit systems.
+
+func PyType_GenericNew
+func PyType_GenericNew(self *PyTypeObject, args, kwds *PyObject) *PyObject
+PyObject* PyType_GenericNew(PyTypeObject *type, PyObject *args, PyObject *kwds) Return value: New reference. New in version 2.2.
+
+func Py_BuildValue
+func Py_BuildValue(format string, args ...interface{}) *PyObject
+PyObject* Py_BuildValue(const char *format, ...) Return value: New reference.
+
+func Py_InitModule
+func Py_InitModule(name string, methods []PyMethodDef) (*PyObject, error)
+func Py_InitModule3
+func Py_InitModule3(name string, methods []PyMethodDef, doc string) (*PyObject, error)
+func (*PyObject) Bytes
+func (self *PyObject) Bytes() *PyObject
+PyObject* PyObject_Bytes(PyObject *o) Compute a bytes representation of object o. In 2.x, this is just a alias for PyObject_Str().
+
+func (*PyObject) Call
+func (self *PyObject) Call(args, kw *PyObject) *PyObject
+PyObject* PyObject_Call(PyObject *callable_object, PyObject *args, PyObject *kw) Return value: New reference. Call a callable Python object callable_object, with arguments given by the tuple args, and named arguments given by the dictionary kw. If no named arguments are needed, kw may be NULL. args must not be NULL, use an empty tuple if no arguments are needed. Returns the result of the call on success, or NULL on failure. This is the equivalent of the Python expression apply(callable_object, args, kw) or callable_object(*args, **kw).
+
+func (*PyObject) CallFunction
+func (self *PyObject) CallFunction(args ...interface{}) *PyObject
+PyObject* PyObject_CallFunction(PyObject *callable, char *format, ...) Return value: New reference. Call a callable Python object callable, with a variable number of C arguments. The C arguments are described using a Py_BuildValue() style format string. The format may be NULL, indicating that no arguments are provided. Returns the result of the call on success, or NULL on failure. This is the equivalent of the Python expression apply(callable, args) or callable(*args). Note that if you only pass PyObject * args, PyObject_CallFunctionObjArgs() is a faster alternative.
+
+func (*PyObject) CallFunctionObjArgs
+func (self *PyObject) CallFunctionObjArgs(format string, args ...interface{}) *PyObject
+PyObject* PyObject_CallFunctionObjArgs(PyObject *callable, ..., NULL) Return value: New reference. Call a callable Python object callable, with a variable number of PyObject* arguments. The arguments are provided as a variable number of parameters followed by NULL. Returns the result of the call on success, or NULL on failure.
+
+New in version 2.2.
+
+func (*PyObject) CallMethod
+func (self *PyObject) CallMethod(method string, args ...interface{}) *PyObject
+PyObject* PyObject_CallMethod(PyObject *o, char *method, char *format, ...) Return value: New reference. Call the method named method of object o with a variable number of C arguments. The C arguments are described by a Py_BuildValue() format string that should produce a tuple. The format may be NULL, indicating that no arguments are provided. Returns the result of the call on success, or NULL on failure. This is the equivalent of the Python expression o.method(args). Note that if you only pass PyObject * args, PyObject_CallMethodObjArgs() is a faster alternative.
+
+func (*PyObject) CallMethodObjArgs
+func (self *PyObject) CallMethodObjArgs(method string, args ...interface{}) *PyObject
+PyObject* PyObject_CallMethodObjArgs(PyObject *o, PyObject *name, ..., NULL) Return value: New reference. Calls a method of the object o, where the name of the method is given as a Python string object in name. It is called with a variable number of PyObject* arguments. The arguments are provided as a variable number of parameters followed by NULL. Returns the result of the call on success, or NULL on failure.
+
+New in version 2.2.
+
+func (*PyObject) CallObject
+func (self *PyObject) CallObject(args *PyObject) *PyObject
+PyObject* PyObject_CallObject(PyObject *callable_object, PyObject *args) Return value: New reference. Call a callable Python object callable_object, with arguments given by the tuple args. If no arguments are needed, then args may be NULL. Returns the result of the call on success, or NULL on failure. This is the equivalent of the Python expression apply(callable_object, args) or callable_object(*args).
+
+func (*PyObject) Check_Callable
+func (self *PyObject) Check_Callable() bool
+int PyCallable_Check(PyObject *o) Determine if the object o is callable. Return 1 if the object is callable and 0 otherwise. This function always succeeds. PyObject* PyObject_Call(PyObject *callable_object, PyObject *args, PyObject *kw) Return value: New reference. Call a callable Python object callable_object, with arguments given by the tuple args, and named arguments given by the dictionary kw. If no named arguments are needed, kw may be NULL. args must not be NULL, use an empty tuple if no arguments are needed. Returns the result of the call on success, or NULL on failure. This is the equivalent of the Python expression apply(callable_object, args, kw) or callable_object(*args, **kw).
+
+New in version 2.2.
+
+func (*PyObject) Clear
+func (self *PyObject) Clear()
+void Py_CLEAR(PyObject *o) Clear sets the PyObject's internal pointer to nil before calling Py_DecRef. This avoids the potential issues with Python code called by the deallocator referencing invalid, partially-deallocated data.
+
+func (*PyObject) Cmp
+func (self *PyObject) Cmp(o2 *PyObject) (err, result int)
+int PyObject_Cmp(PyObject *o1, PyObject *o2, int *result) Compare the values of o1 and o2 using a routine provided by o1, if one exists, otherwise with a routine provided by o2. The result of the comparison is returned in result. Returns -1 on failure. This is the equivalent of the Python statement result = cmp(o1, o2).
+
+func (*PyObject) Compare
+func (self *PyObject) Compare(o2 *PyObject) int
+int PyObject_Compare(PyObject *o1, PyObject *o2) Compare the values of o1 and o2 using a routine provided by o1, if one exists, otherwise with a routine provided by o2. Returns the result of the comparison on success. On error, the value returned is undefined; use PyErr_Occurred() to detect an error. This is equivalent to the Python expression cmp(o1, o2).
+
+func (*PyObject) DecRef
+func (self *PyObject) DecRef()
+void Py_DecRef(PyObject *o) Decrement the reference count for object o. If the object is NULL, nothing happens. If the reference count reaches zero, the object’s type’s deallocation function (which must not be NULL) is invoked. WARNING: The deallocation function can cause arbitrary Python code to be invoked. See the warnings and instructions in the Python docs, and consider using Clear instead.
+
+func (*PyObject) DelAttr
+func (self *PyObject) DelAttr(attr_name *PyObject) int
+int PyObject_DelAttr(PyObject *o, PyObject *attr_name) Delete attribute named attr_name, for object o. Returns -1 on failure. This is the equivalent of the Python statement del o.attr_name.
+
+func (*PyObject) DelAttrString
+func (self *PyObject) DelAttrString(attr_name string) int
+int PyObject_DelAttrString(PyObject *o, const char *attr_name) Delete attribute named attr_name, for object o. Returns -1 on failure. This is the equivalent of the Python statement del o.attr_name.
+
+func (*PyObject) GenericGetAttr
+func (self *PyObject) GenericGetAttr(name *PyObject) *PyObject
+PyObject* PyObject_GenericGetAttr(PyObject *o, PyObject *name) Generic attribute getter function that is meant to be put into a type object’s tp_getattro slot. It looks for a descriptor in the dictionary of classes in the object’s MRO as well as an attribute in the object’s __dict__ (if present). As outlined in Implementing Descriptors, data descriptors take preference over instance attributes, while non-data descriptors don’t. Otherwise, an AttributeError is raised.
+
+func (*PyObject) GenericSetAttr
+func (self *PyObject) GenericSetAttr(name, value *PyObject) int
+int PyObject_GenericSetAttr(PyObject *o, PyObject *name, PyObject *value) Generic attribute setter function that is meant to be put into a type object’s tp_setattro slot. It looks for a data descriptor in the dictionary of classes in the object’s MRO, and if found it takes preference over setting the attribute in the instance dictionary. Otherwise, the attribute is set in the object’s __dict__ (if present). Otherwise, an AttributeError is raised and -1 is returned.
+
+func (*PyObject) GetAttr
+func (self *PyObject) GetAttr(attr_name *PyObject) *PyObject
+PyObject* PyObject_GetAttr(PyObject *o, PyObject *attr_name) Return value: New reference. Retrieve an attribute named attr_name from object o. Returns the attribute value on success, or NULL on failure. This is the equivalent of the Python expression o.attr_name.
+
+func (*PyObject) GetAttrString
+func (self *PyObject) GetAttrString(attr_name string) *PyObject
+PyObject* PyObject_GetAttrString(PyObject *o, const char *attr_name) Return value: New reference. Retrieve an attribute named attr_name from object o. Returns the attribute value on success, or NULL on failure. This is the equivalent of the Python expression o.attr_name.
+
+func (*PyObject) GetCPointer
+func (self *PyObject) GetCPointer() *C.PyObject
+C.PyObject* PyObject_GetCPointer(PyObject *o) Returns the internal C pointer to CPython object.
+
+func (*PyObject) HasAttr
+func (self *PyObject) HasAttr(attr_name *PyObject) int
+int PyObject_HasAttr(PyObject *o, PyObject *attr_name) Returns 1 if o has the attribute attr_name, and 0 otherwise. This is equivalent to the Python expression hasattr(o, attr_name). This function always succeeds.
+
+func (*PyObject) HasAttrString
+func (self *PyObject) HasAttrString(attr_name string) int
+int PyObject_HasAttrString(PyObject *o, const char *attr_name) Returns 1 if o has the attribute attr_name, and 0 otherwise. This is equivalent to the Python expression hasattr(o, attr_name). This function always succeeds.
+
+func (*PyObject) Hash
+func (self *PyObject) Hash() int64
+long PyObject_Hash(PyObject *o) Compute and return the hash value of an object o. On failure, return -1. This is the equivalent of the Python expression hash(o).
+
+func (*PyObject) HashNotImplemented
+func (self *PyObject) HashNotImplemented() bool
+long PyObject_HashNotImplemented(PyObject *o) Set a TypeError indicating that type(o) is not hashable and return -1. This function receives special treatment when stored in a tp_hash slot, allowing a type to explicitly indicate to the interpreter that it is not hashable.
+
+New in version 2.6.
+
+func (*PyObject) IncRef
+func (self *PyObject) IncRef()
+void Py_IncRef(PyObject *o) Increment the reference count for object o. The object may be NULL, in which case the function has no effect.
+
+func (*PyObject) IsInstance
+func (self *PyObject) IsInstance(cls *PyObject) int
+int PyObject_IsInstance(PyObject *inst, PyObject *cls) Returns 1 if inst is an instance of the class cls or a subclass of cls, or 0 if not. On error, returns -1 and sets an exception. If cls is a type object rather than a class object, PyObject_IsInstance() returns 1 if inst is of type cls. If cls is a tuple, the check will be done against every entry in cls. The result will be 1 when at least one of the checks returns 1, otherwise it will be 0. If inst is not a class instance and cls is neither a type object, nor a class object, nor a tuple, inst must have a __class__ attribute — the class relationship of the value of that attribute with cls will be used to determine the result of this function.
+
+New in version 2.1.
+
+Changed in version 2.2: Support for a tuple as the second argument added.
+
+Subclass determination is done in a fairly straightforward way, but includes a wrinkle that implementors of extensions to the class system may want to be aware of. If A and B are class objects, B is a subclass of A if it inherits from A either directly or indirectly. If either is not a class object, a more general mechanism is used to determine the class relationship of the two objects. When testing if B is a subclass of A, if A is B, PyObject_IsSubclass() returns true. If A and B are different objects, B‘s __bases__ attribute is searched in a depth-first fashion for A — the presence of the __bases__ attribute is considered sufficient for this determination.
+
+func (*PyObject) IsSubclass
+func (self *PyObject) IsSubclass(cls *PyObject) int
+int PyObject_IsSubclass(PyObject *derived, PyObject *cls) Returns 1 if the class derived is identical to or derived from the class cls, otherwise returns 0. In case of an error, returns -1. If cls is a tuple, the check will be done against every entry in cls. The result will be 1 when at least one of the checks returns 1, otherwise it will be 0. If either derived or cls is not an actual class object (or tuple), this function uses the generic algorithm described above.
+
+New in version 2.1.
+
+Changed in version 2.3: Older versions of Python did not support a tuple as the second argument.
+
+func (*PyObject) IsTrue
+func (self *PyObject) IsTrue() bool
+int PyObject_IsTrue(PyObject *o) Returns 1 if the object o is considered to be true, and 0 otherwise. This is equivalent to the Python expression not not o. On failure, return -1.
+
+func (*PyObject) Not
+func (self *PyObject) Not() bool
+int PyObject_Not(PyObject *o) Returns 0 if the object o is considered to be true, and 1 otherwise. This is equivalent to the Python expression not o. On failure, return -1.
+
+func (*PyObject) PyObject_Dir
+func (self *PyObject) PyObject_Dir() *PyObject
+PyObject* PyObject_Dir() Return value: New reference. This is equivalent to the Python expression dir(o), returning a (possibly empty) list of strings appropriate for the object argument, or NULL if there was an error. If the argument is NULL, this is like the Python dir(), returning the names of the current locals; in this case, if no execution frame is active then NULL is returned but PyErr_Occurred() will return false.
+
+func (*PyObject) Repr
+func (self *PyObject) Repr() *PyObject
+PyObject* PyObject_Repr(PyObject *o) Return value: New reference. Compute a string representation of object o. Returns the string representation on success, NULL on failure. This is the equivalent of the Python expression repr(o). Called by the repr() built-in function and by reverse quotes.
+
+func (*PyObject) RichCompare
+func (self *PyObject) RichCompare(o2 *PyObject, opid Py_OPID) *PyObject
+PyObject* PyObject_RichCompare(PyObject *o1, PyObject *o2, int opid) Return value: New reference. Compare the values of o1 and o2 using the operation specified by opid, which must be one of Py_LT, Py_LE, Py_EQ, Py_NE, Py_GT, or Py_GE, corresponding to <, <=, ==, !=, >, or >= respectively. This is the equivalent of the Python expression o1 op o2, where op is the operator corresponding to opid. Returns the value of the comparison on success, or NULL on failure.
+
+func (*PyObject) RichCompareBool
+func (self *PyObject) RichCompareBool(o2 *PyObject, opid Py_OPID) int
+int PyObject_RichCompareBool（PyObject _o1、PyObject _o2、int opid） 使用 opid 指定的运算比较 o1 和 o2 的值，该运算必须分别与 < < < ===___gt;， >或 >或 >或 >= 对应的Py_LT、Py_LE、Py_EQ、Py_NE、Py_GT或Py_GE的值。如果结果为 false，则返回 -1，如果结果为 false，则返回 0，否则返回 1。这相当于 Python 表达式 o1 op o2，其中 op 是与 opid 对应的运算符。
+
+乐趣 （_皮对象）设置
+func (self *PyObject) SetAttr(attr_name, v *PyObject) int
+int PyObject_SetAttr（PyObject _o，PyObject _attr_name，PyObject _v） 将名为attr_name的属性的值设置为对象 o 的值 v. 失败时返回 -1。这相当于 Python 语句 o.attr_name = v.
+
+乐趣 （_皮对象）设置目标String
+func (self *PyObject) SetAttrString(attr_name string, v *PyObject) int
+int PyObject_SetAttrString（PyObject _o，const char _attr_name，PyObject _v） 将名为 attr_name 的属性的值设置为对象 o 的值 v. 失败时返回 -1。这相当于 Python 语句 o.attr_name = v.
+
+乐趣 （_皮对象）斯特
+func (self *PyObject) Str() *PyObject
+PyObject® PyObject_Str（PyObject _o） 返回值：新引用。计算对象 o 的字符串表示形式， 在成功时返回字符串表示形式，在失败时返回 NULL。这相当于 Python 表达式 str（o）。由 str（） 内置函数和打印语句调用。
+
+func （_PyObject）字符串
+func (self *PyObject) String() string
+字符串返回 PyObject 的字符串表示形式
+
+乐趣 （_皮对象）类型
+func (self *PyObject) Type() *PyObject
+PyObject® PyObject_Type（PyObject _o） 返回值：新引用。当 o 是非 NULL 时，返回与对象 o 的对象类型对应的类型对象。发生故障时，引发系统错误并返回 NULL。这等效于 Python 表达式类型 （o）。此函数增加返回值的引用计数。实际上没有理由使用此函数而不是公共表达式 o->ob_type，该表达式返回 PyTypeObject®类型的指针*，除非需要增量引用计数。
+
+func （_PyObject） Unicode
+func (self *PyObject) Unicode() *PyObject
+pyObject® PyObject_Unicode（PyObject _o） 返回值：新引用。计算对象 o 的 Unicode 字符串表示形式，在成功时返回 Unicode 字符串表示形式，在失败时返回 NULL。这相当于 Python 表达式单码 （o）。由 unicode（） 内置函数调用。
+
+类型PySlice 对象
+type PySliceObject struct {
+    // contains filtered or unexported fields
+}
+类型 PyString
+type PyString PyObject
+字符串 //////// / /
+
+类型 PyThreadState
+type PyThreadState struct {
+    // contains filtered or unexported fields
+}
+PyThreadState 图层
+
+乐趣PyEval_SaveThread
+func PyEval_SaveThread() *PyThreadState
+PyThreadState® PyEval_SaveThread（） 释放全局解释器锁（如果已创建并启用线程支持），并将线程状态重置为 NULL，返回以前的线程状态（不是 NULL）。如果已创建锁，则当前线程必须已获取该锁。（即使在编译时禁用线程支持时，此功能也可用。
+
+类型PyType 对象
+type PyTypeObject struct {
+    // contains filtered or unexported fields
+}
+类型Py_OPID
+type Py_OPID C.int
+const (
+    Py_LT Py_OPID = C.Py_LT
+    Py_LE Py_OPID = C.Py_LE
+    Py_EQ Py_OPID = C.Py_EQ
+    Py_NE Py_OPID = C.Py_NE
+    Py_GT Py_OPID = C.Py_GT
+    Py_GE Py_OPID = C.Py_GE
+)
+类型Py_buffer
+type Py_buffer struct {
+    // contains filtered or unexported fields
+}
+Py_buffer层
+
+乐趣PyBuffer_FillInfo
+func PyBuffer_FillInfo(self *PyObject, buf []byte, readonly bool, infoflags int) (buffer *Py_buffer, err error)
+int PyBuffer_FillInfo（Py_buffer _view， PyObject _obj， 空白 _buf， Py_ssize_t len， int 只读， int 信息标志） 填写一个缓冲信息结构，视图，正确为导出，只能共享给定长度的"无符号字节"的连续内存块。成功时返回 0，在错误时返回 -1（带引发错误）。
+
+乐趣PyMemoryView_GET_BUFFER
+func PyMemoryView_GET_BUFFER(obj *PyObject) *Py_buffer
+Py_buffer _PyMemoryView_GET_BUFFER（PyObject _obj） 返回指向由给定对象包裹的缓冲区信息结构的指针。对象必须是内存视图实例;因此，该对象必须是内存视图实例。此宏不检查其类型，您必须自己执行，否则将面临崩溃的风险。
+
+乐趣PyObject_GetBuffer
+func PyObject_GetBuffer(self *PyObject, flags PyBUF_Flag) (buf *Py_buffer, err error)
+int PyObject_GetBuffer （PyObject _obj， Py_buffer _view， int 标志） 导出 obj 到Py_buffer， 视图.这些参数绝不能为 NULL。标志参数是一个位字段，指示调用方准备处理的缓冲区类型，因此允许导出者返回哪种缓冲区。缓冲区接口允许复杂的内存共享可能性，但某些调用方可能无法处理所有的复杂性，但可能希望查看导出器是否允许他们对其内存采取更简单的视图。
+
+一些出口商可能无法以各种可能的方式共享内存，可能需要提出错误，向一些消费者发出信号，表明某些内容是不可能的。除非出现另一个错误，否则这些错误应为 BufferError。导出器可以使用标志信息来简化Py_buffer结构中有多少填充非默认值，并且/或者如果对象不支持其内存的更简单视图，则引发错误。
+
+0 在成功时返回，在错误时返回 -1。
+
+下表为标志参数提供了可能的值。
+
+标志说明PyBUF_SIMPLE这是默认标志状态。返回的缓冲区可能具有可写内存，也可能没有可写内存。数据的格式将假定为未签名的字节。这是一个"独立"标志常量。它从来不需要是']d 给其他人。如果导出器无法提供此类连续字节缓冲区，则将引发错误。PyBUF_WRITABLE返回的缓冲区必须是可写。如果无法写，则引发错误。PyBUF_STRIDES这意味着PyBUF_ND。返回的缓冲区必须提供步进信息（即步进不能为 NULL）。当使用者可以处理跨步、不连续的数组时，将使用此参数。自动处理步进假定您可以处理形状。如果无法对数据进行分步表示（即没有子偏移），导出者可能会引发错误。PyBUF_ND返回的缓冲区必须提供形状信息。内存将假定为 C 样式连续（最后一个维度变化最快）。如果出口商无法提供这种连续缓冲区，则可能会引发错误。如果未给出此值，则形状将为 NULL。PyBUF_C_CONTIGUOUS PyBUF_F_CONTIGUOUS PyBUF_ANY_CONTIGUOUS 这些标志表示返回的连续缓冲区必须分别为 C 连续（最后一个维度变化最快）、Fortran 连续（第一个维度变化最快）或任一维度。所有这些标志都意味着PyBUF_STRIDES，并保证正确填充步长缓冲区信息结构。PyBUF_INDIRECT 此标志指示返回的缓冲区必须具有子偏移信息（如果没有子偏移量，则该信息可以是 NULL）。当使用者可以处理这些子偏移量隐含的间接数组引用时，可以使用此选项。这意味着PyBUF_STRIDES。PyBUF_FORMAT 如果提供此标志，则返回的缓冲区必须具有真实格式信息。当使用者要检查实际存储的"类型"数据时，将使用此值。如果要求，出口商应始终能够提供此信息。如果未显式请求格式，则必须将格式返回为 NULL（即"B"或无符号字节PyBUF_STRIDED这相当于 （PyBUF_STRIDES |PyBUF_WRITABLE）。PyBUF_STRIDED_RO这相当于 （PyBUF_STRIDES）。PyBUF_RECORDS这相当于 （PyBUF_STRIDES |PyBUF_FORMAT |PyBUF_WRITABLE）。PyBUF_RECORDS_RO 这相当于 （PyBUF_STRIDES |PyBUF_FORMAT）。PyBUF_FULL 这相当于 （PyBUF_INDIRECT |PyBUF_FORMAT |PyBUF_WRITABLE）。PyBUF_FULL_RO这相当于 （PyBUF_INDIRECT |PyBUF_FORMAT）。PyBUF_CONTIG 这相当于 （PyBUF_ND |PyBUF_WRITABLE）。PyBUF_CONTIG_RO这相当于 （PyBUF_ND）。
+
+包装蛇导入6个包（图），由10个包导入。更新2个月前。立即刷新。用于包所有者的工具。
+
+
+

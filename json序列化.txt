@@ -1,0 +1,197 @@
+struct->json
+byte,err:=json.Marshal(var)（序列化）
+
+json->struct
+err:=json.Unmarshal(var,interface{})（反序列化）
+
+结构体tag'
+tag时结构体的元信息,可以运行的时候通过反射的机制读取出来,Tag在结构体字段的后方定义,由一对``包裹
+`key1:"value1" key2:"value2"
+
+// 使用json tag指定序列化与反序列化时的行为
+type Person struct {
+	Name   string `json:"name"` // 指定json序列化/反序列化时使用小写name
+	Age    int64
+	Weight float64   `json:"-"` // 指定json序列化/反序列化时忽略此字段
+}
+
+
+当struct字段未设置值时,json.Marshal() 序列化的时候不会忽略该字段,默认使用该字段对应的数据类型的零值例如int和float类型零值是 0，string类型零值是""，对象类型零值是 nil）
+如果要忽略无值的字段时,在对应字段后设置omitempty tag
+type Person struct {
+	Name string  `json:"people_name"`
+	Age  int     `json:"people_age"`
+	Weight int    `json:"_,omitempty"`
+	Hoob []string    `json:"hobby,omitempty"`
+}
+
+result
+序列化 struct——》json
+{"people_name":"jim","people_age":21}
+
+
+
+使用结构体嵌套时 忽略空字段
+需要使用子字段的指针
+type Person struct {
+	Name string  `json:"people_name"`
+	Age  int     `json:"people_age"`
+	Weight int    `json:"_,omitempty"`
+	Hoob []string    `json:"hobby,omitempty"`
+    *Adress    `json:"adress,omitempty"`
+}
+type Adress struct {
+	City string `json:"city"`
+	Num int     `json:"num"`
+}
+
+
+
+使用json序列化结构体，个别字段又不可以序列化 需要额外定义一个结构体，匿名嵌套原来的结构体,通知指定非序列化的字段为匿名结构体指针类型，并添加tag omitempty。
+(与其说是序列化部分的字段，倒不如说是重写结构体的非序列化字段且为指针类型的空结构体)
+
+
+type Adress struct {
+	City string `json:"city"`
+	Num int     `json:"num"`
+}
+
+type piaNum struct {
+	*Adress  //匿名嵌套
+	Num  *struct{}  `json:"num,omitempty"`
+}
+
+var ad Adress
+    ad.Num=2
+    ad.City="齐齐哈尔"
+    var pia piaNum
+    pia.Adress=&ad
+    b1,err3:=json.Marshal(pia)
+
+
+
+处理string格式的数字
+前端在传递来的json数据中可能会使用字符串类型的数字，这个时候可以在结构体tag中添加string来告诉json包从字符串中解析相应字段的数据：
+type Card struct {
+	ID    int64   `json:"id,string"`    // 添加string tag
+	Score float64 `json:"score,string"` // 添加string tag
+}
+
+jsonStr1 := `{"id": "1234567","score": "88.50"}`
+	var c1 Card
+	if err := json.Unmarshal([]byte(jsonStr1), &c1); err != nil {
+		fmt.Printf("json.Unmarsha jsonStr1 failed, err:%v\n", err)
+		return
+
+var c1 Card    ID=1   Sorce=3.55
+b,err4:=json.Marshal(c1)
+
+********************************************
+整数变浮点数
+var m = make(map[string]interface{}, 1)
+	m["count"] = 1 // int
+	b, err := json.Marshal(m)
+
+
+var m2 map[string]interface{}
+	err = json.Unmarshal(b, &m2)
+
+m2["count"] ====> type is float64 
+
+
+如果想要利用原先的int类型数据 需要decoder反序列化
+
+使用decoder方式反序列化,指定使用number类型
+decoder := json.NewDecoder(bytes.NewReader(b))
+decoder.UseNumber()
+err = decoder.Decode(&m2)
+fmt.Printf("type:%T\n", m2["count"])  // json.Number
+
+将m2["count"]转为json.Number之后调用Int64()方法获得int64类型的值
+count, err := m2["count"].(json.Number).Int64()
+
+注： 在处理number类型的json字段时需要先得到json.Number类型，然后根据该字段的实际类型调用Float64()或Int64()。
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+自定义解析时间字段
+   Go语言内置的 json 包使用 RFC3339 标准中定义的时间格式
+
+
+
+***************************************************************
+// 使用匿名结构体内嵌原有结构体并添加额外字段
+	b, err2 = json.Marshal(struct {
+		*Walker
+		Age int `json:"age"`
+	}{
+		&w1,
+		16,
+	
+})
+
+
+使用匿名结构体来组合多个结构体来序列化与反序列化数据：
+	c1 := Comment{
+		Content: "永远不要高估自己",
+	}
+	i1 := Image{
+		Title: "赞赏码",
+		URL:   "https://www.liwenzhou.com/images/zanshang_qr.jpg",
+	}
+	// struct -> json string
+	b, err = json.Marshal(struct {
+		*Comment
+		*Image
+	}{&c1, &i1})
+	if err != nil {
+		fmt.Printf("json.Marshal failed, err:%v\n", err)
+		return
+	}
+	fmt.Printf("str:%s\n", b)
+	// json string -> struct
+	jsonStr := `{"Content":"永远不要高估自己","title":"赞赏码","url":"https://www.liwenzhou.com/images/zanshang_qr.jpg"}`
+	var (
+		c2 Comment
+		i2 Image
+	)
+	if err ：= json.Unmarshal([]byte(jsonStr), &struct {
+		*Comment
+		*Image
+	}{&c2, &i2}); err != nil {
+		fmt.Printf("json.Unmarshal failed, err:%v\n", err)
+		return
+	}
+	fmt.Printf("c2:%#v i2:%#v\n", c2, i2)
+}
+
+
+
+
+
+************************************************************
+处理不定层级的接送
+
+如果json串没有固定的格式导致不好定义与其相对应的结构体时，我们可以使用json.RawMessage原始字节数据保存下来。
+
+
+type sendMsg struct {
+	User string `json:"user"`
+	Msg  string `json:"msg"`
+}
+
+func rawMessageDemo() {
+	jsonStr := `{"sendMsg":{"user":"q1mi","msg":"永远不要高估自己"},"say":"Hello"}`
+	// 定义一个map，value类型为json.RawMessage，方便后续更灵活地处理
+	var data map[string]json.RawMessage
+	if err := json.Unmarshal([]byte(jsonStr), &data); err != nil {
+		fmt.Printf("json.Unmarshal jsonStr failed, err:%v\n", err)
+		return
+	}
+	var msg sendMsg
+	if err := json.Unmarshal(data["sendMsg"], &msg); err != nil {
+		fmt.Printf("json.Unmarshal failed, err:%v\n", err)
+		return
+	}
+	fmt.Printf("msg:%#v\n", msg)
+	// msg:main.sendMsg{User:"q1mi", Msg:"永远不要高估自己"}
+}

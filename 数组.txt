@@ -1,0 +1,63 @@
+数组 Array ：
+    定义： var 数组变量名 [元素数量]T  数组的长度必须是常量，并且长度时数组类型的一部分，一旦定义，长度不能变
+
+数组的初始化： 
+    多为数组只有第一层可以使用... 让编译器推到数组长度
+  1） 可以使用初始化列表来设置数组元素的值
+       eg： var testArray [5] int  //数组会初始化为int类型的零值
+	var numArray = [5]int{1,2,3,5} //使用指定的初始值完成初始化
+	var strArray = [3]string{"北京","深圳","珠海"}// 使用指定的初始值完成初始化
+
+
+2) 确保提供的初始值和数组长度一致 
+    eg：var numArray = [...]int{1,2,3,5} //根据初始值的个数自行推断数组的长度
+
+3） 使用索引值的方式来初始化数组
+     eg： numbArray := [...] float32{0:1.23,6:0.21,7:0.36}
+
+
+
+数组遍历：
+    第一种for循环：
+    for i :=0 ; i <len(strArray); i++ {
+    	fmt.Println(strArray[i])
+	}
+    
+   第二种for循环：
+   for index, value := range strArray {
+		fmt.Println(index, value)
+	}
+
+
+多维数组的定义：
+    二维数组： for_newArray := [...][2]string{
+    	{"北京","天津"},{"珠海","汕头"},{"深圳","佛山"},
+	}
+
+二维数组的遍历： 
+for _,v1:=range for_newArray{
+       for _,v2:=range v1{
+       	fmt.Printf("%T,%s \n",v2,v2)
+	   }
+	}
+
+
+数组是值类型，赋值和传参会赋值整个数组，因此会改变副本的值，不会改变本身的值 
+
+数组支持 '==' '!='操作符，
+[n]*T 表示指针数组，
+*[n]T 表示数组指针
+
+
+切片： 切片是一个拥有相同类型的可变长度的序列，切片是一个引用类型，它的内部结构包括地址、长度、容量，一般用于快速的操作以块数据
+
+切片的定义： var name []T  //  name：变量名  T ：切片中的元素类型
+
+var a[]string // 声明一个字符串切片
+    var b=[]int{} //声明一个整形切片并初始化
+	var c=[]bool{false,true}//声明一个布尔类型并初始化
+	fmt.Println(a,b,c)
+	fmt.Println(a ==nil,b==nil,c==nil) //切片是引用类型，不支持直接比较，只能和nil比较
+}
+
+切片的长度和容量：len（） 长度    cap() 容量

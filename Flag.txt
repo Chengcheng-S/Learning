@@ -1,0 +1,92 @@
+golang内置的flag包实现了命令行参数的解析,flag包使得开发命令行工具更为简单。
+
+1.1  os.Args
+获取命令行参数,
+if len(os.Args) > 0 {
+        for index, arg := range os.Args {
+            fmt.Printf("args[%d]=%v\n", index, arg)
+        }
+    }
+
+os.Args是一个存储命令行参数的字符串切片，它的第一个元素是执行文件的名称
+
+flag参数类型：
+
+  参数                        有效值
+
+字符串flag                  合法字符串
+整数flag		   0、10、8、16 也可以为负数
+浮点数flag		  合法浮点数
+bool类型flag		  1, 0, t, f, T, F, true, false, TRUE, FALSE, True, False。
+
+时间段flag	   任何合法的时间段字符串。如”300ms”、”-1.5h”、”2h45m”。
+合法的单位有”ns”、”us” /“µs”、”ms”、”s”、”m”、”h”。
+
+
+
+1.1.3 定义命令行的flag参数
+
+flag.Type() 
+flag.Type(flag名, 默认值, 帮助信息)*Type
+
+name := flag.String("name", "张三", "姓名")
+age := flag.Int("age", 18, "年龄")
+married := flag.Bool("married", false, "婚否")
+delay := flag.Duration("d", 0, "时间间隔")
+
+注： 此时name、age、married、delay均为对应类型的指针。
+
+flag.TypeVar()
+var name string
+var age int
+var married bool
+var delay time.Duration
+flag.StringVar(&name, "name", "张三", "姓名")
+flag.IntVar(&age, "age", 18, "年龄")
+flag.BoolVar(&married, "married", false, "婚否")
+flag.DurationVar(&delay, "d", 0, "时间间隔")
+
+flag.Parse()
+通过以上方法定义好的参数之后，需要调用flag.Parse() 来对命令行进行解析。
+-flag xxx （使用空格，一个-符号）
+--flag xxx （使用空格，两个-符号）
+-flag=xxx （使用等号，一个-符号）
+--flag=xxx （使用等号，两个-符号）
+其中bool类型的参数必须使用等号的方式指定
+Flag在解析第一个非flag参数(单个”-“不是flag参数)之前停止,还活着在终止符"-"之后停止
+
+
+
+其他函数
+flag.Args() ////返回命令行参数后的其他参数，以[]string类型
+flag.NArg() //返回命令行参数后的其他参数个数
+flag.NFlag() //返回使用的命令行参数个数
+
+
+
+
+    //解析命令行参数
+    flag.Parse()
+    fmt.Println(name, age, married, delay)
+    //返回命令行参数后的其他参数
+    fmt.Println(flag.Args())
+    //返回命令行参数后的其他参数个数
+    fmt.Println(flag.NArg())
+    //返回使用的命令行参数个数
+    fmt.Println(flag.NFlag())
+
+
+
+
+    //解析命令行参数
+    flag.Parse()
+    fmt.Println(name, age, married, delay)
+    //返回命令行参数后的其他参数
+    fmt.Println(flag.Args())
+    //返回命令行参数后的其他参数个数
+    fmt.Println(flag.NArg())
+    //返回使用的命令行参数个数
+    fmt.Println(flag.NFlag())
+
+cmd：
+go run 2.go -name="李四" -age 77 llll

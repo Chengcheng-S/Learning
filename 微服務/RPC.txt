@@ -1,0 +1,229 @@
+# RPC
+
+  远程过程调用 是一个**计算级机通信协议**
+该协议允许运行于一台计算机的程序调用另一台计算机的子程序,无需额外的为这个交互作用编程
+涉及的软件采用面向对象编程,那么远程过程调用亦可称为远程调用或者远程方法调用
+
+golang官方的net/rpc库使用encoding/gob进行编解码，支持tcp和http数据传输方式，由于其他语言不支持gob编解码方式，所以golang的RPC只支持golang开发的服务器与客户端之间的交互
+
+官方还提供了net/rpc/jsonrpc库实现RPC方法，jsonrpc采用JSON进行数据编解码，因而支持跨语言调用，目前jsonrpc库是基于tcp协议实现的，暂不支持http传输方式
+
+> GOLANG写RPC程序,必须符合4个基本条件
+>    · 结构体字段首字母必须大写
+>    ·函数名首字母必须大写
+>    · 函数的第一参数是接收参数,第二个参数时返回给客户端的参数,必须是指针类型
+>    ·函数还必须有一个返回值error
+
+
+Server 端
+
+```go
+type Parmas struct {
+	Width,Height int
+
+}
+// 用于注册的结构体
+type Rect struct {}
+
+// RPC  矩形周长
+func (r *Rect)Perimeter(p Parmas,ret *int)error{
+	*ret=(p.Height+p.Width)*2
+	return nil
+}
+
+// 矩形面积
+func (r *Rect)Area(p *Parmas,are *int)error{
+	*are=p.Width*p.Height
+	return nil
+}
+
+
+func main(){
+
+  // 1、注册服务
+  ret:=new(Rect)
+  // 2、注册一个rect服务
+  rpc.Register(ret)
+  //3、将服务绑定到http协议上
+  rpc.HandleHTTP()
+  //4、监听服务
+  err:=http.ListenAndServer(":8081",nil)
+
+}
+
+
+```
+
+Client:
+
+```go
+type Params struct {
+
+	Width,Height int
+
+}
+```
+
+```go
+func main(){
+  // 连接远程服务器
+  con,err:=rpc.DialHTTP("tcp",":8081")
+  // 求矩形的面积    调用Rect下的Area方法  传入的参数为。。。 结果存入ret
+	ret:=0
+	err2:=con.Call("Rect.Area",Params{Height:20,Width:300},&ret)
+        fmt.Printf("面积%v\n",ret)
+
+   // 周长  
+	err3:=con.Call("Rect.Perimeter",Params{Width:200,Height:30},&ret)
+
+}
+```
+
+异步调用：
+
+```go
+var res float32
+    rescall:=client.Go("MathUtil.Addargs",Param{Arg1:2,Arg2:5},&res,nil)
+    //  在通道中读取数据
+    respla:=<-rescall.Done
+    fmt.Println("结果是：",*&res)
+    fmt.Println(respla)
+```
+
+
+//异步调用，在完成是向通道发送数据，相同的call对象如果完成为0，go将分配一个新通道, 如果非nil，必须对done进行缓冲，否则Go会故意崩溃。
+	//异步调用，将数据传入通道当中，
+
+**********************************************************************
+net/rpc/jsonrpc库通过json格式编解码，支持跨语言调用
+
+SERVER
+	
+
+```go
+// 注册服务
+	rpc.Register(new(Rect))
+
+	// 监听端口
+	lis,err:=net.Listen("tcp",":8081")
+	Handler(err,"listen addr is failed")
+	//  等待并监听端口连接
+	for{
+		conn,err2:=lis.Accept()
+	    Handler(err2,"监听出现问题")
+	     // net.Conn  连接
+	    go func(conn net.Conn){
+	    	fmt.Println("new clien")
+	    	// ServerConn在单个连接上运行JSON-RPC服务器。serverconn阻塞,未连接提供服务,直到客户端挂断，调用方法通常在golang中调用serverconn
+	    	jsonrpc.ServeConn(conn)
+		}(conn)
+
+
+	}
+
+}
+```
+
+```go
+// 声明参数的结构体
+type Params struct {
+	Width,Height int
+}
+// 注册的结构体
+type Rect struct {}
+
+// 周长
+func (r *Rect)Perimeter(p Params,ret *int)error{
+	*ret =(p.Width+p.Height)*2
+	return nil
+}
+
+// 面积
+func (r *Rect)Area(p Params,ret *int)error{
+    *ret=p.Height*p.Width
+	return nil
+}
+
+func Handler(err error,why string){
+	if err!=nil{
+		log.Fatal(err)
+		fmt.Println(why)
+	}
+}
+```
+
+
+
+
+
+CLIENT :
+
+```go
+// 连接指定的服务器 方式为tcp
+    fmt.Println("客户端")
+
+	conn,err:=jsonrpc.Dial("tcp",":8081")
+	Handler(err,"dial is failed")
+	
+	defer conn.Close()// 关闭连接
+	
+	ret:=0
+	err3:=conn.Call("Rect.Area",Params{Width:25,Height:36},&ret)
+	Handler(err3,"CallMethod is failed")
+	fmt.Printf("面积是为：%v\n",ret)
+	
+	err4:=conn.Call("Rect.Perimeter",Params{Height:555,Width:30},&ret)
+	Handler(err4,"callmethod_two is failed")
+	fmt.Println("周长",ret)
+
+
+}
+
+type Params struct {
+	Width,Height int
+}
+
+func Handler(err error,why string){
+	if err!=nil{
+		log.Fatal(err)
+		fmt.Println(why)
+	}
+}
+
+
+```
+
+
+
+
+******************************************************************
+## RPC的调用过程
+
+1. ·微服务架构下数据交互一般是对内 rpc  对外REST
+2. ·将业务按功能模块拆分到各个微服务，具有提高项目协作效率,降低模块耦合度、
+
+提高系统可用性等有点，但开发门槛较高，如rpc的框架的使用,后期服务监控工作
+
+一般情况下，将功能代码在本地直接调用,微服务架构下,只需要将这个函数作为单独的服务运行，客户端通过网络调用
+
+### 网络传输数据的格式：
+
+- 客户端服务端 约定好的数据包的格式
+- 成熟的RPC框架会有自定义传输协议
+
+*********************************************
+实现RPC服务端
+·服务端接收到的数据包括 调用的函数名、参数列表、以及返回值error
+·服务端解决的问题： Map维护客户端传来的调用函数,服务端直到调用那个函数
+
+·服务端核心功能
+- 维护函数map
+- -客户端传来的东西进行解析
+- -函数的返回值打包，传送给客户端
+
+******************************************************
+客户端：
+·客户端只有函数原型,使用reflect.MakeFunc()可以完成原型函数的调用
+·reflect.MakeFunc()是client从函数原型到网络调用的关键
+
+

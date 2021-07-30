@@ -1,0 +1,67 @@
+关于  go build  windoows 下创建exe文件  
+go mod init   初始化模块
+go mod why  解释为什么需要包和模块
+go mod edit 是提供了命令版编辑 go.mod 的功能，例如 go mod edit -fmt go.mod 会格式化 go.mod
+
+go mod download 下载模块到本地缓存，缓存路径是 $GOPATH/pkg/mod/cache
+
+go mod graph 把模块之间的依赖图显示出来
+
+go mod tidy 增加缺失的包，移除没用的包
+
+go mod vendor 把依赖拷贝到 vendor/ 目录下
+
+
+
+TCP/IP  协议 需要建立连接 传输数据
+
+UDP 无需建立连接  传输数据
+
+OSI 七层模型： 应用层(应用层、表示层、会话层) 传输层 网络层
+    网络接口层(数据链路层、物理层)
+
+
+socket编程 是BSD UNIX的进程通信机制(套接字)，用于描述IP地址和端口，是一个通信链的句柄。可以理解为TCP/IP的网络API
+
+************************************************
+GOlang 实现TCP通信  
+    TCP/IP 即传输控制协议/网间协议,是一种面向连接(连接导向)的、可靠的、基于自己流的传输层通信协议，会存在黏包问题
+
+
+一个TCP服务端可以同时连接很多个客户端，每建立一次连接就创建一个goroutine去处理
+
+TCP 服务端程序的处理流程
+1、监听端口 listen,err:=net.Listen("tcp","127.0.0.1:8888")
+2、接收客户端请求建立连接  con,err:=listen.Accpet()
+3、创建goroutine处理连接   go process(conn)
+
+TCP客户端进行TCP通信的流程：
+1、建立于服务器的连接  conn,err:=net.Dial("tcp","127.0.0.1:8888")
+2、进行数据收发 
+3、关闭连接  conn.Close()
+
+***************************************************
+GOlang 实现UDP通信
+UDP协议 用户数据报协议是OSI参考模型中一种无连接的传输层协议，不需要建立连接就能直接进行数据发送和接受，属于不可靠的、没有时序的通信，但是UDP 协议的实时性比较好，通常由于视频直播相关领域
+
+UDP 服务端
+监听端口listen,err:=net.ListenUDP("UDP",&net.UDPAddr{IP:"",Port:""})
+
+n,addr,err:=listen.ReadFormUDP(slice) // 接收数据
+
+_,err:=listen.WriteToUDP(silce，addr) // 发送数据
+
+
+UDP客户端
+socket,err:=net.DialUDP("UDP",&net.UDPAddr{IP:"127.0.0.1",Port:"88889"})
+
+sendData := []byte("Hello server")
+	_, err = socket.Write(sendData) // 发送数据
+
+
+data := make([]byte, 4096)
+	n, remoteAddr, err := socket.ReadFromUDP(data) // 接收数据
+
+
+
+

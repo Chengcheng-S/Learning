@@ -1,0 +1,217 @@
+go get github.com/go-sql-driver/mysql 
+    go get github.com/jmoiron/sqlx
+
+
+dsn:="root:123456@tcp(127.0.0.1:3306)/students"
+
+Db,err=sql.Open("mysql",dsn)
+	if err!=nil{
+
+		return err
+	}
+	defer Db.Close()  //  必须在err判断的下边
+   fmt.Println(Db.Ping()) // db.Ping()检查数据源的名称是否真实有效
+
+var db *sql.DB
+sql.DB 是一个数据库操作的句柄,代表一个具有零到多个底层连接的连接池,可以安全的被多个goroutine使用,database/sql包会自动创建和释放连接;它会维护一个闲置的连接的连接池
+
+返回的DB对象可以安全地被多个goroutine并发使用，并且维护其自己的空闲连接池。因此，Open函数应该仅被调用一次，很少需要关闭这个DB对象。
+
+SetMaxOpneConns 设置于数据库建立连接的最大数目,如果n大于0且小于最大闲置连接数,会将最大闲置连接数减少到匹配最大开启连接数的限制,如果n<=0 不会限制最大开启连接数,默认为0(无限)   func (db *DB) SetMaxOpenConns(n int)
+
+
+SetMaxIdleConns  设置连接池中的最大闲置连接数,如果n大于最大开启的连接数,则新的最大闲置连接数会减小到匹配最大开启连接数的限制.如果n<=0,不会保留闲置连接
+func (db *DB) SetMaxIdleConns(n int)
+
+
+
+CRUD  建库 建表
+单行查询 db.QueryRow() 执行一次查询,并期望返回最多一行结果(即Row),QueryRow 总是返回非nil的值,直到返回值的Scan方法被调用时,才会返回被延迟的错误(如:未找到结果)
+ ——1、连接数据库  
+      db,err:=sql.Open("mysql","root:123456@tcp(127.0.0.1:3306)/students?charset=utf8")
+      if err!=nil{log.Fatal(err) return}
+      Db=db
+     2、定义一个全局变量 var Db *sql.DB // 数据库操作句柄
+     3、定义一个字段  该字段要符合需要查询的表的字段 
+     type Stu struct{id int `db:"id"` name string `db:"name"` age int `db:"age"`}
+     4、查询操作 var s Stu  
+     query:="select id ,name from stu where id=?" // 查询的语句
+      // 确保QueryRow之后调用的Scan方法,否则持有的数据库连接不会被释放
+     err=Db.QueryRow(query,arg:1).Scan(&s.id,&s.name) 
+     if err!=nil{ log.Fatal(err) return}
+     defer Db.Close()
+     fmt.Println("select data from stu are:",s.id,s.name)
+
+
+多行选去: 
+    同上 
+    db.Query() 执行一次查询，返回多行结果,参数args表示query
+中的占位参数
+    4、 querry:="select id,title from subjects where id>?"
+	rows,err:=Db.Query(querry,0)
+	if err!=nil{
+		log.Fatal(err)
+		return
+	}
+	// 关闭连接，释放数据库
+	defer rows.Close()
+
+	// 遍历读取数据
+	for rows.Next(){ // 准备下一个结果行 每次扫描调用，即使是第一个，都必须在调用下一个之前
+		var p1 SUB
+		err:=rows.Scan(&p1.id,&p1.title)
+		if err!=nil{
+			fmt.Println("遍历读取出错",err)
+			return
+		}
+		fmt.Println("多行选取的数据为:",p1.id,p1.title)
+
+	}
+	fmt.Println("程序结束")
+
+
+添加数据
+   1、连接数据库
+   2、增加语句  que:="insert into table_name values(?,?)"
+   res,err:=DB.Exec(que,id,filed)
+   3、检验是否插入成功
+   ID,err:=res.LastInsertId() // 新插入的ID
+   if errI!=nil{
+		fmt.Println(errI)
+		return
+	}
+	fmt.Println("insert successful",ID,"main over")
+   
+Exec执行一次命令 包括查询、删除、更新、插入等. 返回的result是对已经执行的sql命令的总结。参数args表示query中的占位数
+
+
+更新数据 
+   1、连接数据库
+   2、更新
+      
+     queupdate:="update animal set name=? where id=?"
+
+	res,err:=DTB.Exec(queupdate,"皇叔狼",3)
+	if err!=nil{
+		fmt.Println("insert error:",err)
+		return
+	}
+	// 检验是否更新成功
+	N,errU:=res.RowsAffected() // 操作影响的行数
+	if errU!=nil{
+		fmt.Println("got RowsAffected failed",errU)
+		return
+	}
+	fmt.Printf("update successful,affected rows:%d\n",N)
+
+        }
+
+
+
+删除数据
+    queDele := "delete from animal where id=?"
+
+	res, err := DTB.Exec(queDele,  3)
+	if err != nil {
+		fmt.Println("insert error:", err)
+		return
+	}
+	// 检验是否删除成功
+	N, errU := res.RowsAffected() // 操作影响的行数
+	if errU != nil {
+		fmt.Println("got RowsAffected failed", errU)
+		return
+	}
+	fmt.Printf("detele successful,affected rows:%d\n", N)
+
+}
+
+
+
+
+***********************************************************************
+GOLANG 实现MYSQL 预处理
+   Prepare方法先将sql语句发送给mysql服务端，返回一个准备好的状态用于之后的查询和命令,返回值可以同时执行多个查询和命令。
+func main() {
+	sqlStr:="select * from animal where id>?"
+	STmt,err:=DTBS.Prepare(sqlStr)
+	if err!=nil{
+		fmt.Println("prepare failed",err)
+		return
+	}
+	defer STmt.Close()
+	rows,err:=STmt.Query(0)
+    if err!=nil{
+    	fmt.Println("query failed",err)
+	}
+	defer  rows.Close() //关闭连接释放数据库
+
+	for rows.Next(){ // 循环中读取数据
+		var a Ani
+		err:=rows.Scan(&a.id,&a.name)
+		if err!=nil{
+			log.Fatal(err)
+			return
+		}
+		fmt.Printf("id%d,name%s\n",a.id,a.name)
+	}
+    /*
+    事务预处理 增
+     */
+    insertdata:="insert into animal values(?,?)"
+    SMTMS2,err2:=DTBS.Prepare(insertdata)
+    if err2!=nil{
+    	fmt.Println("prepare2 is failed",err)
+		return
+	}
+	defer  SMTMS2.Close()
+    _,err3:=SMTMS2.Exec(3,"猫")
+    if err3!=nil{
+    	fmt.Println("insert is failed,",err3)
+		return
+	}
+    fmt.Println("insert success")
+}
+
+
+
+****************************************************************************
+GOLANG 实现mysql 事务
+ACID
+
+开始事务 Begin() 
+提交事务 Commit()
+回滚事务 Rollback()
+TX, err := DBS.Begin() //开启事务
+	if err != nil {
+		fmt.Println("begin train failed", err)
+		return
+	}
+	updatestr1 := "Update animal set name=? where id=?"
+	stmsu, erru := DBS.Prepare(updatestr1)
+	if erru != nil {
+        fmt.Println("错误",erru)
+	}
+	defer stmsu.Close()
+	_,erru2:=stmsu.Exec("鸭子",1)
+    if erru2!=nil{
+    	TX.Rollback() //回滚
+    	fmt.Println("提交错误呢",erru2)
+		return
+	}
+	TX.Commit()
+	fmt.Println("事务提交完毕,请指示and main over")
+
+
+
+
+
+
+
+
+SQL中的占位符  MYSQL   ?        PostgreSQL   $1 $2
+     SQLite    ?   $1         Oracle   :name
+
+
+
+ 

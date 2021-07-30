@@ -1,0 +1,24 @@
+一、定义类型： 
+1.1、定义结构体  type name struct{filed}
+1.2、定义接口 使用type可以定义接口类型； type Usn interface{.....}
+1.3  定义其他的新类型 
+	type 类型名 type
+	
+1.4   定义函数类型
+	type name func(int,int)(string)
+
+
+二、类型别名
+    type name=type
+
+三、非本地类型不能定义方法
+   重新添加某个包名下的方法 （以time下的 Duration为例） 
+   1） type name time.Duration
+       func(m name)SimpleSet(){ ......  }
+    2） 在time包下重写这个Duration方法
+	type name time.Duration
+
+四、结构体成员嵌入式使用别名
+	接收者相同方法名不能相同
+	type结构体嵌套.go
+

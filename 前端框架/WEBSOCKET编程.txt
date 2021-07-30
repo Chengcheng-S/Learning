@@ -1,0 +1,16 @@
+websocket
+
+·websocket是一种在单个TCP连接上进行全双工通信的协议
+·使得客户端和服务器之间的数据交换变得更加简单,允许服务端主动向客户端推送数据
+·在websocket API中，浏览器和服务器只需要完成一次握手，两者之间就可以创建持久性的连接，并进行双向数据传输
+·需要安装第三方的包
+   go get -u -v github.com/gorilla/websocket
+
+
+在同一级目录下创建四个go文件，connection.go   data.go  hub.go 
+server.go
+
+运行 
+go run  server.go hub.go data.go connection.go 
+
+生成local.html文件 
