@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <title>包</title>
+
+    <link rel="stylesheet" type="text/css" href="foo.css">
+
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+    <h1 class="title">包</h1>
+    <nav id="TOC"><ul>
+<li><a href="#模塊系統">0.1 模塊系統</a><ul></ul></li>
+<li><a href="#包和單元包">0.2 包和單元包</a><ul></ul></li>
+<li><a href="#模塊">0.3 模塊</a><ul>
+<li><a href="#模塊中的條目路徑">0.3.1 模塊中的條目路徑</a><ul></ul></li>
+<li><a href="#模塊的共有">0.3.2 模塊的共有</a><ul></ul></li>
+<li><a href="#super關鍵字">0.3.3 super關鍵字</a><ul></ul></li>
+<li><a href="#結構體">0.3.4 結構體</a><ul></ul></li>
+<li><a href="#路徑引入">0.3.5 路徑引入</a><ul></ul></li>
+<li><a href="#別名">0.3.6 別名</a><ul></ul></li>
+<li><a href="#衝導出名稱">0.3.7 衝導出名稱</a><ul></ul></li></ul></li></ul></nav><h2 id="模塊系統" class="section-header"><a href="#模塊系統">0.1 模塊系統</a></h2>
+<ul>
+<li>包(package)一個用於構建、測試並分享單元包的Cargo功能</li>
+<li>單元包(crate)一個用於生成庫或可執行文件的樹形模塊結構</li>
+<li>模塊(module)use 關鍵字:控制文件結構，作用域以及路徑的私有性</li>
+<li>路徑(path)：一種用於命名條目的方法，包括結構體、函數和模塊等</li>
+</ul>
+<h2 id="包和單元包" class="section-header"><a href="#包和單元包">0.2 包和單元包</a></h2>
+<p>單元包可以被用於生成二進制程序或庫，Rust編譯時所使用的入口文件稱作這個單元包的根節點，同時也是單元包的根模塊，</p>
+<p>包則是由一個或者多個提供相關功能的單元包集合而成，配置文件<code>Cargo.toml</code>描述了如何構建單元包的信息</p>
+<p>包所包含的文件：</p>
+<ol>
+<li>只能擁有最多一個庫單元包</li>
+<li>多個二進制文件單元包</li>
+<li>至少一個單元包(庫單元包或二進制單元包)</li>
+</ol>
+<p>執行cargo new 命令 Cargo會生成一個包並創建對應的Cargo.toml文件，Cargo 默認把<code>src/main.rs</code>視爲一個二進制單元包的根節點，這個二進制單元包和包有相同的名稱</p>
+<p>若包的目錄中包含文件<code>src/lib.rs</code>，Cargo會自動視作與包同名的庫單元包的根節點，Cargo會在構建庫和二進制程序時將這些單元包的根文件作爲參數傳遞給<code>rustc</code></p>
+<p>最初生成的包只包含源文件<code>src /mian.rs</code>,意味著她只是一個二進制單元包。假設包中同時存在<code>src/main.rs</code>和<code>src/lib.rs</code>那麽其中一個問二進制單元包，一個為庫單元包</p>
+<p>單元寶可以將相關的功能分組，並放置到同一作用域下，如此便可以輕鬆的在多個項目中所使用，可以指明某個功能的來源，避免重複命名</p>
+<h2 id="模塊" class="section-header"><a href="#模塊">0.3 模塊</a></h2>
+<p>模塊以及模塊系統，包含可以爲條目命名的路徑，將路徑引入作用域的<code>use</code>關鍵字，以及將條目公開的<code>pub</code>關鍵字.</p>
+<p>模塊允許開發者將單元包内的代碼按照可讀性和易用性來進行分組，，允許控制條目的私有性，換言之，模塊決定了一個條目是否可以被外部代碼使用，或者不對外暴露</p>
+<p>使用<code>cargo new --lib name</code> 來創建一個名爲name的庫，</p>
+<p>以mod關鍵字開頭來聲明一個模塊，然後指明該模塊的名字,<code>{}</code> 中可以包含子模塊或者其他條目(struct, enum, const, trait)</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered">
+<span class="kw">mod</span> <span class="ident">name</span>{
+<span class="comment">// do something</span>
+}</pre></div>
+<p>通過模塊可以將相關的定義放到一組，並根據他們的關係指定又意義的名稱</p>
+<p><code>src/main.rs</code> <code>src/lib.rs</code>成爲單元包的根節點，因爲這兩個包各自組成了一個名爲crate的模塊，並位於單元包模塊結構的根源，這個模塊也被稱爲模塊樹</p>
+<p>當模塊A被包含在了模塊B中，將模塊A稱爲模塊B的子節點，并將模塊B稱爲模塊A的父節點。注：整個模塊樹都被放置在一個名爲<code>crate</code>的隱式模塊下</p>
+<h3 id="模塊中的條目路徑" class="section-header"><a href="#模塊中的條目路徑">0.3.1 模塊中的條目路徑</a></h3>
+<p>爲了在Rust的模塊樹中找到某個條目，就像想類似於文件系統中的路徑進行導航的方式</p>
+<p>路徑的形式：</p>
+<ul>
+<li>使用單元包或字面量<code>crate</code>從根節點開始的絕對路徑</li>
+<li>使用<code>self</code> ，<code>super</code>或内部標識符從當前模塊開始的相對路徑</li>
+</ul>
+<p>絕對路徑與相對路徑都由至少一個標識符組成，標識符之間使用雙冒號分隔</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered">
+<span class="ident">src</span><span class="op">/</span><span class="ident">lib</span>.<span class="ident">rs</span>
+<span class="kw">mod</span> <span class="ident">front</span>{
+	<span class="kw">mod</span> <span class="ident">host</span>{
+		<span class="kw">fn</span> <span class="ident">add</span>(){
+		<span class="comment">//do something</span>
+		}
+	}
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">res</span>(){   <span class="comment">//  該方法是共有的 外部可以訪問的</span>
+   <span class="comment">// 絕對路徑‘</span>
+   <span class="kw">crate</span>::<span class="ident">front</span>::<span class="ident">host</span>::<span class="ident">res</span>();
+   
+   <span class="comment">//相對路徑</span>
+   <span class="ident">front</span>::<span class="ident">host</span>::<span class="ident">res</span>();
+}
+}</pre></div>
+<p>模塊不僅被用於組織代碼，同時還定義了Rust中的私有邊界，外部的代碼無法知曉，調用或依賴那些私有邊界封裝實現的細節。</p>
+<p>Rust中的所有的條目默認都是私有的，處於父級模塊是無法訪問子模塊中的私有條目的，但是子模塊是可以使用父級模塊的條目</p>
+<h3 id="模塊的共有" class="section-header"><a href="#模塊的共有">0.3.2 模塊的共有</a></h3>
+<p>使用關鍵字<code>pub</code>實現了模塊的共有，外部可以訪問該模塊</p>
+<pre><code class="language-go">
+pub mod myproject{
+   pub mod host{
+        pub  fn adds(x:i32)-&gt;i32{
+           x+3
+   }
+     }
+
+    pub mod Add{
+        pub fn jians(x:i32,y:i32)-&gt;i32
+        {
+            let z=x-y;
+            z
+        }
+
+    }
+}
+</code></pre>
+<p>注： 外部訪問模塊的話 該模塊所有的字段必須是<code>pub</code>，否則編譯錯誤</p>
+<h3 id="super關鍵字" class="section-header"><a href="#super關鍵字">0.3.3 super關鍵字</a></h3>
+<p>Rust允許我們從父級模塊構建相對路徑，這個方法需要從路徑的起始処使用<code>super</code>關鍵字，類似於文件系統中使用<code>..</code>開始一段路徑</p>
+<h3 id="結構體" class="section-header"><a href="#結構體">0.3.4 結構體</a></h3>
+<p>結構體和枚舉都可以使用<code>pub</code>關鍵字 聲明為公共的，在定義結構體時，聲明<code>pub</code>其本身成爲公共的結構體，但是他的字段還是私有的。 枚舉聲明為公共的，所有的變體都自動變成了公共的</p>
+<p>由於所有的枚舉變體都在公共可用時才能實現最大的功效，因此枚舉變體默認都是公共的，對於結構體而言，即便部分字段是默認的，除非被標記為<code>pub</code></p>
+<h3 id="路徑引入" class="section-header"><a href="#路徑引入">0.3.5 路徑引入</a></h3>
+<p>使用<code>use</code>關鍵字將路徑引入作用域，并向本地條碼一項調用路徑中的條目(需要遵循私有性的規則)</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered">
+<span class="kw">use</span> <span class="ident">myprojec</span>::<span class="ident">Person</span>;
+<span class="kw">let</span> <span class="ident">p</span><span class="op">=</span><span class="ident">Person</span>::<span class="ident">new</span>(<span class="ident">String</span>::<span class="ident">from</span>(<span class="string">&quot;jack&quot;</span>),<span class="number">72</span>);
+
+<span class="kw">let</span> <span class="ident">x</span><span class="op">=</span> <span class="ident">p</span>.<span class="ident">showage</span>();
+    </pre></div>
+<h3 id="別名" class="section-header"><a href="#別名">0.3.6 別名</a></h3>
+<p>使用關鍵字<code>as</code>指定一個新的本地名稱，即 別名</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered">
+<span class="kw">use</span> <span class="ident">myprojec</span>::<span class="ident">myproject</span>::<span class="ident">host</span>::<span class="ident">Add</span>::<span class="ident">jians</span> <span class="kw">as</span> <span class="ident">ji</span>;</pre></div>
+<h3 id="衝導出名稱" class="section-header"><a href="#衝導出名稱">0.3.7 衝導出名稱</a></h3>
+<p>之前使用了<code>use</code>將路徑引入作用域，這個名稱會以私有的方式在新的作用域中生效，<code>pub use</code>可以讓外部的程序訪問到這些名稱</p>
+
+    
+</body>
+</html>
