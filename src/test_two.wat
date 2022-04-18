@@ -1,0 +1,17 @@
+(module
+  (type (;0;) (func (result i32)))
+  (type (;1;) (func))
+  (import "env" "random_i32" (func $random_i32 (type 0)))
+  (func $discard (type 1)
+    (drop
+      (call $random_i32))
+    (return))
+  (table (;0;) 1 1 funcref)
+  (memory (;0;) 16)
+  (global $__stack_pointer (mut i32) (i32.const 1048576))
+  (global (;1;) i32 (i32.const 1048576))
+  (global (;2;) i32 (i32.const 1048576))
+  (export "memory" (memory 0))
+  (export "discard" (func $discard))
+  (export "__data_end" (global 1))
+  (export "__heap_base" (global 2)))
