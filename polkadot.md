@@ -2,6 +2,24 @@
 
 ## 混合共识
 
+polkadot   NPoS
+
+https://polkadot.network/blog/nominating-and-validator-selection-on-polkadot/
+
+doc
+
+https://wiki.polkadot.network/docs/learn-accounts
+
+
+
+polkadot doc
+
+[Nominated Proof-of-Stake — Research at W3F (web3.foundation)](https://research.web3.foundation/en/latest/polkadot/NPoS/index.html)
+
+
+
+
+
 Polkadot 的共识算法：
 
 - NPOS
