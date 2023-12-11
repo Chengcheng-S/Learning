@@ -746,7 +746,7 @@ async fn run_loop(
 }
 ```
 
-當同一future的多個副本需要同時運行hi是，可以使用`FuturesUnorderd`類型。
+當同一future的多個副本需要同時運行时是，可以使用`FuturesUnorderd`類型。
 
 ```rust
 
